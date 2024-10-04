@@ -1,0 +1,150 @@
+﻿@model YatriSewa.Models.UserRegistrationModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" href="~/img/logo.png">
+    <title>SignUp</title>
+    <!-- Bootstrap core CSS -->
+    <link href="~/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Icofont Icon-->
+    <link href="~/vendor/icons/icofont.min.css" rel="stylesheet" type="text/css">
+    <!-- Slick Slider -->
+    <link rel="stylesheet" type="text/css" href="~/vendor/slick/slick.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/vendor/slick/slick-theme.min.css" />
+    <!-- Custom styles for this template -->
+    <link href="~/css/custom.css" rel="stylesheet">
+    <!-- Sidebar CSS -->
+    <link href="~/vendor/sidebar/demo.css" rel="stylesheet">
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.19.1/jquery.validate.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/mvc/5.2.3/jquery.validate.unobtrusive.min.js"></script>
+
+</head>
+<body>
+    <!-- sign up -->
+    <div class="container-70">
+        <div class="osahan-header-nav shadow-sm p-3 d-flex align-items-center bg-darkblue">
+            <h5 class="font-weight-normal mb-0 text-white">
+                <a class="text-darkblue mr-3" href="@Url.Action("GetStarted", "Login")"><i class="icofont-rounded-left"></i></a>
+                Create an account
+            </h5>
+            <div class="ml-auto d-flex align-items-center">
+                <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#"><i class="icofont-navigation-menu"></i></a>
+            </div>
+        </div>
+        <div class="p-3">
+            <form id="signupForm" method="post" asp-action="RegisterUser" novalidate>
+                    <div class="form-group">
+                        <label asp-for="FullName" class="text-muted f-10 mb-1">Full Name</label>
+                        <input asp-for="FullName" class="form-control" id="fullName" placeholder="Enter Your Full Name" required />
+                        <div class="invalid-feedback">Full Name is required.</div>
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="PhoneEmail" class="text-muted f-10 mb-1">Phone or Email</label>
+                        <input asp-for="PhoneEmail" class="form-control" id="phoneEmail" placeholder="Enter Your Phone or Email" required />
+                        <div class="invalid-feedback">Please enter a valid phone number or email.</div>
+                        <span asp-validation-for="PhoneEmail" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Password" class="text-muted f-10 mb-1">Password</label>
+                        <input asp-for="Password" type="password" class="form-control" id="password" placeholder="Enter Your Password" required />
+                        <div class="invalid-feedback">Password must be minimum 6 chatracters long.</div>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-muted f-10 mb-1">Confirm Password</label>
+                        <input  type="password" class="form-control" id="confirmPassword" placeholder="Enter Your Password" required />
+                        <div class="invalid-feedback">Passwords do not match.</div>
+                        <span class="text-danger"></span>
+                    </div>
+
+                <button type="submit" class="btn btn-yatri-fotter btn-create-account mb-3 rounded-1 mt-4">CREATE AN ACCOUNT</button>
+                <p class="text-muted text-center">By signing up you agree to our Privacy Policy and Terms.</p>
+            </form>
+
+            <div class="sign-or d-flex align-items-center justify-content-center mb-4">
+                <hr class="mr-4">
+                <p class="text-muted text-center py-2 m-0">OR</p>
+                <hr class="ml-4">
+            </div>
+            <a href="verification.html" class="btn rounded-1 google-btn osahanbus-social">
+                <i class="icofont-google-plus"></i> LOGIN WITH GOOGLE
+            </a>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript -->
+
+    <script src="~/vendor/jquery/jquery.min.js"></script>
+    <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- slick Slider JS-->
+    <script type="text/javascript" src="~/vendor/slick/slick.min.js"></script>
+    <!-- Sidebar JS-->
+    <script type="text/javascript" src="~/vendor/sidebar/hc-offcanvas-nav.js"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="~/js/custom.js"></script>
+
+    <!-- Form validation script -->
+    <script>
+        $(document).ready(function () {
+           // Validate form before submission
+           $("#signupForm").on("submit", function (e) {
+              var isValid = true;
+              var fullName = $("#fullName").val();
+              var phoneEmail = $("#phoneEmail").val();
+              var password = $("#password").val();
+              var confirmPassword = $("#confirmPassword").val();
+
+              // Check if full name is provided
+              if (!fullName.trim()) {
+                 $("#fullName").addClass("is-invalid");
+                 isValid = false;
+              } else {
+                 $("#fullName").removeClass("is-invalid");
+              }
+
+              // Check if phone or email is provided
+              if (!phoneEmail.trim()) {
+                 $("#phoneEmail").addClass("is-invalid");
+                 isValid = false;
+              } else {
+                 $("#phoneEmail").removeClass("is-invalid");
+              }
+
+              // Check if password is provided
+               if (password.length < 6) {
+                   $("#password").addClass("is-invalid");
+                   isValid = false;
+               } else {
+                   $("#password").removeClass("is-invalid");
+               }
+
+              // Check if confirm password matches
+              if (confirmPassword !== password || !confirmPassword.trim()) {
+                 $("#confirmPassword").addClass("is-invalid");
+                 isValid = false;
+              } else {
+                 $("#confirmPassword").removeClass("is-invalid");
+              }
+
+              // Prevent form submission if validation fails
+              if (!isValid) {
+                 e.preventDefault();
+              }
+           });
+        });
+    </script>
+</body>
+</html>

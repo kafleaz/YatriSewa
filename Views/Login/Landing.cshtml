@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "LandingPage";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/x-icon" href="@Url.Content("~/favicon.ico")">
+    <link rel="icon" type="image/png" href="~/img/logo.png">
+    <title>@ViewData["Title"] - Bus Booking</title>
+    <!-- Bootstrap core CSS -->
+    <link href="~/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Icofont Icon-->
+    <link href="~/vendor/icons/icofont.min.css" rel="stylesheet" type="text/css">
+    <!-- Slick Slider -->
+    <link rel="stylesheet" type="text/css" href="~/vendor/slick/slick.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/vendor/slick/slick-theme.min.css" />
+    <!-- Custom styles for this template -->
+    <link href="~/css/custom.css" rel="stylesheet">
+    <!-- Sidebar CSS -->
+    <link href="~/vendor/sidebar/demo.css" rel="stylesheet">
+ 
+</head>
+<body style="overflow-x: hidden;">
+    <div class="container-70">
+        <!-- landing page -->
+        <div class="landing-page position-relative" style="min-height: 100vh;">
+            <div class="content">
+                <img class="yatrilogo" src="~/img/yatrilogodark.png" alt="YatriSewa Logo">
+                <p class="welcometext">Welcome to YatriSewa</p>
+                <p class="booking">Book your Online Bus Ticket</p>
+            </div>
+
+            <div class="yatri-fotter position-absolute w-100" style="bottom: 20px;">
+                <a href="@Url.Action("GetStarted", "Login")" class="btn-yatri-fotter btn yatri-btn">Get Started</a>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap core JavaScript -->
+    <script src="~/vendor/jquery/jquery.min.js"></script>
+    <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- slick Slider JS-->
+    <script type="text/javascript" src="~/vendor/slick/slick.min.js"></script>
+    <!-- Sidebar JS-->
+    <script type="text/javascript" src="~/vendor/sidebar/hc-offcanvas-nav.js"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="~/js/custom.js"></script>
+</body>
+</html>

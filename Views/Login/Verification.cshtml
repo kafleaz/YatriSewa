@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" href="~/img/logo.png">
+    <title>Verification - OsahanBus</title>
+    <!-- Bootstrap core CSS -->
+    <link href="~/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Icofont Icon -->
+    <link href="~/vendor/icons/icofont.min.css" rel="stylesheet" type="text/css">
+    <!-- Slick Slider -->
+    <link rel="stylesheet" type="text/css" href="~/vendor/slick/slick.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/vendor/slick/slick-theme.min.css" />
+    <!-- Custom styles for this template -->
+    <link href="~/css/custom.css" rel="stylesheet">
+    <!-- Sidebar CSS -->
+    <link href="~/vendor/sidebar/demo.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-70">
+        <!-- Verification -->
+        <div class="osahan-verification">
+            <div class="osahan-header-nav shadow-sm p-3 d-flex align-items-center bg-darkblue">
+                <h5 class="font-weight-normal mb-0 text-white">
+                    <a class="text-darkblue mr-3" href="@Url.Action("SignUp", "Login")"><i class="icofont-rounded-left"></i></a>
+                    Enter verification code
+                </h5>
+                <div class="ml-auto d-flex align-items-center">
+                    <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#"><i class="icofont-navigation-menu"></i></a>
+                </div>
+            </div>
+            <div class="osahan-form px-3 py-5 text-center mb-5">
+                <p class="verification-info">We've sent a 6-digit verification code. Please enter it below.</p>
+                <form action="home.html" method="POST">
+                    <div class="verification-inputs">
+                        <input type="text" id="otp1" maxlength="1" class="form-control" required autocomplete="off">
+                        <input type="text" id="otp2" maxlength="1" class="form-control" required autocomplete="off">
+                        <input type="text" id="otp3" maxlength="1" class="form-control" required autocomplete="off">
+                        <input type="text" id="otp4" maxlength="1" class="form-control" required autocomplete="off">
+                        <input type="text" id="otp5" maxlength="1" class="form-control" required autocomplete="off">
+                        <input type="text" id="otp6" maxlength="1" class="form-control" required autocomplete="off">
+                    </div>
+
+                    <button type="submit" name="submit_button" class="btn btn-darkblue btn-block-verify yatri-btn mb-4">VERIFY</button>
+                    <p class="text-muted">Didn't receive it? <a href="@Url.Action("Verification", "Login")" class="ml-2 text-green">Resend</a></p>
+                </form>
+            </div>
+        </div>
+        <!-- Sidebar -->
+        <nav id="main-nav">
+            <ul class="second-nav">
+                <!-- Sidebar content -->
+            </ul>
+        </nav>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const otpInputs = document.querySelectorAll('.verification-inputs input');
+
+            otpInputs.forEach((input, index) => {
+                input.addEventListener('input', (event) => {
+                    const value = input.value;
+
+                    // Allow only integer input
+                    if (!/^[0-9]$/.test(value)) {
+                        input.value = ''; // Clear if not a number
+                    } else {
+                        // Automatically move to the next input after typing a digit
+                        if (input.value.length === 1 && index < otpInputs.length - 1) {
+                            otpInputs[index + 1].focus();
+                        }
+                    }
+                });
+
+                input.addEventListener('keydown', (event) => {
+                    if (event.key === 'Backspace' && input.value === '' && index > 0) {
+                        otpInputs[index - 1].focus(); // Move back on backspace
+                    }
+                });
+
+                // Automatically focus on the first box when the page loads
+                if (index === 0) {
+                    input.focus();
+                }
+            });
+        });
+
+
+    </script>
+    <!-- Bootstrap core JavaScript -->
+    <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Slick Slider JS -->
+    <script type="text/javascript" src="~/vendor/slick/slick.min.js"></script>
+    <!-- Sidebar JS -->
+    <script type="text/javascript" src="~/vendor/sidebar/hc-offcanvas-nav.js"></script>
+    <!-- Custom scripts for all pages -->
+    <script src="~/js/custom.js"></script>
+</body>
+</html>
