@@ -33,19 +33,27 @@
                 </div>
             </div>
             <div class="osahan-form px-3 py-5 text-center mb-5">
-                <p class="verification-info">We've sent a 6-digit verification code. Please enter it below.</p>
-                <form action="home.html" method="POST">
+                <p class="verification-info">
+                    A 6-digit verification code has been sent to <strong class="text-green">@TempData["EmailOrPhone"]</strong>. Please enter the code below to proceed.
+                </p>
+                @if (ViewData.ModelState.ContainsKey(string.Empty))
+                {
+                    <p class="text-danger">
+                        @ViewData.ModelState[string.Empty]?.Errors.FirstOrDefault()?.ErrorMessage
+                    </p>
+                }
+                <form asp-action="VerifyOTP" method="POST">
                     <div class="verification-inputs">
-                        <input type="text" id="otp1" maxlength="1" class="form-control" required autocomplete="off">
-                        <input type="text" id="otp2" maxlength="1" class="form-control" required autocomplete="off">
-                        <input type="text" id="otp3" maxlength="1" class="form-control" required autocomplete="off">
-                        <input type="text" id="otp4" maxlength="1" class="form-control" required autocomplete="off">
-                        <input type="text" id="otp5" maxlength="1" class="form-control" required autocomplete="off">
-                        <input type="text" id="otp6" maxlength="1" class="form-control" required autocomplete="off">
+                        <input type="text" id="otp1" name="otp1" maxlength="1" class="form-control" required autocomplete="off">
+                        <input type="text" id="otp2" name="otp2" maxlength="1" class="form-control" required autocomplete="off">
+                        <input type="text" id="otp3" name="otp3" maxlength="1" class="form-control" required autocomplete="off">
+                        <input type="text" id="otp4" name="otp4" maxlength="1" class="form-control" required autocomplete="off">
+                        <input type="text" id="otp5" name="otp5" maxlength="1" class="form-control" required autocomplete="off">
+                        <input type="text" id="otp6" name="otp6" maxlength="1" class="form-control" required autocomplete="off">  
                     </div>
-
-                    <button type="submit" name="submit_button" class="btn btn-darkblue btn-block-verify yatri-btn mb-4">VERIFY</button>
-                    <p class="text-muted">Didn't receive it? <a href="@Url.Action("Verification", "Login")" class="ml-2 text-green">Resend</a></p>
+                    <span asp-validation-summary="All" class="text-danger"></span>
+                    <button type="submit" class="btn btn-darkblue btn-block-verify yatri-btn mb-4">VERIFY</button>
+                    <p class="text-muted">Didn't receive it? <a href="@Url.Action("ResendOTP")" class="ml-2 text-green">Resend</a></p>
                 </form>
             </div>
         </div>
@@ -56,6 +64,7 @@
             </ul>
         </nav>
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
             const otpInputs = document.querySelectorAll('.verification-inputs input');
@@ -87,9 +96,8 @@
                 }
             });
         });
-
-
     </script>
+
     <!-- Bootstrap core JavaScript -->
     <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <!-- Slick Slider JS -->

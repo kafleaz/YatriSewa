@@ -24,6 +24,10 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 
 // Register email service
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddTransient<ISMSService, SMSService>();
+
+
+
 
 // Configure and register the SMTP client
 builder.Services.AddSingleton(new SmtpClient("smtp.gmail.com")
@@ -32,6 +36,13 @@ builder.Services.AddSingleton(new SmtpClient("smtp.gmail.com")
     Credentials = new NetworkCredential("otp.yatri.service@gmail.com", "@#$12345"), // Replace with your credentials
     EnableSsl = true,
 });
+
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options =>
+    {
+        options.LoginPath = "/Login/SignIn"; // Define the login path
+        options.AccessDeniedPath = "/Home/AccessDenied"; // Path for access denied errors
+    });
 
 // Add session services
 builder.Services.AddSession(options =>
@@ -61,6 +72,7 @@ app.UseRouting();
 // Enable session handling
 app.UseSession(); // This is necessary for session management
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
