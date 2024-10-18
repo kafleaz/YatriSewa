@@ -25,4 +25,13 @@ namespace YatriSewa.Models
         [Required(ErrorMessage = "Password is required")]
         public required string Password { get; set; }
     }
+
+    public class ForgotPasswordModel
+    {
+        [Required(ErrorMessage = "Phone or Email is required")]
+        public required string EmailOrPhone { get; set; }
+
+        public required string NewPassword { get; set; }
+    }
+
 }
