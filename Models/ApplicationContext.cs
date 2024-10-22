@@ -26,5 +26,45 @@ namespace YatriSewa.Models
         // DbSet properties for the tables in your database
         public DbSet<User> User_Table { get; set; }
         public DbSet<OTP> Otp_Table { get; set; }
+        public DbSet<Bus> Bus_Table { get; set; }
+        public DbSet<BusCompany> Company_Table { get; set; }
+        public DbSet<Service> Service_Table { get; set; }
+        public DbSet<BusDriver> Driver_Table { get; set; }
+        public DbSet<Route> Route_Table { get; set; }
+
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Define the one-to-one relationship between User and BusDriver
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.BusDriver)
+                .WithOne(bd => bd.User)
+                .HasForeignKey<BusDriver>(bd => bd.UserId);
+
+            // Bus -> Route relationship with "Restrict" to prevent cascading deletes
+            modelBuilder.Entity<Bus>()
+                .HasOne(b => b.Route)
+                .WithMany(r => r.Buses)
+                .HasForeignKey(b => b.RouteId)
+                .OnDelete(DeleteBehavior.Restrict);  // No cascading delete for routes
+
+            // Bus -> BusCompany relationship with "Cascade" to allow company deletion to cascade
+            modelBuilder.Entity<Bus>()
+                .HasOne(b => b.BusCompany)
+                .WithMany(c => c.Buses)
+                .HasForeignKey(b => b.CompanyId)
+                .OnDelete(DeleteBehavior.Cascade);  // Allow cascading delete if needed, or change to Restrict if not
+
+            // Bus -> BusDriver relationship with "Restrict" to prevent cascading deletes
+            modelBuilder.Entity<Bus>()
+                .HasOne(b => b.BusDriver)
+                .WithMany(d => d.Buses)
+                .HasForeignKey(b => b.DriverId)
+                .OnDelete(DeleteBehavior.Restrict);  // No cascading delete for drivers
+
+            base.OnModelCreating(modelBuilder);
+        }
+
+
     }
 }

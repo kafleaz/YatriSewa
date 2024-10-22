@@ -635,7 +635,7 @@ h1.success-icon {
     background: -moz-linear-gradient(45deg, #03314B 0%, #03314B 100%);
     background: -webkit-linear-gradient(45deg, #03314B 0%,#03314B 100%);
     background: linear-gradient(45deg, #03314B 0%,#03314B 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#03314B',endColorstr='#ad2b2d',GradientType=1 );
+/*    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#03314B',endColorstr='#ad2b2d',GradientType=1 );*/
     color: #fff;
 }
 
@@ -694,7 +694,7 @@ h1.success-icon {
 
         .rate:not(:checked) > label:before {
             font-family: IcoFont !important;
-            speak-as: none;
+            speak-as:digits;
             font-style: normal;
             font-weight: 400;
             font-variant: normal;
@@ -1026,6 +1026,212 @@ input[type="button"].btn-block {
     width: 100%; 
     max-width: 320px;
     margin: 0 auto;
+}
+
+/*==================================================================================*/
+/* Sidebar styling */
+.sidebar {
+    height: 100vh;
+    background-color: #051b35;
+    color: white;
+    padding-top: 10px;
+    width: 220px;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    left: 0;
+    top: 0;
+    transition: transform 0.3s ease-in-out;
+    z-index: 999; /* Ensure the sidebar is above other content */
+}
+
+    .sidebar.hidden {
+        transform: translateX(0px); /* Move the sidebar completely off-screen */
+    }
+
+    .sidebar .nav-links .nav-link i {
+        margin-right: 10px;
+    }
+
+.profileicon {
+    margin-right: 10px;
+}
+
+
+.logo {
+    text-align: center;
+    margin-bottom: 30px;
+    flex-shrink: 0;
+}
+
+    .logo img {
+        width: 150px;
+    }
+
+.nav-links {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0 10px;
+}
+
+.nav-link {
+    color: white;
+    font-size: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    display: block;
+}
+
+    .nav-link:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+/* Navbar Styling */
+.navbar {
+    position: fixed;
+    width: calc(100% - 220px); /* Adjust for the sidebar width */
+    top: 0;
+    left: 220px;
+    z-index: 999;
+    background-color: #051b35;
+    height: 50px;
+    transition: left 0.3s ease-in-out;
+}
+
+
+
+    /* Adjust the size of the icons in the navbar */
+    .navbar .btn {
+        padding: 6px 12px;
+        font-size: 1rem;
+        background-color: transparent;
+        border: none;
+    }
+
+        /* Ensure the search and menu icons are properly aligned */
+        .navbar .btn i {
+            font-size: 1.2rem;
+        }
+
+    /* Align right-side icons in the navbar */
+    .navbar .navbar-nav {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+
+        .navbar .navbar-nav .nav-item {
+            margin-left: 10px;
+        }
+
+        .navbar .navbar-nav .nav-link i {
+            font-size: 1rem;
+        }
+
+    /* Notification badge adjustment */ 
+    .navbar .badge {
+        position: relative;
+        top: -12px;
+        right: 7px;
+        padding: 3px 5px;
+        margin-right: -6px;
+    }
+
+/* Main content styling */
+.main-content {
+    position: relative;
+    overflow-x: hidden;
+    margin-left: 220px;
+    margin-top: 50px;
+    padding: 10px;
+}
+
+    .main-content.sidebar-hidden {
+        margin-left: 0;
+    }
+
+.navbar.sidebar-hidden {
+    left: 0; /* Adjust navbar position when sidebar is hidden */
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #0A2D48;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+}
+
+* {
+    scrollbar-color: rgba(255, 255, 255, 0.5) #0A2D48;
+    scrollbar-width: thin;
+}
+
+.container-fluid {
+    padding-left: 0;
+}
+
+.hide-search-icon {
+    display: none;
+}
+
+.d-none {
+    display: none !important;
+}
+
+/* Search input inside the box */
+.search-box-mobile input {
+    width: 100%;
+    border: none;
+    outline: none;
+    flex: 1;
+    padding: 5px;
+    font-size: 1rem;
+}
+
+.search-active {
+    width: 100%; /* Full width when active */
+    opacity: 1; /* Visible when active */
+    right: 60px; /* Slide left from the search icon */
+}
+
+
+/* Show the dropdown when active */
+.show-dropdown {
+    display: block !important;
+    opacity: 1;
+    transform: translateY(0); /* Slide down */
+    right: 1%;
+    padding: 7px;
+}
+
+/* Notification Item Styling */
+.notification-item {
+    margin-bottom: 10px;
+}
+
+    .notification-item .dropdown-item {
+        display: flex;
+        align-items: center;
+    }
+
+        .notification-item .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+    .notification-item .small {
+        color: #6c757d;
+    }
+
+.dropdown-menu {
+    min-width: 1px;
 }
 
 @media (min-width: 992px) {

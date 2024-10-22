@@ -385,6 +385,7 @@ namespace YatriSewa.Controllers
                 UserRole.Admin => RedirectToAction("AdminDashboard", "Admin"),
                 UserRole.Operator => RedirectToAction("OperatorDashboard", "Operator"),
                 UserRole.Passenger => RedirectToAction("PassengerDashboard", "Passenger"),
+                UserRole.Driver => RedirectToAction("DriverDashboard", "Driver"),
                 _ => RedirectToAction("Index", "Home"),
             };
         }
@@ -433,7 +434,13 @@ namespace YatriSewa.Controllers
 
 
 
-
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(); // Sign out the user from authentication
+            HttpContext.Session.Clear(); // Clear session data
+            return RedirectToAction("SignIn", "Login"); // Redirect to login
+        }
 
 
 

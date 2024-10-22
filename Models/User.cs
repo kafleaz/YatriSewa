@@ -1,5 +1,6 @@
 ﻿using static System.Net.WebRequestMethods;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YatriSewa.Models
 {
@@ -16,6 +17,7 @@ namespace YatriSewa.Models
         Admin,
         Passenger,
         Operator,
+        Driver
         // Add more roles as necessary
     }
     public class User
@@ -56,5 +58,14 @@ namespace YatriSewa.Models
         public DateTime Updated_At { get; set; } = DateTime.UtcNow; // Timestamp for last update
         public int OTP { get; set; }
         public ICollection<OTP> Otp_Table { get; set; } = new List<OTP>();// One-to-many relationship with OTPs
+
+        public int? CompanyID { get; set; } // Foreign Key to BusCompany
+        [ForeignKey("CompanyID")]
+        public virtual BusCompany? BusCompany { get; set; }
+
+        public int? DriverId { get; set; }
+        public virtual BusDriver? BusDriver { get; set; }
     }
+
+
 }
