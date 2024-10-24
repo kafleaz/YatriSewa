@@ -24,7 +24,7 @@
             <a href="#" class="nav-link">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
-            <a href="#" class="nav-link">
+            <a asp-controller="Operator" asp-action="ListBus" class="nav-link">
                 <i class="fas fa-bus"></i> Bus
             </a>
             <a href="#" class="nav-link">
@@ -60,6 +60,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
+
             <!-- Menu icon for mobile view -->
             <button class="btn btn-primary d-lg-none" id="menu-toggle">
                 <i class="fas fa-bars"></i>
@@ -161,6 +162,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 
 </html>

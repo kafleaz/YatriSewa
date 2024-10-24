@@ -18,6 +18,17 @@ namespace YatriSewa.Models
         [StringLength(50)]
         public string? ContactInfo { get; set; }
 
+        [StringLength(50)]
+        public string? Reg_No { get; set; }
+
+        [StringLength(50)]
+        public string? VAT_PAN { get; set; }
+
+        public string? VAT_PAN_PhotoPath { get; set; }
+
+        public int UserId { get; set; }
+
+
         // One-to-Many relationship: A company can have multiple buses
         public virtual ICollection<Bus> Buses { get; set; } = new List<Bus>();
     }
@@ -54,11 +65,11 @@ namespace YatriSewa.Models
         public virtual BusCompany? BusCompany { get; set; }
 
         // Foreign Key to Route (Each bus operates on one route at a time)
-        public int RouteId { get; set; }
+        public int? RouteId { get; set; }
         [ForeignKey("RouteId")]
         public virtual Route? Route { get; set; }  // A bus operates on one route
 
-        public int DriverId { get; set; }
+        public int? DriverId { get; set; }
         public virtual BusDriver? BusDriver { get; set; }
     }
 

@@ -93,6 +93,7 @@ $(function () {  // Using the shorthand version, recommended
 
 
 //===============================
+
 (function ($) {
     "use strict"; // Start of use strict
 

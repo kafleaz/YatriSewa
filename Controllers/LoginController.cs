@@ -363,6 +363,7 @@ namespace YatriSewa.Controllers
             // Create claims and set up the authentication cookie
             var claims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),  // Add UserId to claims
                 new Claim(ClaimTypes.Name, user.Email ?? user.PhoneNo ?? "UnknownUser"),  // Use a fallback if both are null
                 new Claim(ClaimTypes.Role, user.Role.ToString())  // This should be safe since user.Role is an enum
             };
@@ -432,8 +433,6 @@ namespace YatriSewa.Controllers
             return RedirectToAction("ForgotPasswordVerification");  // Redirect to OTP verification page
         }
 
-
-
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -441,9 +440,6 @@ namespace YatriSewa.Controllers
             HttpContext.Session.Clear(); // Clear session data
             return RedirectToAction("SignIn", "Login"); // Redirect to login
         }
-
-
-
 
         public IActionResult ForgotPasswordVerification()
         {
