@@ -1,47 +1,39 @@
-﻿@model IEnumerable<YatriSewa.Models.Bus>
+﻿@model IEnumerable<YatriSewa.Models.Route>
 
 @{
-    ViewData["Title"] = "ListBus";
+    ViewData["Title"] = "ListRoute";
     Layout = "~/Views/Shared/_OperatorLayout.cshtml";
 }
-
-<h3>List of All Buses for <span class="text-success">@ViewBag.CompanyName</span></h3>
+<h3>Routes Managed by <span class="text-success">@ViewBag.CompanyName</span></h3>
 <p>
-    <a asp-controller="Operator" asp-action="AddBus">Create New</a>
+    <a asp-controller="Operator" asp-action="AddRoute">Create New</a>
 </p>
-<table id="busTable" class="table">
+<table id="routeTable" class="table">
     <thead>
         <tr>
-
             <th onclick="sortTable(0)" style="cursor:pointer;">
-                @* @Html.DisplayNameFor(model => model.First().BusName) *@
-                Bus Name
+                 @* @Html.DisplayNameFor(model => model.StartLocation)  *@
+                 Start Location
+                
             </th>
-
             <th onclick="sortTable(1)" style="cursor:pointer;">
-                @* @Html.DisplayNameFor(model => model.BusNumber) *@
-                Bus Number
+                @* @Html.DisplayNameFor(model => model.Stops)  *@
+                Stops
+               
             </th>
             <th onclick="sortTable(2)" style="cursor:pointer;">
-                @Html.DisplayNameFor(model => model.Description)
+                 @* @Html.DisplayNameFor(model => model.EndLocation) *@
+                 End Location
+               
             </th>
             <th onclick="sortTable(3)" style="cursor:pointer;">
-                @* @Html.DisplayNameFor(model => model.SeatCapacity) *@
-                Seat
+              @* @Html.DisplayNameFor(model => model.EstimatedTime) *@
+              Estimated Time
+             
             </th>
-            <th onclick="sortTable(4)" style="cursor:pointer;">
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-@*             <th onclick="sortTable(5)" style="cursor:pointer;">
+            @* <th onclick="sortTable(0)" style="cursor:pointer;">
                 @Html.DisplayNameFor(model => model.BusCompany)
             </th> *@
-            <th onclick="sortTable(5)" style="cursor:pointer;">
-                @Html.DisplayNameFor(model => model.Route)
-            </th>
-            <th onclick="sortTable(6)" style="cursor:pointer;">
-                 @* @Html.DisplayNameFor(model => model.BusDriver) *@
-                 Bus Driver
-            </th>
             <th></th>
         </tr>
     </thead>
@@ -50,60 +42,35 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.BusName)
+                    @Html.DisplayFor(modelItem => item.StartLocation)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.BusNumber)
+                    @Html.DisplayFor(modelItem => item.Stops)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Description)
+                    @Html.DisplayFor(modelItem => item.EndLocation)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.SeatCapacity)
+                    @Html.DisplayFor(modelItem => item.EstimatedTime) <text>Hours</text>
                 </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Price)
-                </td>
-@*                 <td>
+                @* <td>
                     @Html.DisplayFor(modelItem => item.BusCompany.CompanyName)
                 </td> *@
                 <td>
-                    <!-- Display concatenated RouteDescription -->
-                    @if (item.Route != null)
-                    {
-                        string stops = string.Join(", ", item.Route.Stops);
-                        @($"{item.Route.StartLocation} - {stops} - {item.Route.EndLocation}")
-                    }
-                    else
-                    {
-                        <text><span class="text-danger">No Route Assigned</span></text>
-                    }
-                </td>
-                <td>
-                    @if (item.BusDriver != null)
-                    {
-                        @Html.DisplayFor(modelItem => item.BusDriver.DriverName)
-                    }
-                    else
-                    {
-                        <text><span class="text-danger">No Driver Assigned</span></text>
-                    }
-                    @* @Html.DisplayFor(modelItem => item.BusDriver.DriverName) *@
-                </td>
-                <td>
-                    <a asp-action="EditBus" asp-route-id="@item.BusId">Edit</a> |
-                    <a asp-action="BusDetails" asp-route-id="@item.BusId">Details</a> |
-                    <a asp-action="DeleteBus" asp-route-id="@item.BusId">Delete</a>
+                    <a asp-action="EditRoute" asp-route-id="@item.RouteID">Edit</a> |
+                    <a asp-action="RouteDetails" asp-route-id="@item.RouteID">Details</a> |
+                    <a asp-action="DeleteRoute" asp-route-id="@item.RouteID">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
 @section Scripts {
     <script>
         function sortTable(columnIndex) {
             var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-            table = document.getElementById("busTable");  // Ensure this references the correct table ID
+            table = document.getElementById("routeTable");  // Ensure this references the correct table ID
             switching = true;
             // Set the sorting direction to ascending:
             dir = "asc";

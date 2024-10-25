@@ -91,7 +91,7 @@ namespace YatriSewa.Models
         [StringLength(255)]
         public required string EndLocation { get; set; }
 
-        public TimeSpan EstimatedTime { get; set; }
+        public string? EstimatedTime { get; set; }
 
         // Foreign Key to BusCompany (Route belongs to a bus company)
         public int CompanyID { get; set; }
@@ -122,7 +122,7 @@ namespace YatriSewa.Models
         [Required(ErrorMessage = "AC status is required")]
         public bool AC { get; set; }
 
-        public BusType BusType { get; set; }
+        public BusType? BusType { get; set; }
 
         // Safety features, such as sanitization or masks
         [StringLength(255, ErrorMessage = "Safety Features cannot exceed 255 characters")]
@@ -139,12 +139,10 @@ namespace YatriSewa.Models
         [Column("snacks")]
         public string? Snacks { get; set; }
 
-        // Foreign Key linking services to a specific bus
         [ForeignKey("Bus")]
         public int BusId { get; set; }
 
-        // Navigation property to Bus
-        public virtual required Bus Bus { get; set; }
+        public virtual Bus? Bus { get; set; }
     }
 
 

@@ -1,0 +1,73 @@
+﻿@model IEnumerable<YatriSewa.Models.Service>
+
+@{
+    ViewData["Title"] = "ListService";
+    Layout = "~/Views/Shared/_OperatorLayout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="AddService">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Wifi)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AC)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BusType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SafetyFeatures)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Essentials)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Snacks)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Bus)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Wifi)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AC)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BusType)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SafetyFeatures)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Essentials)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Snacks)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Bus.BusName)
+                </td>
+                <td>
+                    <a asp-action="EditService" asp-route-id="@item.ServiceId">Edit</a> |
+                    <a asp-action="ServiceDetails" asp-route-id="@item.ServiceId">Details</a> |
+                    <a asp-action="DeleteService" asp-route-id="@item.ServiceId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,69 @@
+﻿@model YatriSewa.Models.Service
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_OperatorLayout.cshtml";
+}
+
+<h1>Edit </h1>
+<h3>Edit <span class="text-primary">@ViewBag.BusName</span> Service</h3>
+
+<h4>Service</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditService">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ServiceId" />
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Wifi" /> @Html.DisplayNameFor(model => model.Wifi)
+                </label>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="AC" /> @Html.DisplayNameFor(model => model.AC)
+                </label>
+            </div>
+            <div class="form-group">
+                <label asp-for="BusType" class="control-label">Bus Type</label>
+                <select asp-for="BusType" class="form-control" asp-items="@(ViewData["BusType"] as IEnumerable<SelectListItem>)"></select> <!-- Cast ViewData to IEnumerable<SelectListItem> -->
+                <span asp-validation-for="BusType" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SafetyFeatures" class="control-label"></label>
+                <input asp-for="SafetyFeatures" class="form-control" />
+                <span asp-validation-for="SafetyFeatures" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Essentials" class="control-label"></label>
+                <input asp-for="Essentials" class="form-control" />
+                <span asp-validation-for="Essentials" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Snacks" class="control-label"></label>
+                <input asp-for="Snacks" class="form-control" />
+                <span asp-validation-for="Snacks" class="text-danger"></span>
+            </div>
+            <input asp-for="BusId" type="hidden" class="form-control" />
+            @* <div class="form-group">
+                <label asp-for="BusId" class="control-label"></label>
+                <select asp-for="BusId" class="form-control" asp-items="ViewBag.BusId"></select>
+                <span asp-validation-for="BusId" class="text-danger"></span>
+            </div> *@
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="ListService">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
