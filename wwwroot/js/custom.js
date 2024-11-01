@@ -91,6 +91,30 @@ $(function () {  // Using the shorthand version, recommended
     });
 });
 
+//==============================================================
+//function validateFileSize(fileInput, maxSize) {
+//    const file = fileInput.files[0];
+//    if (file && file.size > maxSize) {
+//        document.getElementById('fileSizeError').style.display = 'block';
+//        fileInput.value = ''; // Clear the file input
+//        return false;
+//    } else {
+//        document.getElementById('fileSizeError').style.display = 'none';
+//        return true;
+//    }
+//}
+
+//document.getElementById('licensePhoto').addEventListener('change', function () {
+//    validateFileSize(this, 2 * 1024 * 1024); // 2 MB in bytes
+//});
+
+//document.getElementById('driverRequestForm').addEventListener('submit', function (e) {
+//    const fileInput = document.getElementById('licensePhoto');
+//    if (!validateFileSize(fileInput, 2 * 1024 * 1024)) {
+//        e.preventDefault(); // Prevent form submission
+//        alert("The selected file is too large. Please choose a file smaller than 2 MB.");
+//    }
+//});
 
 //===============================
 

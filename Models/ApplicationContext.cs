@@ -31,6 +31,7 @@ namespace YatriSewa.Models
         public DbSet<Service> Service_Table { get; set; }
         public DbSet<BusDriver> Driver_Table { get; set; }
         public DbSet<Route> Route_Table { get; set; }
+        public DbSet<DriverAssignment> DriverAssign_Table { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

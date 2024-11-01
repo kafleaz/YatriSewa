@@ -1,0 +1,164 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" href="~/img/logo.png">
+    <title>OsahanBus - Bus Booking HTML Mobile Template</title>
+    <!-- Bootstrap core CSS -->
+    <link href="~/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Icofont Icon-->
+    <link href="~/vendor/icons/icofont.min.css" rel="stylesheet" type="text/css">
+    <!-- Slick Slider -->
+    <link rel="stylesheet" type="text/css" href="~/vendor/slick/slick.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/vendor/slick/slick-theme.min.css" />
+    <!-- Custom styles for this template -->
+    <link href="~/css/custom.css?v=1.0.1" rel="stylesheet">
+
+    <!-- Sidebar CSS -->
+    <link href="~/vendor/sidebar/demo.css?v=1.0.1" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container-70">
+        <!-- My Ticket -->
+        <div class="">
+            <div class="osahan-header-nav shadow-sm p-3 d-flex align-items-center bg-darkblue">
+                <h5 class="font-weight-normal mb-0 text-white">
+                    <a class="text-darkblue mr-3" asp-controller="Passenger" asp-action="PassengerDashboard"><i class="icofont-rounded-left"></i></a>
+                    Your Bookings
+                </h5>
+                <div class="ml-auto d-flex align-items-center">
+                    <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#"><i class="icofont-navigation-menu"></i></a>
+                </div>
+            </div>
+            <!-- You Ticket -->
+            <div class=" border-top m-0 p-3">
+                @RenderBody()
+            </div>
+            <!-- sidebar -->
+            <nav id="main-nav">
+                <ul class="second-nav">
+                    <li>
+                        <a asp-controller="Passenger" asp-action="PassengerDashboard" class="bg-secondary sidebar-user d-flex align-items-center py-4 px-3 border-0 mb-0">
+                            <img src="~/img/user1.jpg" class="img-fluid rounded-pill mr-3">
+                            <div class="text-white">
+                                <h6 class="mb-0">I Am </h6>
+                                <small>+977 12345-67890</small><br>
+                                <span class="f-10 text-white-50">Version 0.1</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Passenger" asp-action="PassengerDashboard"><i class="icofont-page mr-2"></i> OperatorDashboard</a>
+                    </li>
+                    <li>
+                        <a asp-action="Landing"><i class="icofont-stylish-right mr-2"></i> Landing</a>
+                    </li>
+                    <li>
+                        <a asp-action="GetStarted"><i class="icofont-ui-play mr-2"></i> Get Started</a>
+                    </li>
+                    <li>
+                        <a href="#"><i class="icofont-key mr-2"></i> Authentication</a>
+                        <ul>
+                            <li><a asp-action="SignIn">Sign In</a></li>
+                            <li><a asp-action="SignUp">Sign Up</a></li>
+                            <li><a asp-action="ForgotPassword"> Change Password</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="home.html"><i class="icofont-ui-home mr-2"></i> Homepage</a></li>
+                    <li><a href="gift-card.html"><i class="icofont-sale-discount mr-2"></i> Offers</a></li>
+                    <li><a href="listing.html"><i class="icofont-list mr-2"></i> Listing</a></li>
+                    <li><a href="bus-details.html"><i class="icofont-file-text mr-2"></i> Bus Detail</a></li>
+                    <li><a href="select-seat.html"><i class="icofont-check-circled mr-2"></i> Select Seat</a></li>
+                    <li><a href="payment.html"><i class="icofont-id-card mr-2"></i> Checkout</a></li>
+                    <li><a href="payment-card.html"><i class="icofont-ui-v-card mr-2"></i> Payment</a></li>
+                    <li>
+                        <a href="#"><i class="icofont-user-alt-3 mr-2"></i> Profile Pages</a>
+                        <ul>
+                            <li><a href="profile.html"> Profile</a></li>
+                            <li><a href="your-ticket.html"> Your Ticket</a></li>
+                            <li><a href="my-ticket.html"> History</a></li>
+                            <li><a href="customer-feedback.html">  Customer Feedback</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="icofont-page mr-2"></i> Request Forms</a>
+                        <ul>
+                            <li><a asp-controller="Passenger" asp-action="OperatorRequest">Operator</a></li>
+                            <li><a asp-controller="Passenger" asp-action="DriverRequest">Driver</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="icofont-link mr-2"></i> Navigation Link Example</a>
+                        <ul>
+                            <li>
+                                <a href="#">Link Example 1</a>
+                                <ul>
+                                    <li>
+                                        <a href="#">Link Example 1.1</a>
+                                        <ul>
+                                            <li><a href="#">Link</a></li>
+                                            <li><a href="#">Link</a></li>
+                                            <li><a href="#">Link</a></li>
+                                            <li><a href="#">Link</a></li>
+                                            <li><a href="#">Link</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="#">Link Example 1.2</a>
+                                        <ul>
+                                            <li><a href="#">Link</a></li>
+                                            <li><a href="#">Link</a></li>
+                                            <li><a href="#">Link</a></li>
+                                            <li><a href="#">Link</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li><a href="#">Link Example 2</a></li>
+                            <li><a href="#">Link Example 3</a></li>
+                            <li><a href="#">Link Example 4</a></li>
+                            <li data-nav-custom-content>
+                                <div class="custom-message">
+                                    You can add any custom content to your navigation items. This text is just an example.
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="bottom-nav">
+                    <li class="email">
+                        <a class="text-green nav-item text-center" href="home.html" tabindex="0" role="menuitem">
+                            <p class="h5 m-0"><i class="icofont-ui-home text-green"></i></p>
+                            Home
+                        </a>
+                    </li>
+                    <li class="github">
+                        <a href="gift-card.html" class="nav-item text-center" tabindex="0" role="menuitem">
+                            <p class="h5 m-0"><i class="icofont-sale-discount"></i></p>
+                            Offer
+                        </a>
+                    </li>
+                    <li class="ko-fi">
+                        <a href="support.html" class="nav-item text-center" tabindex="0" role="menuitem">
+                            <p class="h5 m-0"><i class="icofont-support-faq"></i></p>
+                            Help
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- Bootstrap core JavaScript -->
+    <script src="~/vendor/jquery/jquery.min.js"></script>
+    <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- slick Slider JS-->
+    <script type="text/javascript" src="~/vendor/slick/slick.min.js"></script>
+    <!-- Sidebar JS-->
+    <script type="text/javascript" src="~/vendor/sidebar/hc-offcanvas-nav.js"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="~/js/custom.js?v=@DateTime.Now.Ticks"></script>
+</body>
+</html>

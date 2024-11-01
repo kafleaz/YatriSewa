@@ -1,0 +1,67 @@
+﻿@model YatriSewa.Models.BusDriver
+
+@{
+    ViewData["Title"] = "DriverRequestForm";
+    Layout = "~/Views/Shared/_PassengerLayoutNoFooter.cshtml";
+}
+<div class="p-3">
+    <form id="driverRequestForm" method="post" asp-action="SubmitDriverRequest" enctype="multipart/form-data" novalidate>
+        <div class="form-group">
+            <label asp-for="DriverName" class="text-muted f-10 mb-1">Driver Name</label>
+            <input asp-for="DriverName" class="form-control" placeholder="Enter Your Full Name" required />
+            <div class="invalid-feedback">Driver Name is required.</div>
+            <span asp-validation-for="DriverName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="LicenseNumber" class="text-muted f-10 mb-1">License Number</label>
+            <input asp-for="LicenseNumber" class="form-control" placeholder="Enter Your License Number" required />
+            <div class="invalid-feedback">License Number is required.</div>
+            <span asp-validation-for="LicenseNumber" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="PhoneNumber" class="text-muted f-10 mb-1">Phone Number</label>
+            <input asp-for="PhoneNumber" class="form-control" placeholder="Enter Your Phone Number" required />
+            <div class="invalid-feedback">Phone Number is required.</div>
+            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Address" class="text-muted f-10 mb-1">Address</label>
+            <input asp-for="Address" class="form-control" placeholder="Enter Your Address" required />
+            <div class="invalid-feedback">Address is required.</div>
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="DateOfBirth" class="text-muted f-10 mb-1">Date of Birth</label>
+            <input asp-for="DateOfBirth" class="form-control" type="date" required />
+            <div class="invalid-feedback">Date of Birth is required.</div>
+            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+        </div>
+
+        @* <div class="form-group">
+            <label asp-for="LicensePhotoPath" class="text-muted f-10 mb-1">License Photo</label>
+            <input asp-for="LicensePhotoPath" class="form-control" type="file" accept=".jpg, .jpeg, .png, .gif" id="licensePhoto" />
+            <span asp-validation-for="LicensePhotoPath" class="text-danger"></span>
+            <small class="text-danger" id="fileSizeError" style="display: none;">File size must be less than 2 MB.</small>
+        </div> *@
+        <div class="form-group">
+            <label asp-for="LicensePhotoPath" class="text-muted f-10 mb-1">License Photo</label>
+
+            @* Display the existing license photo if it exists *@
+            @if (!string.IsNullOrEmpty(Model.LicensePhotoPath))
+            {
+                <div class="mb-2">
+                    <img src="@Model.LicensePhotoPath" alt="Uploaded License Photo" class="img-thumbnail" style="max-width: 200px;" />
+                </div>
+            }
+
+            <input asp-for="LicensePhotoPath" class="form-control" type="file" accept=".jpg, .jpeg, .png, .gif" id="licensePhoto" />
+            <span asp-validation-for="LicensePhotoPath" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-yatri-fotter btn-create-account mb-3 rounded-1 mt-4">Submit Request</button>
+    </form>
+</div>

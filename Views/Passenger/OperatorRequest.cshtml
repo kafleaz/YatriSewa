@@ -1,0 +1,63 @@
+﻿@model YatriSewa.Models.BusCompany
+
+@{
+    ViewData["Title"] = "OperatorRequestForm";
+    Layout = "~/Views/Shared/_PassengerLayoutNoFooter.cshtml";
+}
+
+<div class="p-3">
+    <form id="operatorRequestForm" method="post" asp-action="SubmitOperatorRequest" enctype="multipart/form-data" novalidate>
+        <div class="form-group">
+            <label asp-for="CompanyName" class="text-muted f-10 mb-1">Company Name</label>
+            <input asp-for="CompanyName" class="form-control" placeholder="Enter Your Company Name" required />
+            <div class="invalid-feedback">Company Name is required.</div>
+            <span asp-validation-for="CompanyName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="CompanyAddress" class="text-muted f-10 mb-1">Company Address</label>
+            <input asp-for="CompanyAddress" class="form-control" placeholder="Enter Your Company Address" />
+            <span asp-validation-for="CompanyAddress" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="ContactInfo" class="text-muted f-10 mb-1">Contact Info</label>
+            <input asp-for="ContactInfo" class="form-control" placeholder="Enter Contact Info" />
+            <span asp-validation-for="ContactInfo" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Reg_No" class="text-muted f-10 mb-1">Registration Number</label>
+            <input asp-for="Reg_No" class="form-control" placeholder="Enter Company Registration Number" />
+            <span asp-validation-for="Reg_No" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="VAT_PAN" class="text-muted f-10 mb-1">VAT/PAN</label>
+            <input asp-for="VAT_PAN" class="form-control" placeholder="Enter VAT/PAN Number" />
+            <span asp-validation-for="VAT_PAN" class="text-danger"></span>
+        </div>
+
+        @* <div class="form-group">
+            <label asp-for="VAT_PAN_PhotoPath" class="text-muted f-10 mb-1">VAT/PAN Photo</label>
+            <input asp-for="VAT_PAN_PhotoPath" class="form-control" type="file" />
+            <span asp-validation-for="VAT_PAN_PhotoPath" class="text-danger"></span>
+        </div> *@
+        <div class="form-group">
+            <label asp-for="VAT_PAN_PhotoPath" class="text-muted f-10 mb-1">VAT/PAN Photo</label>
+
+            @* Check if the photo path exists and display it *@
+            @if (!string.IsNullOrEmpty(Model.VAT_PAN_PhotoPath))
+            {
+                <div class="mb-2">
+                    <img src="@Model.VAT_PAN_PhotoPath" alt="Uploaded VAT/PAN Photo" class="img-thumbnail" style="max-width: 200px;" />
+                </div>
+            }
+
+            <input asp-for="VAT_PAN_PhotoPath" class="form-control" type="file" />
+            <span asp-validation-for="VAT_PAN_PhotoPath" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-yatri-fotter btn-create-account mb-3 rounded-1 mt-4">Submit Request</button>
+    </form>
+</div>

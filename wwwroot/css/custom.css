@@ -1170,7 +1170,7 @@ input[type="button"].btn-block {
 }
 
 * {
-    scrollbar-color: rgba(255, 255, 255, 0.5) #0A2D48;
+    scrollbar-color: rgba(255, 255, 255, 0.5) ;
     scrollbar-width: thin;
 }
 
@@ -1233,13 +1233,21 @@ input[type="button"].btn-block {
 .dropdown-menu {
     min-width: 1px;
 }
-
+.footer-fixed-bottom {
+    position: fixed;
+    width: 70%;
+    /* right: 0; */
+    bottom: 0;
+    /* left: 0; */
+    z-index: 1030;
+}
+/*=============================992px==========================================*/
 @media (min-width: 992px) {
     #main-nav {
         display: block;
     }
 }
-
+/*=================================800px====================================*/
 /* Responsive design: When the screen width is less than 800px, make the content full width */
 @media (max-width: 800px) {
     .container-70 {
@@ -1268,6 +1276,14 @@ input[type="button"].btn-block {
         padding: 10px;
         z-index: 1030;
     }
+    .footer-fixed-bottom {
+        position: fixed;
+        width: 100%;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1030;
+    }
     .google-btn {
         background-color: #ffffff;
         border-color: #507cc0;
@@ -1291,6 +1307,7 @@ input[type="button"].btn-block {
 
 }
 
+/*===========================600px=============================*/
 
 @media (max-width: 600px) {
     .btn-yatri-fotter {

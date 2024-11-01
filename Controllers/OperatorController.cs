@@ -886,6 +886,151 @@ namespace YatriSewa.Controllers
         {
             return _context.Service_Table.Any(e => e.ServiceId == id);
         }
+
+        //============================Bus Drivers==============================
+
+        // GET: BusDrivers
+        public async Task<IActionResult> ListDrivers()
+        {
+            var applicationContext = _context.Driver_Table.Include(b => b.User);
+            return View(await applicationContext.ToListAsync());
+        }
+
+        // GET: BusDrivers/Details/5
+        public async Task<IActionResult> DriverDetails(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var busDriver = await _context.Driver_Table
+                .Include(b => b.User)
+                .FirstOrDefaultAsync(m => m.DriverId == id);
+            if (busDriver == null)
+            {
+                return NotFound();
+            }
+
+            return View(busDriver);
+        }
+
+        // GET: BusDrivers/Create
+        public IActionResult AddDriver()
+        {
+            ViewData["UserId"] = new SelectList(_context.User_Table, "UserId", "Name");
+            return View();
+        }
+
+        // POST: BusDrivers/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("DriverId,DriverName,LicenseNumber,PhoneNumber,Address,DateOfBirth,LicensePhotoPath,IsAvailable,UserId")] BusDriver busDriver)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(busDriver);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(ListDrivers));
+            }
+            ViewData["UserId"] = new SelectList(_context.User_Table, "UserId", "Name", busDriver.UserId);
+            return View(busDriver);
+        }
+
+        // GET: BusDrivers/Edit/5
+        public async Task<IActionResult> EditDriver(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var busDriver = await _context.Driver_Table.FindAsync(id);
+            if (busDriver == null)
+            {
+                return NotFound();
+            }
+            ViewData["UserId"] = new SelectList(_context.User_Table, "UserId", "Name", busDriver.UserId);
+            return View(busDriver);
+        }
+
+        // POST: BusDrivers/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditDriver(int id, [Bind("DriverId,DriverName,LicenseNumber,PhoneNumber,Address,DateOfBirth,LicensePhotoPath,IsAvailable,UserId")] BusDriver busDriver)
+        {
+            if (id != busDriver.DriverId)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(busDriver);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!BusDriverExists(busDriver.DriverId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(ListDrivers));
+            }
+            ViewData["UserId"] = new SelectList(_context.User_Table, "UserId", "Name", busDriver.UserId);
+            return View(busDriver);
+        }
+
+        // GET: BusDrivers/Delete/5
+        public async Task<IActionResult> DeleteDriver(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var busDriver = await _context.Driver_Table
+                .Include(b => b.User)
+                .FirstOrDefaultAsync(m => m.DriverId == id);
+            if (busDriver == null)
+            {
+                return NotFound();
+            }
+
+            return View(busDriver);
+        }
+
+        // POST: BusDrivers/Delete/5
+        [HttpPost, ActionName("DeleteDriver")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteDriver(int id)
+        {
+            var busDriver = await _context.Driver_Table.FindAsync(id);
+            if (busDriver != null)
+            {
+                _context.Driver_Table.Remove(busDriver);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(ListDrivers));
+        }
+
+        private bool BusDriverExists(int id)
+        {
+            return _context.Driver_Table.Any(e => e.DriverId == id);
+        }
+
     }
 
 

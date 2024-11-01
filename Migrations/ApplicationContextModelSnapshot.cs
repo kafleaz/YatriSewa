@@ -123,6 +123,9 @@ namespace YatriSewa.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("CompanyId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
@@ -130,6 +133,9 @@ namespace YatriSewa.Migrations
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
+
+                    b.Property<bool>("IsAssigned")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
@@ -145,18 +151,49 @@ namespace YatriSewa.Migrations
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("DriverId");
 
+                    b.HasIndex("CompanyId");
+
                     b.HasIndex("UserId")
                         .IsUnique();
 
                     b.ToTable("Driver_Table");
+                });
+
+            modelBuilder.Entity("YatriSewa.Models.DriverAssignment", b =>
+                {
+                    b.Property<int>("AssignmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AssignmentId"));
+
+                    b.Property<int?>("BusId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DriverId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("AssignmentId");
+
+                    b.HasIndex("BusId");
+
+                    b.HasIndex("DriverId");
+
+                    b.ToTable("DriverAssign_Table");
                 });
 
             modelBuilder.Entity("YatriSewa.Models.OTP", b =>
@@ -353,13 +390,34 @@ namespace YatriSewa.Migrations
 
             modelBuilder.Entity("YatriSewa.Models.BusDriver", b =>
                 {
+                    b.HasOne("YatriSewa.Models.BusCompany", "BusCompany")
+                        .WithMany()
+                        .HasForeignKey("CompanyId");
+
                     b.HasOne("YatriSewa.Models.User", "User")
                         .WithOne("BusDriver")
                         .HasForeignKey("YatriSewa.Models.BusDriver", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("BusCompany");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("YatriSewa.Models.DriverAssignment", b =>
+                {
+                    b.HasOne("YatriSewa.Models.Bus", "Bus")
+                        .WithMany()
+                        .HasForeignKey("BusId");
+
+                    b.HasOne("YatriSewa.Models.BusDriver", "BusDriver")
+                        .WithMany()
+                        .HasForeignKey("DriverId");
+
+                    b.Navigation("Bus");
+
+                    b.Navigation("BusDriver");
                 });
 
             modelBuilder.Entity("YatriSewa.Models.OTP", b =>
