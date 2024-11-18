@@ -8,7 +8,7 @@
 <h1>Index</h1>
 
 <p>
-    <a asp-action="AddDrivers">Create New</a>
+    <a asp-action="SearchDriver">Add Driver</a>
 </p>
 <table class="table">
     <thead>
@@ -29,14 +29,14 @@
                 @Html.DisplayNameFor(model => model.DateOfBirth)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.IsAvailable)
+            </th>
+            @* <th>
                 @Html.DisplayNameFor(model => model.LicensePhotoPath)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.IsAvailable)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.User)
-            </th>
+            </th> *@
             <th></th>
         </tr>
     </thead>
@@ -60,18 +60,18 @@
                     @Html.DisplayFor(modelItem => item.DateOfBirth)
                 </td>
                 <td>
+                    @Html.DisplayFor(modelItem => item.IsAvailable)
+                </td>
+                @* <td>
                     @Html.DisplayFor(modelItem => item.LicensePhotoPath)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.IsAvailable)
-                </td>
-                <td>
                     @Html.DisplayFor(modelItem => item.User.Name)
-                </td>
+                </td> *@
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.DriverId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.DriverId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.DriverId">Delete</a>
+                    @* <a asp-action="EditDriver" asp-route-id="@item.DriverId">Edit</a> | *@
+                    <a asp-action="DriverDetails" asp-route-id="@item.DriverId">Details</a> |
+                    <a asp-action="DeleteDriver" asp-route-id="@item.DriverId">Remove</a>
                 </td>
             </tr>
         }
