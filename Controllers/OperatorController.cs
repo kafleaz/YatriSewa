@@ -5,20 +5,28 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using YatriSewa.Models;
 using YatriSewa.Services;
+using YatriSewa.Services.Interfaces;
 using Route = YatriSewa.Models.Route;
 
 namespace YatriSewa.Controllers
 {
     public class OperatorController : Controller
     {
-        private readonly ApplicationContext _context;
-        private readonly ILogger<OperatorController> _logger;
+        //private readonly ApplicationContext _context;
+        //private readonly ILogger<OperatorController> _logger;
 
         // Modify the constructor to accept ILogger<OperatorController>
-        public OperatorController(ApplicationContext context, ILogger<OperatorController> logger)
+        //public OperatorController(ApplicationContext context, ILogger<OperatorController> logger)
+        //{
+        //    _context = context;
+        //    _logger = logger;  // Assign logger to the private field
+        //} 15-23 AZ
+
+        //for using service --pratikshya
+        private readonly IOperatorService _operatorService;
+        public OperatorController(IOperatorService operatorService)
         {
-            _context = context;
-            _logger = logger;  // Assign logger to the private field
+            _operatorService = operatorService;
         }
 
         [Authorize(Roles = "Operator")]
