@@ -12,22 +12,19 @@ namespace YatriSewa.Controllers
 {
     public class OperatorController : Controller
     {
-        //private readonly ApplicationContext _context;
-        //private readonly ILogger<OperatorController> _logger;
+        private readonly ApplicationContext _context;
+        private readonly ILogger<OperatorController> _logger;
+        private readonly IOperatorService _operatorService;
 
         // Modify the constructor to accept ILogger<OperatorController>
-        //public OperatorController(ApplicationContext context, ILogger<OperatorController> logger)
-        //{
-        //    _context = context;
-        //    _logger = logger;  // Assign logger to the private field
-        //} 15-23 AZ
 
-        //for using service --pratikshya
-        private readonly IOperatorService _operatorService;
-        public OperatorController(IOperatorService operatorService)
+        public OperatorController(ApplicationContext context, IOperatorService operatorService, ILogger<OperatorController> logger)
         {
-            _operatorService = operatorService;
+            _context = context; // Initialize context
+            _operatorService = operatorService; // Initialize the service
+            _logger = logger; // Assign logger to the private field
         }
+
 
         [Authorize(Roles = "Operator")]
         public IActionResult OperatorDashboard()

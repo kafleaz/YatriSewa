@@ -1,4 +1,4 @@
-﻿// Services/Implementations/OperatorService.cs
+﻿// Services/OperatorService.cs
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,15 +7,28 @@ using YatriSewa.Models;
 using YatriSewa.Services.Interfaces;
 using Route = YatriSewa.Models.Route;
 
-namespace YatriSewa.Services.Implementations
+namespace YatriSewa.Services
 {
     public class OperatorService : IOperatorService
     {
-        private readonly ApplicationContext _context;
+        private readonly ApplicationContext _context; // Database context
 
         public OperatorService(ApplicationContext context)
         {
-            _context = context;
+            _context = context; // Initialize context
+        }
+
+        public async Task<IEnumerable<User>> GetAllOperatorsAsync()
+        {
+            return await _context.User_Table
+                .Where(u => u.Role == UserRole.Operator) // Assuming you have a Role property to distinguish users
+                .Include(u => u.BusCompany) // Include related BusCompany if needed
+                .ToListAsync();
+        }
+
+        public async Task<User?> GetOperatorByIdAsync(int id)
+        {
+            return await _context.User_Table.FindAsync(id); // Fetch operator by ID
         }
 
         public async Task<IEnumerable<Bus>> GetBusesByUserIdAsync(string userId)
@@ -77,7 +90,6 @@ namespace YatriSewa.Services.Implementations
         {
             return await _context.Route_Table.FindAsync(id);
         }
-        
 
         public async Task AddRouteAsync(Route route, string userId)
         {
@@ -91,17 +103,5 @@ namespace YatriSewa.Services.Implementations
                 await _context.SaveChangesAsync();
             }
         }
-
-        Task<IEnumerable<Route>> IOperatorService.GetRoutesByUserIdAsync(string userId)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Route?> IOperatorService.GetRouteDetailsAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-       
     }
 }

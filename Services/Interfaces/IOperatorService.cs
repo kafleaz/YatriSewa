@@ -8,7 +8,8 @@ namespace YatriSewa.Services.Interfaces
   
         public interface IOperatorService
         {
-            Task<IEnumerable<Bus>> GetBusesByUserIdAsync(string userId);
+        Task<IEnumerable<User>> GetAllOperatorsAsync();
+        Task<IEnumerable<Bus>> GetBusesByUserIdAsync(string userId);
             Task<Bus?> GetBusDetailsAsync(int id);
             Task AddBusAsync(Bus bus, string userId);
             Task<IEnumerable<Route>> GetRoutesByUserIdAsync(string userId);
