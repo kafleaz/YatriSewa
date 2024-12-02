@@ -385,7 +385,7 @@ namespace YatriSewa.Controllers
             {
                 UserRole.Admin => RedirectToAction("AdminDashboard", "Admin"),
                 UserRole.Operator => RedirectToAction("OperatorDashboard", "Operator"),
-                UserRole.Passenger => RedirectToAction("PassengerDashboard", "Passenger"),
+                UserRole.Passenger => RedirectToAction("HomePage", "Passenger"),
                 UserRole.Driver => RedirectToAction("DriverDashboard", "Driver"),
                 _ => RedirectToAction("Index", "Home"),
             };
@@ -433,7 +433,8 @@ namespace YatriSewa.Controllers
             return RedirectToAction("ForgotPasswordVerification");  // Redirect to OTP verification page
         }
 
-        [HttpPost]
+        //[HttpPost]
+        [HttpPost, ActionName("Logout")]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(); // Sign out the user from authentication

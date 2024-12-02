@@ -7,7 +7,7 @@ using YatriSewa.Models;
 
 namespace YatriSewa.Controllers
 {
-    [Authorize(Roles = "Passenger")]
+    //[Authorize(Roles = "Passenger")]
     public class PassengerController : Controller
     {
         private readonly ApplicationContext _context;
@@ -236,6 +236,74 @@ namespace YatriSewa.Controllers
 
             // If model state is not valid, return to the form with validation errors
             return View("OperatorRequest", model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(User updatedUser, IFormFile? profilePic)
+        {
+            var user = await _context.User_Table.FindAsync(updatedUser.UserId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Update user details
+            user.Name = updatedUser.Name;
+            user.Email = updatedUser.Email;
+            user.PhoneNo = updatedUser.PhoneNo;
+
+            // Handle profile picture update
+            if (profilePic != null)
+            {
+                var filePath = Path.Combine("wwwroot/uploads", Path.GetFileName(profilePic.FileName));
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await profilePic.CopyToAsync(stream);
+                }
+                user.ProfilePicPath = "/uploads/" + Path.GetFileName(profilePic.FileName);
+            }
+
+            // Save changes
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Profile");
+        }
+
+
+        public IActionResult HomePage()
+        {
+            return View();
+        }
+        public IActionResult BusListing()
+        {
+            return View();
+        }
+        public IActionResult BusDetails()
+        {
+            return View();
+        }
+        public IActionResult SeatSelection()
+        {
+            return View();
+        }
+        public IActionResult Payment()
+        {
+            return View();
+        }
+        public IActionResult PaymentCard()
+        {
+            return View();
+        }
+        public IActionResult Ticket()
+        {
+            return View();
+        }
+        public IActionResult Profile()
+        {
+            return View();
+        }
+        public IActionResult Notification()
+        {
+            return View();
         }
 
     }

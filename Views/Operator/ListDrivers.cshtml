@@ -28,9 +28,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.DateOfBirth)
             </th>
-            <th>
+            @* <th>
                 @Html.DisplayNameFor(model => model.IsAvailable)
-            </th>
+            </th> *@
             @* <th>
                 @Html.DisplayNameFor(model => model.LicensePhotoPath)
             </th>
@@ -60,16 +60,6 @@
                     @Html.DisplayFor(modelItem => item.DateOfBirth)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.IsAvailable)
-                </td>
-                @* <td>
-                    @Html.DisplayFor(modelItem => item.LicensePhotoPath)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.User.Name)
-                </td> *@
-                <td>
-                    @* <a asp-action="EditDriver" asp-route-id="@item.DriverId">Edit</a> | *@
                     <a asp-action="DriverDetails" asp-route-id="@item.DriverId">Details</a> |
                     <a asp-action="DeleteDriver" asp-route-id="@item.DriverId">Remove</a>
                 </td>
