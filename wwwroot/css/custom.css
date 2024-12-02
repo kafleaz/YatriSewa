@@ -861,9 +861,9 @@ h1.success-icon {
         color: #36A690;
     }
 
-.icofont-info-circle {
+/*.icofont-info-circle {
     color: #36A690;
-}
+}*/
 
 .btn-darkblue {
     background-color: #042F40;
@@ -1075,7 +1075,7 @@ input[type="button"].btn-block {
 }
 
 .nav-link {
-    color: white;
+    color: #36A690;
     font-size: 15px;
     padding: 10px;
     border-radius: 5px;
@@ -1083,8 +1083,8 @@ input[type="button"].btn-block {
 }
 
     .nav-link:hover {
-        background-color: #007bff;
-        color: white;
+        background-color: none;
+        color: #398779;
     }
 
 /* Navbar Styling */

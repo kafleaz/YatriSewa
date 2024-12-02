@@ -25,7 +25,7 @@ namespace YatriSewa.Models
         public required string Address { get; set; }
 
         [Required]
-        public DateTime DateOfBirth { get; set; }  // Removed nullable type since it's required
+        public DateOnly DateOfBirth { get; set; }  // Removed nullable type since it's required
 
         [StringLength(255)]
         public string? LicensePhotoPath { get; set; }  // Can be optional for now

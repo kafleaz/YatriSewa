@@ -145,5 +145,39 @@ namespace YatriSewa.Models
         public virtual Bus? Bus { get; set; }
     }
 
+    public class Schedule
+    {
+        [Key]
+        public int ScheduleId { get; set; }  // Primary Key
+
+        [ForeignKey("BusId")]
+        public int? BusId { get; set; }  // Foreign Key to Bus Table
+        public virtual Bus? Bus { get; set; }  // Navigation property
+
+        [ForeignKey("RouteId")]
+        public int RouteId { get; set; }  // Foreign Key to Route Table
+        public virtual Route? Route { get; set; }  // Navigation property
+
+        public DateTime DepartureTime { get; set; }  // Departure time of the schedule
+        public DateTime ArrivalTime { get; set; }  // Arrival time of the schedule
+
+        [Column(TypeName = "decimal(10, 2)")]
+        public decimal Price { get; set; }  // Ticket price
+
+        public int? AvailableSeats { get; set; }  // Number of available seats
+
+        [StringLength(50)]
+        public string? Status { get; set; }  // Status of the schedule
+
+        public int? DriverId { get; set; }  // Foreign Key to Driver Table
+        [ForeignKey("DriverId")]
+        public virtual BusDriver? Driver { get; set; }  // Navigation property
+
+        public int? BusCompanyId { get; set; }  // Foreign Key to BusCompany Table
+        [ForeignKey("BusCompanyId")]
+        public virtual BusCompany? BusCompany { get; set; }  // Navigation property
+    }
+
+
 
 }

@@ -94,20 +94,6 @@ namespace YatriSewa.Controllers
         }
 
         [Authorize(Roles = "Admin, Operator")]
-        //public IActionResult AddBus()
-        //{
-        //    var routes = _context.Route_Table.Select(r => new {
-        //        r.RouteID,
-        //        RouteDescription = r.StartLocation + " - " + r.Stops + " - " + r.EndLocation
-        //    }).ToList();
-        //    ViewData["RouteId"] = new SelectList(routes, "RouteID", "RouteDescription");
-        //    ViewData["CompanyId"] = new SelectList(_context.Company_Table, "CompanyId", "CompanyName");
-        //    ViewData["DriverId"] = new SelectList(_context.Driver_Table, "DriverId", "DriverName");
-        //    //ViewData["RouteId"] = new SelectList(_context.Route_Table, "RouteID", "EndLocation");
-        //    return View();
-        //}
-        [Authorize(Roles = "Admin, Operator")]
-        [Authorize(Roles = "Admin, Operator")]
         public async Task<IActionResult> AddBus()
         {
             // Get the current user ID
@@ -141,14 +127,16 @@ namespace YatriSewa.Controllers
                 .ToList();
 
             // Fetch drivers indirectly associated with the user's company through Bus
-            var drivers = _context.Bus_Table
-            .Where(b => b.CompanyId == companyId && b.BusDriver != null) // Check for non-null BusDriver
-            .Select(b => new {
-                DriverId = b.BusDriver!.DriverId, // Use null-forgiving operator to suppress nullable warning
-                DriverName = b.BusDriver.DriverName
-            })
-            .Distinct()
-            .ToList();
+            // Fetch drivers assigned to the user's company
+            var drivers = _context.Driver_Table
+                .Where(d => d.CompanyId == companyId) // Check for assigned drivers
+                .Select(d => new {
+                    d.DriverId,
+                    d.DriverName
+                })
+                .ToList();
+
+            
 
             // Populate ViewData with filtered routes and drivers
             ViewData["RouteId"] = new SelectList(routes, "RouteID", "RouteDescription");
@@ -281,14 +269,15 @@ namespace YatriSewa.Controllers
                 .ToList();
 
             // Fetch drivers associated with the user's company (indirectly through Bus)
-            var drivers = _context.Bus_Table
-                .Where(b => b.CompanyId == companyId && b.BusDriver != null)
-                .Select(b => new {
-                    DriverId = b.BusDriver!.DriverId,
-                    DriverName = b.BusDriver.DriverName
+            // Fetch drivers directly assigned to the user's company
+            var drivers = _context.Driver_Table
+                .Where(d => d.CompanyId == companyId) // Directly assigned drivers
+                .Select(d => new {
+                    d.DriverId,
+                    d.DriverName
                 })
-                .Distinct()
                 .ToList();
+
 
             // Populate ViewData with filtered routes, drivers, and company information
             ViewData["RouteId"] = new SelectList(routes, "RouteID", "RouteDescription", bus.RouteId);
@@ -299,9 +288,6 @@ namespace YatriSewa.Controllers
         }
 
 
-        // POST: Buses/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [Authorize(Roles = "Operator, Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -381,52 +367,8 @@ namespace YatriSewa.Controllers
             return _context.Bus_Table.Any(e => e.BusId == id);
         }
 
-
-        //[Authorize(Roles = "Operator, Admin")]
-        //public async Task<IActionResult> SortList(string sortOrder)
-        //{
-        //    // Store the current sort order in ViewBag for the view to know the current sorting state
-        //    ViewBag.CurrentSort = sortOrder;
-
-        //    // Set the toggling sort order for each column
-        //    ViewBag.BusNameSortParm = String.IsNullOrEmpty(sortOrder) || sortOrder == "busname_asc" ? "busname_desc" : "busname_asc";
-        //    ViewBag.BusNumberSortParm = sortOrder == "busnumber_asc" ? "busnumber_desc" : "busnumber_asc";
-        //    ViewBag.SeatCapacitySortParm = sortOrder == "seatcapacity_asc" ? "seatcapacity_desc" : "seatcapacity_asc";
-
-        //    // Fetch the data from the database
-        //    var buses = from b in _context.Bus_Table.Include(b => b.BusCompany)
-        //                select b;
-
-        //    // Apply sorting based on the sortOrder parameter
-        //    switch (sortOrder)
-        //    {
-        //        case "busname_desc":
-        //            buses = buses.OrderByDescending(b => b.BusName);
-        //            break;
-        //        case "busnumber_asc":
-        //            buses = buses.OrderBy(b => b.BusNumber);
-        //            break;
-        //        case "busnumber_desc":
-        //            buses = buses.OrderByDescending(b => b.BusNumber);
-        //            break;
-        //        case "seatcapacity_asc":
-        //            buses = buses.OrderBy(b => b.SeatCapacity);
-        //            break;
-        //        case "seatcapacity_desc":
-        //            buses = buses.OrderByDescending(b => b.SeatCapacity);
-        //            break;
-        //        default:
-        //            buses = buses.OrderBy(b => b.BusName); // Default sorting by BusName ascending
-        //            break;
-        //    }
-
-        //    // Return the view with sorted bus data
-        //    return View(await buses.ToListAsync());
-        //}
-
         //==============================Route Control================================================
        
-        //[Authorize(Roles = "Operator, Admin")]
         [Authorize(Roles = "Admin, Operator, Driver")]
         public async Task<IActionResult> ListRoute()
         {
@@ -494,27 +436,6 @@ namespace YatriSewa.Controllers
             return View();
         }
 
-        // POST: Routes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        // POST: Routes/Create
-        //[Authorize(Roles = "Operator, Admin")]
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> AddRoute([Bind("RouteID,StartLocation,Stops,EndLocation,EstimatedTime,CompanyID")] Route route)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        // Save the new route with the operator's company ID
-        //        _context.Add(route);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(ListRoute));
-        //    }
-
-        //    // If there's an error, reload the view with the appropriate CompanyID
-        //    ViewBag.CompanyID = route.CompanyID;
-        //    return View(route);
-        //}
         [Authorize(Roles = "Operator, Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -568,9 +489,6 @@ namespace YatriSewa.Controllers
             return View(route);
         }
 
-        // POST: Routes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [Authorize(Roles = "Operator, Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -647,8 +565,8 @@ namespace YatriSewa.Controllers
         }
 
 
-        //===================================Service Control==============================
-        // GET: Services
+//===================================Service Control==============================
+
         [Authorize(Roles = "Operator, Admin")]
         public async Task<IActionResult> ListService()
         {
@@ -682,13 +600,6 @@ namespace YatriSewa.Controllers
             return View(services);
         }
 
-        //public async Task<IActionResult> ListService()
-        //{
-        //    var applicationContext = _context.Service_Table.Include(s => s.Bus);
-        //    return View(await applicationContext.ToListAsync());
-        //}
-
-        // GET: Services/Details/5
         [Authorize(Roles = "Operator, Admin")]
         public async Task<IActionResult> ServiceDetails(int? id)
         { 
@@ -746,10 +657,6 @@ namespace YatriSewa.Controllers
             return View();
         }
 
-
-        // POST: Services/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [Authorize(Roles = "Operator, Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -765,25 +672,7 @@ namespace YatriSewa.Controllers
             return View(service);
         }
 
-        // GET: Services/Edit/5
-        //[Authorize(Roles = "Operator, Admin")]
-        //public async Task<IActionResult> EditService(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
 
-        //    var service = await _context.Service_Table.FindAsync(id);
-        //    if (service == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    ViewData["BusId"] = new SelectList(_context.Bus_Table, "BusId", "BusName", service.BusId);
-
-        //    return View(service);
-        //}
         [Authorize(Roles = "Operator, Admin")]
         public async Task<IActionResult> EditService(int? id)
         {
@@ -813,10 +702,6 @@ namespace YatriSewa.Controllers
             return View(service);
         }
 
-
-        // POST: Services/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [Authorize(Roles = "Operator, Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -893,12 +778,66 @@ namespace YatriSewa.Controllers
         }
 
         //============================Bus Drivers==============================
-
-        // GET: BusDrivers
+        [Authorize(Roles = "Operator, Admin, Driver")]
         public async Task<IActionResult> ListDrivers()
         {
-            var applicationContext = _context.Driver_Table.Include(b => b.User);
-            return View(await applicationContext.ToListAsync());
+            // Get the current user ID from claims
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // Convert the user ID to an integer
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return Unauthorized(); // Handle invalid or missing user ID
+            }
+
+            // Retrieve the logged-in user, including their associated company
+            var user = await _context.User_Table
+                .Include(u => u.BusCompany) // Use the correct navigation property for Company_Table
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null || user.BusCompany == null)
+            {
+                return Unauthorized(); // Handle unauthorized access or no associated company
+            }
+
+            var companyId = user.BusCompany.CompanyId; // Use the navigation property to get CompanyID
+
+            // Fetch only drivers associated with the user's company
+            var drivers = await _context.Driver_Table
+                .Include(d => d.User) // Include user details if needed
+                .Where(d => d.CompanyId == companyId) // Filter by company ID
+                .ToListAsync();
+
+            // Optionally, set the company name or other details in ViewBag if needed
+            ViewBag.CompanyName = user.BusCompany.CompanyName;
+
+            // Return the list of drivers to the view
+            return View(drivers);
+        }
+
+        public async Task<IActionResult> SearchDriver(string licenseNumber)
+        {
+            if (string.IsNullOrEmpty(licenseNumber))
+            {
+                // Handle case where no input is provided
+                ModelState.AddModelError("", "Please enter a license number.");
+                return View("SearchDriver");
+            }
+
+            // Retrieve the driver based on the license number
+            var driver = await _context.Driver_Table
+                .Include(d => d.User) // Include related User details if needed
+                .FirstOrDefaultAsync(d => d.LicenseNumber == licenseNumber);
+
+            if (driver == null)
+            {
+                // Handle case where the driver is not found
+                ViewBag.ErrorMessage = "No driver found with the provided license number.";
+                return View("SearchDriver");
+            }
+
+            // Pass the found driver to the view
+            return View("DriverDetails", driver);
         }
 
         // GET: BusDrivers/Details/5
@@ -910,8 +849,10 @@ namespace YatriSewa.Controllers
             }
 
             var busDriver = await _context.Driver_Table
-                .Include(b => b.User)
+                //.Include(b => b.User)
+                .Include(b => b.BusCompany) // Include the related BusCompany
                 .FirstOrDefaultAsync(m => m.DriverId == id);
+
             if (busDriver == null)
             {
                 return NotFound();
@@ -920,81 +861,50 @@ namespace YatriSewa.Controllers
             return View(busDriver);
         }
 
-        // GET: BusDrivers/Create
-        public IActionResult AddDriver()
-        {
-            ViewData["UserId"] = new SelectList(_context.User_Table, "UserId", "Name");
-            return View();
-        }
-
-        // POST: BusDrivers/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Operator, Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("DriverId,DriverName,LicenseNumber,PhoneNumber,Address,DateOfBirth,LicensePhotoPath,IsAvailable,UserId")] BusDriver busDriver)
+        public async Task<IActionResult> AddDriver(int driverId)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(busDriver);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(ListDrivers));
-            }
-            ViewData["UserId"] = new SelectList(_context.User_Table, "UserId", "Name", busDriver.UserId);
-            return View(busDriver);
-        }
+            // Get the current user ID from claims
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        // GET: BusDrivers/Edit/5
-        public async Task<IActionResult> EditDriver(int? id)
-        {
-            if (id == null)
+            // Validate and parse the user ID
+            if (!int.TryParse(userIdString, out int userId))
             {
-                return NotFound();
+                return Unauthorized(); // Handle unauthorized access
             }
 
-            var busDriver = await _context.Driver_Table.FindAsync(id);
-            if (busDriver == null)
-            {
-                return NotFound();
-            }
-            ViewData["UserId"] = new SelectList(_context.User_Table, "UserId", "Name", busDriver.UserId);
-            return View(busDriver);
-        }
+            // Retrieve the current logged-in user with their company
+            var user = await _context.User_Table.FirstOrDefaultAsync(u => u.UserId == userId);
 
-        // POST: BusDrivers/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditDriver(int id, [Bind("DriverId,DriverName,LicenseNumber,PhoneNumber,Address,DateOfBirth,LicensePhotoPath,IsAvailable,UserId")] BusDriver busDriver)
-        {
-            if (id != busDriver.DriverId)
+            if (user == null || user.CompanyID == null)
             {
-                return NotFound();
+                return Unauthorized(); // Handle unauthorized access or missing company
             }
 
-            if (ModelState.IsValid)
+            // Find the driver by ID
+            var driver = await _context.Driver_Table.FirstOrDefaultAsync(d => d.DriverId == driverId);
+
+            if (driver == null)
             {
-                try
-                {
-                    _context.Update(busDriver);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BusDriverExists(busDriver.DriverId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(ListDrivers));
+                return NotFound("Driver not found.");
             }
-            ViewData["UserId"] = new SelectList(_context.User_Table, "UserId", "Name", busDriver.UserId);
-            return View(busDriver);
+
+            if (!driver.IsAvailable)
+            {
+                return BadRequest("Driver is already assigned to a company.");
+            }
+
+            // Update the driver details
+            driver.CompanyId = user.CompanyID.Value;
+            driver.IsAvailable = false;
+
+            // Save changes to the database
+            _context.Update(driver);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(ListDrivers));
         }
 
         // GET: BusDrivers/Delete/5
@@ -1021,13 +931,21 @@ namespace YatriSewa.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteDriver(int id)
         {
+            // Find the driver in the database
             var busDriver = await _context.Driver_Table.FindAsync(id);
             if (busDriver != null)
             {
-                _context.Driver_Table.Remove(busDriver);
+                // Update the properties instead of deleting the record
+                busDriver.IsAvailable = true;
+                busDriver.CompanyId = null;
+
+                // Mark the record as modified
+                _context.Driver_Table.Update(busDriver);
+
+                // Save the changes to the database
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(ListDrivers));
         }
 

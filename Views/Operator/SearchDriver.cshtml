@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Search Driver";
+    Layout = "~/Views/Shared/_OperatorLayout.cshtml";
+}
+
+<h1>Enter License Number to Find Driver</h1>
+
+<form asp-action="SearchDriver" method="get">
+    <div class="form-group">
+        <label for="licenseNumber">License Number:</label>
+        <input type="text" id="licenseNumber" name="licenseNumber" class="form-control" required />
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.ErrorMessage
+    </div>
+}

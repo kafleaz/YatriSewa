@@ -24,24 +24,15 @@
     <div class="container-70">
         <!-- My Ticket -->
         <div class="">
-            <div class="osahan-header-nav shadow-sm p-3 d-flex align-items-center bg-darkblue">
-                <h5 class="font-weight-normal mb-0 text-white">
-                    <a class="text-darkblue mr-3" asp-controller="Passenger" asp-action="PassengerDashboard"><i class="icofont-rounded-left"></i></a>
-                    Your Bookings
-                </h5>
-                <div class="ml-auto d-flex align-items-center">
-                    <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#"><i class="icofont-navigation-menu"></i></a>
-                </div>
-            </div>
             <!-- You Ticket -->
-            <div class=" border-top m-0 p-3">
+            <div class=" m-0">
                 @RenderBody()
             </div>
             <!-- sidebar -->
             <nav id="main-nav">
                 <ul class="second-nav">
                     <li>
-                        <a asp-controller="Passenger" asp-action="PassengerDashboard" class="bg-secondary sidebar-user d-flex align-items-center py-4 px-3 border-0 mb-0">
+                        <a asp-controller="Passenger" asp-action="HomePage" class="bg-secondary sidebar-user d-flex align-items-center py-4 px-3 border-0 mb-0">
                             <img src="~/img/user1.jpg" class="img-fluid rounded-pill mr-3">
                             <div class="text-white">
                                 <h6 class="mb-0">I Am </h6>
@@ -54,7 +45,7 @@
                         <a asp-controller="Passenger" asp-action="PassengerDashboard"><i class="icofont-page mr-2"></i> OperatorDashboard</a>
                     </li>
                     <li>
-                        <a asp-action="Landing"><i class="icofont-stylish-right mr-2"></i> Landing</a>
+                        <a asp-controller="Login" asp-action="Landing"><i class="icofont-stylish-right mr-2"></i> Landing</a>
                     </li>
                     <li>
                         <form id="logoutForm" asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
@@ -66,23 +57,23 @@
                     <li>
                         <a href="#"><i class="icofont-key mr-2"></i> Authentication</a>
                         <ul>
-                            <li><a asp-action="SignIn">Sign In</a></li>
-                            <li><a asp-action="SignUp">Sign Up</a></li>
-                            <li><a asp-action="ForgotPassword"> Change Password</a></li>
+                            <li><a asp-controller="Login" asp-action="SignIn">Sign In</a></li>
+                            <li><a asp-controller="Login" asp-action="SignUp">Sign Up</a></li>
+                            <li><a asp-controller="Login" asp-action="ForgotPassword"> Change Password</a></li>
                         </ul>
                     </li>
                     <li><a asp-controller="Passenger" asp-action="HomePage"><i class="icofont-ui-home mr-2"></i> Homepage</a></li>
                     <li><a asp-controller="Passenger" asp-action="BusListing"><i class="icofont-list mr-2"></i> Listing</a></li>
                     <li><a href="gift-card.html"><i class="icofont-sale-discount mr-2"></i> Offers</a></li>
                     <li><a asp-controller="Passenger" asp-action="BusDetails"><i class="icofont-file-text mr-2"></i> Bus Detail</a></li>
-                    <li><a href="select-seat.html"><i class="icofont-check-circled mr-2"></i> Select Seat</a></li>
-                    <li><a href="payment.html"><i class="icofont-id-card mr-2"></i> Checkout</a></li>
-                    <li><a href="payment-card.html"><i class="icofont-ui-v-card mr-2"></i> Payment</a></li>
+                    <li><a asp-controller="Passenger" asp-action="SeatSelection"><i class="icofont-check-circled mr-2"></i> Select Seat</a></li>
+                    <li><a asp-controller="Passenger" asp-action="Payment"><i class="icofont-id-card mr-2"></i> Payment</a></li>
+                    <li><a asp-controller="Passenger" asp-action="PaymentCard"><i class="icofont-ui-v-card mr-2"></i> PaymentCard</a></li>
                     <li>
                         <a href="#"><i class="icofont-user-alt-3 mr-2"></i> Profile Pages</a>
                         <ul>
-                            <li><a href="profile.html"> Profile</a></li>
-                            <li><a href="your-ticket.html"> Your Ticket</a></li>
+                            <li><a asp-controller="Passenger" asp-action="Profile"> Profile</a></li>
+                            <li><a asp-controller="Passenger" asp-action="Ticket"> Your Ticket</a></li>
                             <li><a href="my-ticket.html"> History</a></li>
                             <li><a href="customer-feedback.html">  Customer Feedback</a></li>
                         </ul>

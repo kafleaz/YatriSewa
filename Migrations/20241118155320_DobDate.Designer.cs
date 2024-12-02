@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YatriSewa.Models;
 
@@ -11,9 +12,11 @@ using YatriSewa.Models;
 namespace YatriSewa.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20241118155320_DobDate")]
+    partial class DobDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -258,55 +261,6 @@ namespace YatriSewa.Migrations
                     b.ToTable("Route_Table");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.Schedule", b =>
-                {
-                    b.Property<int>("ScheduleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScheduleId"));
-
-                    b.Property<DateTime>("ArrivalTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("AvailableSeats")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("BusCompanyId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("BusId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DepartureTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("DriverId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<int>("RouteId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("ScheduleId");
-
-                    b.HasIndex("BusCompanyId");
-
-                    b.HasIndex("BusId");
-
-                    b.HasIndex("DriverId");
-
-                    b.HasIndex("RouteId");
-
-                    b.ToTable("Schedule_Table");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.Service", b =>
                 {
                     b.Property<int>("ServiceId")
@@ -489,35 +443,6 @@ namespace YatriSewa.Migrations
                         .IsRequired();
 
                     b.Navigation("BusCompany");
-                });
-
-            modelBuilder.Entity("YatriSewa.Models.Schedule", b =>
-                {
-                    b.HasOne("YatriSewa.Models.BusCompany", "BusCompany")
-                        .WithMany()
-                        .HasForeignKey("BusCompanyId");
-
-                    b.HasOne("YatriSewa.Models.Bus", "Bus")
-                        .WithMany()
-                        .HasForeignKey("BusId");
-
-                    b.HasOne("YatriSewa.Models.BusDriver", "Driver")
-                        .WithMany()
-                        .HasForeignKey("DriverId");
-
-                    b.HasOne("YatriSewa.Models.Route", "Route")
-                        .WithMany()
-                        .HasForeignKey("RouteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Bus");
-
-                    b.Navigation("BusCompany");
-
-                    b.Navigation("Driver");
-
-                    b.Navigation("Route");
                 });
 
             modelBuilder.Entity("YatriSewa.Models.Service", b =>

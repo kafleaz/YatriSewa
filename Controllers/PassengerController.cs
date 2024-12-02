@@ -7,7 +7,7 @@ using YatriSewa.Models;
 
 namespace YatriSewa.Controllers
 {
-    [Authorize(Roles = "Passenger")]
+    //[Authorize(Roles = "Passenger")]
     public class PassengerController : Controller
     {
         private readonly ApplicationContext _context;
@@ -83,80 +83,13 @@ namespace YatriSewa.Controllers
                     LicenseNumber = string.Empty, // Placeholder or initial value
                     PhoneNumber = string.Empty, // Placeholder or initial value
                     Address = string.Empty, // Placeholder or initial value
-                    DateOfBirth = DateTime.Now // Default value, adjust as needed
+                    DateOfBirth = DateOnly.FromDateTime(DateTime.Now)
+                    // Default value, adjust as needed
                 };
             }
 
             return View(driverRequest); // Pass the existing request or a new model to the view
         }
-
-
-
-        //[HttpPost]
-        //[Authorize(Roles = "Passenger")]
-        //public async Task<IActionResult> SubmitDriverRequest(BusDriver model)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        // Link the current user as the requester
-        //        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //        if (string.IsNullOrEmpty(userId))
-        //        {
-        //            return Unauthorized(); // Handle invalid or missing user ID
-        //        }
-        //        model.UserId = int.Parse(userId);
-
-        //        // Handle file upload for LicensePhotoPath
-        //        var licensePhoto = Request.Form.Files.FirstOrDefault();
-        //        if (licensePhoto != null && licensePhoto.Length > 0)
-        //        {
-        //            // Define the upload path
-        //            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "licensephoto");
-
-        //            // Ensure the directory exists
-        //            if (!Directory.Exists(uploadsFolder))
-        //            {
-        //                Directory.CreateDirectory(uploadsFolder);
-        //            }
-
-        //            // Generate a unique file name
-        //            var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(licensePhoto.FileName);
-        //            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-        //            // Save the file to the server
-        //            using (var fileStream = new FileStream(filePath, FileMode.Create))
-        //            {
-        //                await licensePhoto.CopyToAsync(fileStream);
-        //            }
-
-        //            // Update the model's LicensePhotoPath with the relative path
-        //            model.LicensePhotoPath = "/licensephoto/" + uniqueFileName;
-        //        }
-
-        //        // Initially, the driver is unassigned and has no company
-        //        model.CompanyId = null;
-        //        model.IsAvailable = false;
-        //        model.IsAssigned = false;
-
-        //        try
-        //        {
-        //            // Save the driver request to the database
-        //            _context.Driver_Table.Add(model);
-        //            await _context.SaveChangesAsync();
-        //            return RedirectToAction("PassengerDashboard", "Passenger"); // Redirect after submission
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            // Log the exception
-        //            Console.WriteLine($"Error during database save: {ex.Message}");
-        //            ModelState.AddModelError("", "An error occurred while saving the data.");
-        //            return View("DriverRequest", model);
-        //        }
-        //    }
-
-        //    // If model state is not valid, return to the form with validation errors
-        //    return View("DriverRequest", model);
-        //}
 
         [HttpPost]
         [Authorize]
@@ -303,6 +236,74 @@ namespace YatriSewa.Controllers
 
             // If model state is not valid, return to the form with validation errors
             return View("OperatorRequest", model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(User updatedUser, IFormFile? profilePic)
+        {
+            var user = await _context.User_Table.FindAsync(updatedUser.UserId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Update user details
+            user.Name = updatedUser.Name;
+            user.Email = updatedUser.Email;
+            user.PhoneNo = updatedUser.PhoneNo;
+
+            // Handle profile picture update
+            if (profilePic != null)
+            {
+                var filePath = Path.Combine("wwwroot/uploads", Path.GetFileName(profilePic.FileName));
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await profilePic.CopyToAsync(stream);
+                }
+                user.ProfilePicPath = "/uploads/" + Path.GetFileName(profilePic.FileName);
+            }
+
+            // Save changes
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Profile");
+        }
+
+
+        public IActionResult HomePage()
+        {
+            return View();
+        }
+        public IActionResult BusListing()
+        {
+            return View();
+        }
+        public IActionResult BusDetails()
+        {
+            return View();
+        }
+        public IActionResult SeatSelection()
+        {
+            return View();
+        }
+        public IActionResult Payment()
+        {
+            return View();
+        }
+        public IActionResult PaymentCard()
+        {
+            return View();
+        }
+        public IActionResult Ticket()
+        {
+            return View();
+        }
+        public IActionResult Profile()
+        {
+            return View();
+        }
+        public IActionResult Notification()
+        {
+            return View();
         }
 
     }
