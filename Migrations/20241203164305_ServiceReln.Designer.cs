@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YatriSewa.Models;
 
@@ -11,9 +12,11 @@ using YatriSewa.Models;
 namespace YatriSewa.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20241203164305_ServiceReln")]
+    partial class ServiceReln
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,43 +24,6 @@ namespace YatriSewa.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("YatriSewa.Models.Booking", b =>
-                {
-                    b.Property<int>("BookingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookingId"));
-
-                    b.Property<DateTime>("BookingDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("BusId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasMaxLength(20)
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<int?>("TotalSeats")
-                        .IsRequired()
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("BookingId");
-
-                    b.HasIndex("BusId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Booking_Table");
-                });
 
             modelBuilder.Entity("YatriSewa.Models.Bus", b =>
                 {
@@ -264,43 +230,6 @@ namespace YatriSewa.Migrations
                     b.ToTable("Otp_Table");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.Payment", b =>
-                {
-                    b.Property<int>("PaymentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
-
-                    b.Property<decimal>("AmountPaid")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<int>("BookingId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("PaymentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PaymentMethod")
-                        .HasMaxLength(20)
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasMaxLength(20)
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PaymentId");
-
-                    b.HasIndex("BookingId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Payment_Table");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.Route", b =>
                 {
                     b.Property<int>("RouteID")
@@ -385,45 +314,6 @@ namespace YatriSewa.Migrations
                     b.ToTable("Schedule_Table");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.Seat", b =>
-                {
-                    b.Property<int>("SeatId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SeatId"));
-
-                    b.Property<int?>("BookingId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BusId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ReservedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ReservedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SeatNumber")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("SeatId");
-
-                    b.HasIndex("BookingId");
-
-                    b.HasIndex("BusId");
-
-                    b.HasIndex("ReservedByUserId");
-
-                    b.ToTable("Seat_Table");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.Service", b =>
                 {
                     b.Property<int>("ServiceId")
@@ -468,37 +358,6 @@ namespace YatriSewa.Migrations
                         .IsUnique();
 
                     b.ToTable("Service_Table");
-                });
-
-            modelBuilder.Entity("YatriSewa.Models.Ticket", b =>
-                {
-                    b.Property<int>("TicketId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TicketId"));
-
-                    b.Property<int>("BookingId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("BusId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<int>("SeatId")
-                        .HasColumnType("int");
-
-                    b.HasKey("TicketId");
-
-                    b.HasIndex("BookingId");
-
-                    b.HasIndex("BusId");
-
-                    b.HasIndex("SeatId");
-
-                    b.ToTable("Ticket_Table");
                 });
 
             modelBuilder.Entity("YatriSewa.Models.User", b =>
@@ -561,23 +420,6 @@ namespace YatriSewa.Migrations
                     b.HasIndex("CompanyID");
 
                     b.ToTable("User_Table");
-                });
-
-            modelBuilder.Entity("YatriSewa.Models.Booking", b =>
-                {
-                    b.HasOne("YatriSewa.Models.Bus", "Bus")
-                        .WithMany()
-                        .HasForeignKey("BusId");
-
-                    b.HasOne("YatriSewa.Models.User", "User")
-                        .WithMany("Bookings")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Bus");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("YatriSewa.Models.Bus", b =>
@@ -648,21 +490,6 @@ namespace YatriSewa.Migrations
                     b.Navigation("User_Table");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.Payment", b =>
-                {
-                    b.HasOne("YatriSewa.Models.Booking", "Booking")
-                        .WithMany()
-                        .HasForeignKey("BookingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("YatriSewa.Models.User", null)
-                        .WithMany("Payments")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Booking");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.Route", b =>
                 {
                     b.HasOne("YatriSewa.Models.BusCompany", "BusCompany")
@@ -681,7 +508,7 @@ namespace YatriSewa.Migrations
                         .HasForeignKey("BusCompanyId");
 
                     b.HasOne("YatriSewa.Models.Bus", "Bus")
-                        .WithMany("Schedules")
+                        .WithMany()
                         .HasForeignKey("BusId");
 
                     b.HasOne("YatriSewa.Models.BusDriver", "Driver")
@@ -703,29 +530,6 @@ namespace YatriSewa.Migrations
                     b.Navigation("Route");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.Seat", b =>
-                {
-                    b.HasOne("YatriSewa.Models.Booking", "Booking")
-                        .WithMany()
-                        .HasForeignKey("BookingId");
-
-                    b.HasOne("YatriSewa.Models.Bus", "Bus")
-                        .WithMany("Seats")
-                        .HasForeignKey("BusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("YatriSewa.Models.User", "ReservedByUser")
-                        .WithMany()
-                        .HasForeignKey("ReservedByUserId");
-
-                    b.Navigation("Booking");
-
-                    b.Navigation("Bus");
-
-                    b.Navigation("ReservedByUser");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.Service", b =>
                 {
                     b.HasOne("YatriSewa.Models.Bus", "Bus")
@@ -737,29 +541,6 @@ namespace YatriSewa.Migrations
                     b.Navigation("Bus");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.Ticket", b =>
-                {
-                    b.HasOne("YatriSewa.Models.Booking", "Booking")
-                        .WithMany("Tickets")
-                        .HasForeignKey("BookingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("YatriSewa.Models.Bus", null)
-                        .WithMany("Tickets")
-                        .HasForeignKey("BusId");
-
-                    b.HasOne("YatriSewa.Models.Seat", "Seat")
-                        .WithMany()
-                        .HasForeignKey("SeatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Booking");
-
-                    b.Navigation("Seat");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.User", b =>
                 {
                     b.HasOne("YatriSewa.Models.BusCompany", "BusCompany")
@@ -769,20 +550,9 @@ namespace YatriSewa.Migrations
                     b.Navigation("BusCompany");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.Booking", b =>
-                {
-                    b.Navigation("Tickets");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.Bus", b =>
                 {
-                    b.Navigation("Schedules");
-
-                    b.Navigation("Seats");
-
                     b.Navigation("Service");
-
-                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("YatriSewa.Models.BusCompany", b =>
@@ -802,13 +572,9 @@ namespace YatriSewa.Migrations
 
             modelBuilder.Entity("YatriSewa.Models.User", b =>
                 {
-                    b.Navigation("Bookings");
-
                     b.Navigation("BusDriver");
 
                     b.Navigation("Otp_Table");
-
-                    b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618
         }

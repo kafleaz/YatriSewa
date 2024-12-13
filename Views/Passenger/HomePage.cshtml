@@ -3,119 +3,62 @@
     ViewData["Title"] = "Home Page";
     Layout = "~/Views/Shared/_SidebarLayout.cshtml";
 }
+
 <body>
-        <!-- verification -->
-        <div class="osahan-verification padding-bt">
-            <div class="p-3 shadow bg-darkblue danger-nav osahan-home-header">
-                <div class="font-weight-normal mb-0 d-flex align-items-center">
-                    <img src="~/img/yatrilogodark.png" class="img-fluid osahan-nav-logo">
-                    <div class="ml-auto d-flex align-items-center">
-                        <a class="mr-3"><img src="~/img/user1.jpg" class="img-fluid rounded-circle"></a>
-                        <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#"><i class="icofont-navigation-menu"></i></a>
+    <!-- Verification -->
+    <div class="osahan-verification padding-bt">
+        <div class="p-3 shadow bg-darkblue danger-nav osahan-home-header">
+            <div class="font-weight-normal mb-0 d-flex align-items-center">
+                <img src="~/img/yatrilogodark.png" class="img-fluid osahan-nav-logo">
+                <div class="ml-auto d-flex align-items-center">
+                    <a asp-controller="Passenger" asp-action="Profile">
+                        <img src="@ViewBag.ProfilePicPath" class="rounded-pill" 
+                             style="width: 30px; height: 30px; object-fit: cover;">
+                    </a>
+                    <span class="mr-3"></span>
+                    <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#"><i class="icofont-navigation-menu"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="bg-darkblue px-3 pb-3">
+            <div class="bg-white rounded-1 p-3">
+                <form asp-action="SearchBuses" method="post">
+                    <div class="form-group border-bottom pb-2">
+                        <label class="mb-2">
+                            <span class="icofont-search-map text-green"></span> From
+                        </label>
+                        <select name="From" class="js-example-basic-single form-control dropdown-toggle text-muted" required>
+                            <option class="small" value="">Select Location</option>
+                            @foreach (var location in ViewBag.Locations)
+                            {
+                                <option value="@location">@location</option>
+                            }
+                        </select>
                     </div>
-                </div>
-            </div>
-            <div class="bg-darkblue px-3 pb-3">
-                <div class="bg-white rounded-1 p-3">
-                    <form asp-action="Home" method="post">
-                        <input type="hidden" name="userLoginId" value="@ViewBag.UserLoginId" />
-                        <div class="form-group border-bottom pb-2">
-                            <label  class=" mb-2"><span class="icofont-search-map text-green"></span> From</label> <br />
-                            <select  class="js-example-basic-single form-control dropdown-toggle text-muted">
-                                <option class="small" value="">Select Location</option>
-                                <option value="Kathmandu">Kathmandu</option>
-                                <option value="Biratnagar">Biratnagar</option>
-                                <option value="Birgunj">Birgunj</option>
-                                <option value="Butwāl">Butwāl</option>
-                                <option value="Dharan">Dharan</option>
-                                <option value="Bhiwani">Bhiwani</option>
-                                <option value="Bharatpur">Bharatpur</option>
-                                <option value="Janakpur">Janakpur</option>
-                                <option value="Dhangadhi">Dhangadhi</option>
-                                <option value="Gaighat">Gaighat</option>
-                                <option value="Khotang">Khotang</option>
-                                <option value="Hetauda">Hetauda</option>
-                                <option value="Ilām">Ilām</option>
-                                <option value="Lahān">Lahān</option>
-                                <option value="Nepalgunj">Nepalgunj</option>
-                                <option value="Dipayal">Dipayal</option>
-                                <option value="Nepalgunj">Nepalgunj</option>
-                                <option value="Itahari">Itahari</option>
-                                <option value="Tikapur">Tikapur</option>
-                                <option value="Dailekh">Dailekh</option>
-                                <option value="Darchula">Darchula</option>
-                                <option value="Dhankuta">Dhankuta</option>
-                                <option value="Dailekh">Dailekh</option>
-                                <option value="Mahendranagar">Mahendranagar</option>
-                                <option value="Tulsipur">Tulsipur</option>
-                            </select>
-                            <span  class="text-danger"></span>
-                        </div>
-                        <div class="form-group border-bottom pb-2">
-                            <label  class=" mb-2"><span class="icofont-google-map text-green"></span> To</label> <br />
-                            <select  class="js-example-basic-single form-control text-muted">
-                                <option class="small" value="">Select Location</option>
-                                <option value="Kathmandu">Kathmandu</option>
-                                <option value="Biratnagar">Biratnagar</option>
-                                <option value="Birgunj">Birgunj</option>
-                                <option value="Butwāl">Butwāl</option>
-                                <option value="Dharan">Dharan</option>
-                                <option value="Bhiwani">Bhiwani</option>
-                                <option value="Bharatpur">Bharatpur</option>
-                                <option value="Janakpur">Janakpur</option>
-                                <option value="Dhangadhi">Dhangadhi</option>
-                                <option value="Gaighat">Gaighat</option>
-                                <option value="Khotang">Khotang</option>
-                                <option value="Hetauda">Hetauda</option>
-                                <option value="Ilām">Ilām</option>
-                                <option value="Lahān">Lahān</option>
-                                <option value="Nepalgunj">Nepalgunj</option>
-                                <option value="Dipayal">Dipayal</option>
-                                <option value="Nepalgunj">Nepalgunj</option>
-                                <option value="Itahari">Itahari</option>
-                                <option value="Tikapur">Tikapur</option>
-                                <option value="Dailekh">Dailekh</option>
-                                <option value="Darchula">Darchula</option>
-                                <option value="Dhankuta">Dhankuta</option>
-                                <option value="Dailekh">Dailekh</option>
-                                <option value="Mahendranagar">Mahendranagar</option>
-                                <option value="Tulsipur">Tulsipur</option>
-                            </select>
-                            <span  class="text-danger"></span>
-                        </div>
-                        <div class="form-group border-bottom pb-1">
-                            <label class=" mb-2"><span class="icofont-ui-calendar text-green"></span> Date</label><br />
-                            <input  class="form-control border-0 p-0" type="date" required>
-                        </div>
-                        @* @* <div class="form-group border-bottom pb-2">
-                        <label asp-for="From" class="mb-2"><span class="icofont-search-map text-green"></span> From</label><br>
-                        <select asp-for="From" id="From" class="form-control">
-                        <option value="">Select Location</option>
-                        @foreach (var location in Model.From)
-                        {
-                        <option value="@location">@location</option>
-                        }
+                    <div class="form-group border-bottom pb-2">
+                        <label class="mb-2">
+                            <span class="icofont-google-map text-green"></span> To
+                        </label>
+                        <select name="To" class="js-example-basic-single form-control dropdown-toggle text-muted" required>
+                            <option class="small" value="">Select Location</option>
+                            @foreach (var location in ViewBag.Locations)
+                            {
+                                <option value="@location">@location</option>
+                            }
                         </select>
-                        </div>
-                        <div class="form-group border-bottom pb-2">
-                        <label asp-for="To" class="mb-2"><span class="icofont-google-map text-green"></span> To</label><br>
-                        <select asp-for="To" class=" form-control">
-                        <option value="">Select Location</option>
-                        @foreach (var location in Model.To)
-                        {
-                        <option value="@location">@location</option>
-                        }
-                        </select>
-                        </div>
-                        <div class="form-group border-bottom pb-1">
-                        <label asp-for="Date" class="mb-2"><span class="icofont-ui-calendar text-green"></span> Date</label><br>
-                        <input asp-for="Date" name="Date" class="form-control border-0 p-0" type="date">
-                        </div> *@
-                        <button type="submit" class="btn btn-darkblue btn-block osahanbus-btn">Search</button>
-                    </form>
-                </div>
+                    </div>
+                    <div class="form-group border-bottom pb-1">
+                        <label class="mb-2">
+                            <span class="icofont-ui-calendar text-green"></span> Date
+                        </label>
+                        <input name="Date" class="form-control border-0 p-0" type="date" required>
+                    </div>
+                    <button type="submit" class="btn btn-darkblue btn-block osahanbus-btn">Search</button>
+                </form>
             </div>
-            <div class="p-3 bg-green">
+        </div>
+        <!-- Additional Sections -->
+        <div class="p-3 bg-green">
                 <div class="row m-0">
                     <div class="col-6 py-1 pr-1 pl-0">
                         <div class="p-3 bg-white shadow-sm rounded-1">
@@ -169,10 +112,5 @@
                 </div>
             </div>
         </div>
-        <!-- Initialize Select2 -->
-        @*  <script>
-        $(document).ready(function () {
-        $('.js-example-basic-single').select2();
-        });
-        </script> *@
+
 </body>

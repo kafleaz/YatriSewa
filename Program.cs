@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Net.Mail;
+using YatriSewa.Migrations;
 using YatriSewa.Models;
 using YatriSewa.Services;
 
@@ -25,6 +26,8 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 // Register email service
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<ISMSService, SMSService>();
+builder.Services.AddHostedService<SeatReservationCleanupService>();
+
 
 
 
