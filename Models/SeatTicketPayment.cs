@@ -105,7 +105,7 @@ namespace YatriSewa.Models
         public virtual Seat? Seat { get; set; } // Navigation property
 
         [StringLength(20)]
-        public string TicketNo { get; set; } = Guid.NewGuid().ToString("N").Substring(0, 9); // Auto-generated unique ticket number
+        public string TicketNo { get; set; } = Guid.NewGuid().ToString("N").Substring(0, 9).ToUpper(); // Auto-generated unique ticket number
 
         [StringLength(20)]
         public string PNR { get; set; } = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(); // Auto-generated unique PNR
@@ -135,10 +135,22 @@ namespace YatriSewa.Models
         [Required]
         [StringLength(20)]
         public  PaymentMethod PaymentMethod { get; set; } // Card, Cash, UPI, etc.
+
+        [ForeignKey("Passenger")]
+        public int? PassengerId { get; set; } 
         public virtual Passenger? Passenger { get; set; }
+
+        [ForeignKey("User")]
+        public int? UserId { get; set; }
+        public virtual User? User { get; set; }
+
         [Required]
         [StringLength(20)]
         public PaymentStatus Status { get; set; } // Successful, Failed
+
+        [ForeignKey("EsewaTransaction")]
+        public int? TransactionId { get; set; } // Foreign key to EsewaTransaction
+        public virtual EsewaTransaction? EsewaTransaction { get; set; }
     }
 
 

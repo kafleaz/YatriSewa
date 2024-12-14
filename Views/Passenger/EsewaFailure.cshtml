@@ -1,0 +1,12 @@
+﻿@model dynamic
+
+@{
+    ViewData["Title"] = "Payment Failed";
+}
+
+<div class="alert alert-danger" role="alert">
+    <h4 class="alert-heading">Payment Failed</h4>
+    <p>Unfortunately, your payment for Booking ID: @Model.BookingId was not successful.</p>
+    <hr>
+    <p class="mb-0">Please try again or contact support for assistance.</p>
+</div>

@@ -38,6 +38,8 @@ namespace YatriSewa.Models
         public DbSet<Ticket> Ticket_Table { get; set; }
         public DbSet<Payment> Payment_Table { get; set; }
         public DbSet<Passenger> Passenger_Table { get; set; }
+        public DbSet<Merchant> Merchant_Table { get; set; }
+        public DbSet<EsewaTransaction> EsewaTransaction_Table { get; set; }
 
 
 

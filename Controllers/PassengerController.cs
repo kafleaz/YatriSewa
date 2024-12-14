@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.Json;
@@ -744,7 +745,7 @@ namespace YatriSewa.Controllers
 
         [HttpGet]
         [HttpGet]
-        public IActionResult Payment(string token)
+        public IActionResult Payment(string token, bool paymentSuccess = false)
         {
             try
             {
@@ -780,6 +781,7 @@ namespace YatriSewa.Controllers
 
                 var viewModel = new PaymentViewModel
                 {
+                    BusId = schedule.BusId,
                     FullName = user.Name,
                     PhoneNumber = user.PhoneNo,
                     TicketNumber = ticketNumber,
@@ -813,25 +815,143 @@ namespace YatriSewa.Controllers
 
 
 
+        //[HttpPost]
+        //public async Task<IActionResult> ConfirmPayment(PaymentConfirmationRequest request)
+        //{
+        //    //try
+        //    //{
+        //        // Step 1: Validate input data
+        //        if (request == null ||
+        //            string.IsNullOrEmpty(request.PhoneNumber) ||
+        //            string.IsNullOrEmpty(request.FullName) ||
+        //            request.SeatNumbers == null ||
+        //            !request.SeatNumbers.Any())
+        //        {
+        //            //return BadRequest("Invalid payment request data.");
+        //            return Json(new { success = false, message = "Invalid payment request data." });
+        //        }
+
+        //        // Step 2: Fetch or create Passenger entry
+        //        //var passenger = await _context.Passenger_Table
+        //        //    .FirstOrDefaultAsync(p => p.PhoneNumber == request.PhoneNumber);
+
+        //        //if (passenger == null)
+        //        //{
+        //          var passenger = new Passenger
+        //            {
+        //                Name = request.FullName,
+        //                PhoneNumber = request.PhoneNumber,
+        //                BoardingPoint = request.BoardingPoint,
+        //                DroppingPoint = request.DroppingPoint
+        //            };
+        //            _context.Passenger_Table.Add(passenger);
+        //            await _context.SaveChangesAsync();
+
+        //    var bus = await _context.Bus_Table.FirstOrDefaultAsync(b => b.BusId == request.BusId);
+        //    if (bus == null)
+        //    {
+        //        return BadRequest("Invalid BusId. The bus does not exist.");
+        //    }
+        //    // Step 3: Create a new Booking entry
+        //    var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        //    var booking = new Booking
+        //        {
+        //            UserId = userId,
+        //            PassengerId = passenger.PassengerId,
+        //            BusId = request.BusId,
+        //            TotalSeats = request.SeatNumbers.Count,
+        //            TotalAmount = request.TotalAmount,
+        //            BookingDate = DateTime.UtcNow,
+        //            Status = BookingStatus.Pending // Mark as pending until payment is processed
+        //        };
+        //        _context.Booking_Table.Add(booking);
+        //        await _context.SaveChangesAsync();
+
+        //        // Step 4: Create Tickets and update Seat status
+        //        foreach (var seatNumber in request.SeatNumbers)
+        //        {
+        //            // Check if the seat exists in the Seat_Table
+        //            var seat = await _context.Seat_Table
+        //                .FirstOrDefaultAsync(s => s.SeatNumber == seatNumber && s.BusId == request.BusId);
+
+        //            //if (seat == null)
+        //            //{
+        //            //    return BadRequest($"Seat {seatNumber} does not exist or is invalid.");
+        //            //}
+
+        //            if (seat.Status != SeatStatus.Reserved)
+        //            {
+        //                return BadRequest($"Seat {seatNumber} is not reserved and cannot be booked.");
+        //            }
+
+        //            // Update seat status to Booked
+        //            seat.Status = SeatStatus.Booked;
+
+        //            // Create a ticket for the booking
+        //            var ticket = new Ticket
+        //            {
+        //                BookingId = booking.BookingId,
+        //                SeatId = seat.SeatId,
+        //                TicketNo = request.TicketNumber,
+        //                Price = request.PricePerSeat
+        //            };
+        //            _context.Ticket_Table.Add(ticket);
+        //        }
+
+        //        await _context.SaveChangesAsync();
+
+        //        // Step 5: Redirect to payment card page based on payment method
+        //        string redirectUrl = request.PaymentMethod switch
+        //        {
+        //            "Esewa" => Url.Action("Esewa", "PaymentCard",
+        //                new { bookingId = booking.BookingId, totalAmount = request.TotalAmount }),
+        //            "Stripe" => Url.Action("Stripe", "PaymentCard",
+        //                new { bookingId = booking.BookingId, totalAmount = request.TotalAmount }),
+        //            _ => null
+        //        };
+
+        //        if (redirectUrl == null)
+        //        {
+        //            return BadRequest("Unsupported payment method selected.");
+        //        }
+
+        //        return Redirect(redirectUrl);
+        //    //}
+        //    //catch (Exception ex)
+        //    //{
+        //    //    Console.WriteLine($"Error in ConfirmPayment: {ex.Message}");
+        //    //    //return BadRequest("An error occurred while processing your request.");
+        //    //    return Json(new { success = false, message = "An error occurred while processing your request." });
+        //    //}
+        //}
+
         [HttpPost]
         public async Task<IActionResult> ConfirmPayment(PaymentConfirmationRequest request)
         {
             try
             {
-                // Step 1: Validate input data
+                // Step 1: Validate input
                 if (request == null ||
                     string.IsNullOrEmpty(request.PhoneNumber) ||
                     string.IsNullOrEmpty(request.FullName) ||
-                    request.SeatNumbers == null ||
-                    !request.SeatNumbers.Any())
+                    string.IsNullOrEmpty(request.SeatNumbers))
                 {
-                    return BadRequest("Invalid payment request data.");
+                    return Json(new { success = false, message = "Invalid payment request data." });
                 }
 
-                // Step 2: Fetch or create Passenger entry
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                // Step 2: Split seat numbers into a list
+                var seatNumbers = request.SeatNumbers.Split(',').Select(s => s.Trim()).ToList();
+
+                if (!seatNumbers.Any())
+                {
+                    return Json(new { success = false, message = "No seat numbers provided." });
+                }
+
+                // Fetch or create passenger
                 var passenger = await _context.Passenger_Table
                     .FirstOrDefaultAsync(p => p.PhoneNumber == request.PhoneNumber);
-
                 if (passenger == null)
                 {
                     passenger = new Passenger
@@ -845,65 +965,69 @@ namespace YatriSewa.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // Step 3: Create a new Booking entry
+                // Create a new booking
                 var booking = new Booking
                 {
+                    UserId = userId,
                     PassengerId = passenger.PassengerId,
                     BusId = request.BusId,
-                    TotalSeats = request.SeatNumbers.Count,
+                    TotalSeats = seatNumbers.Count,
                     TotalAmount = request.TotalAmount,
                     BookingDate = DateTime.UtcNow,
-                    Status = BookingStatus.Pending // Mark as pending until payment is processed
+                    Status = BookingStatus.Pending
                 };
                 _context.Booking_Table.Add(booking);
                 await _context.SaveChangesAsync();
 
-                // Step 4: Create Tickets and update Seat status
-                foreach (var seatNumber in request.SeatNumbers)
+                // Fetch schedule and seat price
+                var schedule = await _context.Schedule_Table.FirstOrDefaultAsync(s => s.BusId == request.BusId);
+                if (schedule == null)
                 {
-                    // Check if the seat exists in the Seat_Table
+                    return Json(new { success = false, message = "Schedule not found for the selected bus." });
+                }
+                decimal pricePerSeat = schedule.Price;
+                foreach (var seatNumber in seatNumbers)
+                {
                     var seat = await _context.Seat_Table
                         .FirstOrDefaultAsync(s => s.SeatNumber == seatNumber && s.BusId == request.BusId);
 
                     if (seat == null)
                     {
-                        return BadRequest($"Seat {seatNumber} does not exist or is invalid.");
+                        seat = new Seat
+                        {
+                            SeatNumber = seatNumber,
+                            BusId = request.BusId,
+                            Status = SeatStatus.Available,
+                            BookingId = booking.BookingId
+                        };
+                        _context.Seat_Table.Add(seat);
                     }
-
-                    if (seat.Status != SeatStatus.Reserved)
+                    else if (seat.Status == SeatStatus.Available ||
+                             (seat.Status == SeatStatus.Reserved && seat.ReservedByUserId == userId))
                     {
-                        return BadRequest($"Seat {seatNumber} is not reserved and cannot be booked.");
+                        seat.BookingId = booking.BookingId;
                     }
-
-                    // Update seat status to Booked
-                    seat.Status = SeatStatus.Booked;
-
-                    // Create a ticket for the booking
-                    var ticket = new Ticket
+                    else
                     {
-                        BookingId = booking.BookingId,
-                        SeatId = seat.SeatId,
-                        TicketNo = request.TicketNumber,
-                        Price = request.PricePerSeat
-                    };
-                    _context.Ticket_Table.Add(ticket);
+                        return BadRequest($"Seat {seatNumber} is already booked or not available for purchase.");
+                    }
                 }
-
                 await _context.SaveChangesAsync();
 
-                // Step 5: Redirect to payment card page based on payment method
+
+                // Redirect based on payment method
                 string redirectUrl = request.PaymentMethod switch
                 {
-                    "Esewa" => Url.Action("Esewa", "PaymentCard",
+                    "Esewa" => Url.Action("EsewaPayment", "Passenger",
                         new { bookingId = booking.BookingId, totalAmount = request.TotalAmount }),
-                    "Stripe" => Url.Action("Stripe", "PaymentCard",
+                    "Stripe" => Url.Action("Ticket", "Passenger",
                         new { bookingId = booking.BookingId, totalAmount = request.TotalAmount }),
                     _ => null
                 };
 
                 if (redirectUrl == null)
                 {
-                    return BadRequest("Unsupported payment method selected.");
+                    return Json(new { success = false, message = "Unsupported payment method selected." });
                 }
 
                 return Redirect(redirectUrl);
@@ -911,9 +1035,222 @@ namespace YatriSewa.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in ConfirmPayment: {ex.Message}");
-                return BadRequest("An error occurred while processing your request.");
+                return Json(new { success = false, message = "An error occurred while processing your request." });
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> EsewaPayment(int bookingId, decimal totalAmount)
+        {
+            // Fetch the booking along with associated bus and company information
+            var booking = await _context.Booking_Table
+                .Include(b => b.Bus)
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId);
+
+            if (booking == null || booking.Bus == null)
+            {
+                return BadRequest("Invalid booking ID or bus information not found.");
+            }
+
+            // Determine operatorId (CompanyId or DriverId) based on the booking
+            //var operatorId = booking.Bus.CompanyId.HasValue ? booking.Bus.CompanyId.Value : booking.Bus.DriverId;
+            var operatorId = booking.Bus.CompanyId != 0 ? booking.Bus.CompanyId : booking.Bus.DriverId;
+
+
+            if (!operatorId.HasValue)
+            {
+                return BadRequest("Operator information not found for the booking.");
+            }
+
+            // Fetch merchant data using operatorId
+            var merchant = await _context.Merchant_Table
+                .FirstOrDefaultAsync(m => m.CompanyId == operatorId || m.DriverId == operatorId);
+
+            if (merchant == null)
+            {
+                return BadRequest("Merchant information not found.");
+            }
+
+            var esewaPaymentUrl = "https://uat.esewa.com.np/epay/main"; // Test environment URL
+
+            // Generate absolute success and failure URLs
+            var successUrl = Url.Action("EsewaSuccess", "Passenger", new { bookingId, totalAmount }, Request.Scheme, Request.Host.Value);
+            var failureUrl = Url.Action("EsewaFailure", "Passenger", new { bookingId }, Request.Scheme, Request.Host.Value);
+
+            // Prepare eSewa payment request data
+            var esewaRequestData = new Dictionary<string, string>
+            {
+                { "amt", totalAmount.ToString("F2") }, // Base amount
+                { "tAmt", (totalAmount + merchant.TaxAmount + merchant.ServiceCharge + merchant.ProductCharge).ToString("F2") }, // Total amount
+                { "txAmt", merchant.TaxAmount.ToString("F2") }, // Tax amount
+                { "psc", merchant.ServiceCharge.ToString("F2") }, // Service charge
+                { "pdc", merchant.ProductCharge.ToString("F2") }, // Product charge
+                { "scd", merchant.MerchantCode }, // Merchant code
+                { "pid", $"booking-{bookingId}" }, // Unique payment identifier
+                { "su", successUrl }, // Success URL
+                { "fu", failureUrl } // Failure URL
+            };
+
+            // Redirect to eSewa payment gateway
+            var esewaRedirectUrl = QueryHelpers.AddQueryString(esewaPaymentUrl, esewaRequestData);
+            return Redirect(esewaRedirectUrl);
+        }
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> EsewaSuccess(int bookingId, string refId, decimal totalAmount)
+        {
+            var esewaVerificationUrl = "https://uat.esewa.com.np/epay/transrec"; // Test environment URL
+
+            // Fetch booking and related bus
+            var booking = await _context.Booking_Table
+                .Include(b => b.Bus) // Include related bus
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId);
+
+            if (booking == null)
+            {
+                return BadRequest("Booking not found.");
+            }
+
+            // Fetch seats related to this booking indirectly
+            var seats = await _context.Seat_Table
+                .Where(s => s.BookingId == bookingId)
+                .ToListAsync();
+
+            if (!seats.Any())
+            {
+                return BadRequest("No seats found for this booking.");
+            }
+
+            // Fetch dynamic merchant code based on operator
+            int operatorId = booking.Bus?.CompanyId ?? booking.Bus?.DriverId ?? 0;
+            var merchant = await _context.Merchant_Table
+                .FirstOrDefaultAsync(m => m.CompanyId == operatorId || m.DriverId == operatorId);
+
+            if (merchant == null)
+            {
+                return BadRequest("Merchant information not found.");
+            }
+
+            var merchantCode = merchant.MerchantCode;
+            Console.WriteLine($"Merchant code: {merchantCode}");
+
+            // Prepare eSewa verification request
+                    var esewaVerificationData = new Dictionary<string, string>
+
+            {
+
+                { "amt", totalAmount.ToString("F2") },
+                { "scd", merchantCode },
+                { "pid", $"booking-{bookingId}" },
+                { "rid", refId }
+            };
+            // Verify payment with eSewa
+            // Log verification data
+            foreach (var kvp in esewaVerificationData)
+            {
+                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+            }
+            using (var httpClient = new HttpClient())
+            {
+                var content = new FormUrlEncodedContent(esewaVerificationData);
+                var response = await httpClient.PostAsync(esewaVerificationUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    //if (responseString.Contains("<response_code>Success</response_code>", StringComparison.OrdinalIgnoreCase))
+
+                        if (responseString.Contains("<response_code>Success</response_code>"))
+                        Console.WriteLine($"eSewa verification response: {responseString}");
+                    {
+
+                        // Update booking status to Paid
+                        booking.Status = BookingStatus.Paid;
+
+                        // Update seat statuses
+                        foreach (var seat in seats)
+                        {
+                            seat.Status = SeatStatus.Booked;
+                        }
+
+                        // Generate tickets
+                        foreach (var seat in seats)
+                        {
+                            var ticket = new Ticket
+                            {
+                                BookingId = booking.BookingId,
+                                SeatId = seat.SeatId,
+                                Price = totalAmount / booking.TotalSeats.Value,
+                                TicketNo = Guid.NewGuid().ToString("N").Substring(0, 9).ToUpper(),
+                                PNR = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper()
+                            };
+                            _context.Ticket_Table.Add(ticket);
+                        }
+
+                        // Log transaction in EsewaTransaction table
+                        var esewaTransaction = new EsewaTransaction
+                        {
+                            MerchantCode = merchantCode,
+                            PaymentId = null,
+                            TotalAmount = totalAmount,
+                            TaxAmount = merchant.TaxAmount,
+                            ServiceCharge = merchant.ServiceCharge,
+                            ProductCharge = merchant.ProductCharge,
+                            PaidAmount = totalAmount,
+                            ReferenceId = refId.ToString(),
+                            BookingId = bookingId.ToString(),
+                            Status = "Successful",
+                            TransactionDate = DateTime.UtcNow
+                        };
+                        _context.EsewaTransaction_Table.Add(esewaTransaction);
+                        await _context.SaveChangesAsync();
+
+                        // Log payment in Payment table with PassengerId
+                        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                        var payment = new Payment
+                        {
+                            UserId = userId,
+                            PassengerId = booking.PassengerId,
+                            BookingId = bookingId,
+                            AmountPaid = totalAmount,
+                            PaymentDate = DateTime.UtcNow,
+                            PaymentMethod = PaymentMethod.Esewa,
+                            Status = PaymentStatus.Successful,
+                            TransactionId = esewaTransaction.TransactionId // Foreign key to EsewaTransaction
+                        };
+                        _context.Payment_Table.Add(payment);
+                        await _context.SaveChangesAsync();
+
+                        esewaTransaction.PaymentId = payment.PaymentId.ToString();
+                        _context.EsewaTransaction_Table.Update(esewaTransaction);
+
+                        await _context.SaveChangesAsync();
+
+                        //return RedirectToAction("Ticket", "Passenger", new { bookingId });
+                        return RedirectToAction("Ticket", "Passenger", new { bookingId, paymentSuccess = true });
+                    }
+                }
+            }
+
+            return RedirectToAction("Payment", "Passenger", new { bookingId, paymentSuccess = false });
+        }
+
+
+        [HttpGet]
+        public IActionResult EsewaFailure(int bookingId)
+        {
+            // Log the failure for debugging purposes
+            Console.WriteLine($"Esewa payment failed for Booking ID: {bookingId}");
+
+            // Display an error message or redirect to an appropriate page
+            return View("EsewaFailure", new { BookingId = bookingId });
+        }
+
+
+
 
 
 

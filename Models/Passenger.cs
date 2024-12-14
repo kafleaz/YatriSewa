@@ -21,10 +21,7 @@ namespace YatriSewa.Models
 
         [StringLength(50)]
         public string DroppingPoint { get; set; } = string.Empty;
-
-        [ForeignKey("Booking")]
-        public int BookingId { get; set; } // Foreign key to Booking
-        public virtual Booking? Booking { get; set; } // Navigation property
+        public virtual ICollection<Booking>? Bookings { get; set; }
     }
 
     public class BusDetailsViewModel
@@ -98,6 +95,7 @@ namespace YatriSewa.Models
     //}
     public class PaymentViewModel
     {
+        public int? BusId { get; set; }
         public string? FullName { get; set; }
         public string? PhoneNumber { get; set; }
         public string? TicketNumber { get; set; }
@@ -120,7 +118,7 @@ namespace YatriSewa.Models
         public string? FullName { get; set; }
         public string? PhoneNumber { get; set; }
         public int BusId { get; set; }
-        public List<string>? SeatNumbers { get; set; }
+        public required string SeatNumbers { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal PricePerSeat { get; set; }
         public string? BoardingPoint { get; set; }

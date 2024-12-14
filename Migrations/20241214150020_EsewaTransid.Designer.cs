@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YatriSewa.Models;
 
@@ -11,9 +12,11 @@ using YatriSewa.Models;
 namespace YatriSewa.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20241214150020_EsewaTransid")]
+    partial class EsewaTransid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -263,6 +266,7 @@ namespace YatriSewa.Migrations
                         .HasColumnType("decimal(10, 2)");
 
                     b.Property<string>("PaymentId")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -842,7 +846,7 @@ namespace YatriSewa.Migrations
                         .WithMany()
                         .HasForeignKey("TransactionId");
 
-                    b.HasOne("YatriSewa.Models.User", "User")
+                    b.HasOne("YatriSewa.Models.User", null)
                         .WithMany("Payments")
                         .HasForeignKey("UserId");
 
@@ -851,8 +855,6 @@ namespace YatriSewa.Migrations
                     b.Navigation("EsewaTransaction");
 
                     b.Navigation("Passenger");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("YatriSewa.Models.Route", b =>
