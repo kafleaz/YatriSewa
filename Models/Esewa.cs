@@ -70,5 +70,26 @@ namespace YatriSewa.Models
 
         public bool IsActive { get; set; } = true; // Whether the merchant is currently active
     }
+    public class StripeTrans
+    {
+        [Key]
+        public int TransactionId { get; set; }
+
+        [Required]
+        public string StripeTransactionId { get; set; } = string.Empty; // Stripe-specific transaction ID
+
+        [Required]
+        public int BookingId { get; set; } // Associated booking ID
+
+        [Required]
+        [Column(TypeName = "decimal(10, 2)")]
+        public decimal TotalAmount { get; set; }
+
+        [Required]
+        public string Status { get; set; } = "Pending"; // Transaction status
+
+        public DateTime TransactionDate { get; set; } = DateTime.UtcNow; // Transaction timestamp
+    }
+
 
 }

@@ -96,6 +96,8 @@ namespace YatriSewa.Models
     public class PaymentViewModel
     {
         public int? BusId { get; set; }
+        public string? BusName { get; set; }
+        public int? PassengerId { get; set; }
         public string? FullName { get; set; }
         public string? PhoneNumber { get; set; }
         public string? TicketNumber { get; set; }

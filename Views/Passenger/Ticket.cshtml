@@ -1,10 +1,63 @@
-﻿@{
+﻿@model List<YatriSewa.Models.BookingViewModel>
+@{
     ViewData["Title"] = "Home Page";
     Layout = "~/Views/Shared/_SidebarLayout.cshtml";
 }
 
+<div class="my-ticket padding-bt">
+    <div class="osahan-header-nav shadow-sm p-3 d-flex align-items-center bg-darkblue">
+        <h5 class="font-weight-normal mb-0 text-white">
+            <a asp-controller="Passenger" asp-action="HomePage" class="text-darkblue mr-3">
+                <i class="icofont-rounded-left"></i>
+            </a>
+            Your Bookings
+        </h5>
+        <div class="ml-auto d-flex align-items-center">
+            <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#">
+                <i class="icofont-navigation-menu"></i>
+            </a>
+        </div>
+    </div>
 
-<!-- My Ticket -->
+    <!-- Ticket List -->
+    @foreach (var ticket in Model)
+    {
+        <div class="your-ticket border-top row m-0 p-3">
+            <div class="bg-white rounded-1 shadow-sm p-3 mb-3 w-100">
+                <a asp-controller="Passenger" asp-action="Ticket" asp-route-bookingId="@ticket.BookingId">
+                    <div class="d-flex align-items-center mb-2">
+                        <small class="text-muted">Bus ID: @ticket.BusId</small>
+                        <small class="text-success ml-auto f-10">CONFIRMED</small>
+                    </div>
+                    <h6 class="mb-3 l-hght-18 font-weight-bold text-dark">@ticket.BusName</h6>
+                </a>
+                <div class="row mx-0 mb-3">
+                    <div class="col-6 p-0">
+                        <small class="text-muted mb-1 f-10 pr-1">GOING FROM</small>
+                        <p class="small mb-0 l-hght-14">@ticket.StartLocation</p>
+                    </div>
+                    <div class="col-6 p-0">
+                        <small class="text-muted mb-1 f-10 pr-1">TO</small>
+                        <p class="small mb-0 l-hght-14">@ticket.EndLocation</p>
+                    </div>
+                </div>
+                <div class="row mx-0">
+                    <div class="col-6 p-0">
+                        <small class="text-muted mb-1 f-10 pr-1">DATE OF JOURNEY</small>
+                        <p class="small mb-0 l-hght-14">@ticket.JourneyDate.ToShortDateString()</p>
+                    </div>
+                    <div class="col-6 p-0">
+                        <small class="text-muted mb-1 f-10 pr-1">SEATS</small>
+                        <p class="small mb-0 l-hght-14">@ticket.SelectedSeats</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+@* <!-- My Ticket -->
 <div class="my-ticket padding-bt">
     <div class="osahan-header-nav shadow-sm p-3 d-flex align-items-center bg-darkblue">
         <h5 class="font-weight-normal mb-0 text-white">
@@ -78,7 +131,7 @@
         </div>
     </div>
 </div>
-
+ *@
 <!-- Payment Success Modal -->
 <!-- Payment Success Modal -->
 <div id="paymentSuccessModal" class="modal" style="display: none;">

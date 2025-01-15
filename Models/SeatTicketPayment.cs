@@ -134,10 +134,10 @@ namespace YatriSewa.Models
 
         [Required]
         [StringLength(20)]
-        public  PaymentMethod PaymentMethod { get; set; } // Card, Cash, UPI, etc.
+        public PaymentMethod PaymentMethod { get; set; } // Card, Cash, UPI, etc.
 
         [ForeignKey("Passenger")]
-        public int? PassengerId { get; set; } 
+        public int? PassengerId { get; set; }
         public virtual Passenger? Passenger { get; set; }
 
         [ForeignKey("User")]
@@ -151,6 +151,10 @@ namespace YatriSewa.Models
         [ForeignKey("EsewaTransaction")]
         public int? TransactionId { get; set; } // Foreign key to EsewaTransaction
         public virtual EsewaTransaction? EsewaTransaction { get; set; }
+
+        [ForeignKey("StripeTrans")]
+        public int? StripeTransId { get; set; } // Foreign key to EsewaTransaction
+        public virtual StripeTrans? StripeTrans { get; set; }
     }
 
 

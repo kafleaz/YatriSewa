@@ -40,7 +40,7 @@ namespace YatriSewa.Models
         public DbSet<Passenger> Passenger_Table { get; set; }
         public DbSet<Merchant> Merchant_Table { get; set; }
         public DbSet<EsewaTransaction> EsewaTransaction_Table { get; set; }
-
+        public DbSet<StripeTrans> StripeTrans_Table { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

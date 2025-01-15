@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YatriSewa.Models;
 
@@ -11,9 +12,11 @@ using YatriSewa.Models;
 namespace YatriSewa.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250113185958_AddStripeTransactionTable1")]
+    partial class AddStripeTransactionTable1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -425,7 +428,8 @@ namespace YatriSewa.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("StripeTransId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("StripeTransId");
 
                     b.Property<int?>("TransactionId")
                         .HasColumnType("int");

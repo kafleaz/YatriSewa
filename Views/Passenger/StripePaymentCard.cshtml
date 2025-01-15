@@ -1,0 +1,111 @@
+﻿@model PaymentViewModel
+
+@{
+    ViewData["Title"] = "Bus Details";
+    Layout = "~/Views/Shared/_NoFooterLayout.cshtml";
+}
+        <div class="payment padding-bt">
+            <div class="osahan-header-nav shadow-sm p-3 d-flex align-items-center bg-darkblue">
+                <h5 class="font-weight-normal mb-0 text-white">
+                <a class="text-darkblue mr-3" onclick="goBack()"><i class="icofont-rounded-left"></i></a>
+                    Payment
+                </h5>
+                <div class="ml-auto d-flex align-items-center">
+                    <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#"><i class="icofont-navigation-menu"></i></a>
+                </div>
+            </div>
+            <!-- Your Ticket -->
+            <div class="your-ticket p-3">
+                <div class="list_item d-flex rounded-1 col-12 m-0 bg-white shadow-sm mb-3">
+                    <div class="pt-3 d-flex mb-auto">
+                    </div>
+                    <div class="pl-3 py-3 d-flex w-100">
+                        <div class="bus_details w-100">
+                            <p class="mb-2 l-hght-18 font-weight-bold">@Model.BusName</p>
+                            <div class="l-hght-10 d-flex align-items-center my-2">
+                                <small class="text-muted mb-0 pr-1">Journey Start</small>
+                                <p class="small mb-0 l-hght-14 ml-auto">@Model.PickupTime</p>
+                            </div>
+                            <div class="l-hght-10 d-flex align-items-center my-2">
+                                <small class="text-muted mb-0 pr-1">From - To</small>
+                                <p class="small mb-0 l-hght-14 ml-auto">@Model.StartLocation to @Model.EndLocation</p>
+                            </div>
+                            <div class="l-hght-10 d-flex align-items-center my-2">
+                                <small class="text-muted mb-0 pr-1">Pickup Point</small>
+                                <p class="small mb-0 l-hght-14 ml-auto">@Model.StartLocation Bus Station</p>
+                            </div>
+                            <div class="l-hght-10 d-flex align-items-center mt-2">
+                                <small class="text-muted mb-0 pr-1">Seat No.</small>
+                                <p class="small mb-0 l-hght-14 ml-auto">@string.Join(", ", Model.SeatNumbers)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Select Payment -->
+        <div class="payment-borrad shadow bg-white m-3 rounded-1 p-3 osahan-fotter">
+            <div class="d-flex">
+                <p>Total Payable NPR</p>
+                <p class="ml-auto font-weight-bold text-green">Rs. @Model.TotalAmount</p>
+            </div>
+            <div class="d-flex small">
+        <form id="payment-form" asp-action="StripePaymentSuccess" asp-controller="Passenger" method="post" class="w-100">
+                    <input type="hidden" name="bookingId" value="@ViewBag.BookingId" />
+                    <input type="hidden" name="totalAmount" value="@Model.TotalAmount" />
+                    <div class="form-group mb-2">
+                        <label for="cardNumber" class="mb-1 text-muted">Card Number</label>
+                        <div id="card-element" class="form-control">
+                            <!-- A Stripe Element will be inserted here. -->
+                        </div>
+                        <div id="card-errors" role="alert"></div>
+                    </div>
+                    <button type="submit" form="payment-form" class="btn btn-darkblue btn-block">Pay</button>
+                </form>
+            </div>
+        </div>
+
+        <script src="https://js.stripe.com/v3/"></script>
+        <script>
+            var stripe = Stripe('pk_test_51PNIqUB3UNeeoGIfi9PmjcqcnD9yxuOVBNYfCmGnhIQlUqAR0mUc2qFXWICir0siHGOeTMads3hropx7gvL5O0zv007TTg7Afv'); // Replace with your Stripe publishable key
+            var elements = stripe.elements();
+            var card = elements.create('card');
+            card.mount('#card-element');
+
+            // Handle real-time validation errors from the card Element.
+            card.on('change', function (event) {
+                var displayError = document.getElementById('card-errors');
+                if (event.error) {
+                    displayError.textContent = event.error.message;
+                } else {
+                    displayError.textContent = '';
+                }
+            });
+
+            // Handle form submission.
+            var form = document.getElementById('payment-form');
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                stripe.createToken(card).then(function (result) {
+                    if (result.error) {
+                        // Inform the user if there was an error.
+                        var errorElement = document.getElementById('card-errors');
+                        errorElement.textContent = result.error.message;
+                    } else {
+                        // Send the token to your server.
+                        stripeTokenHandler(result.token);
+                    }
+                });
+            });
+
+            // Submit the form with the Stripe token.
+            function stripeTokenHandler(token) {
+                var form = document.getElementById('payment-form');
+                var hiddenInput = document.createElement('input');
+                hiddenInput.setAttribute('type', 'hidden');
+                hiddenInput.setAttribute('name', 'stripeToken');
+                hiddenInput.setAttribute('value', token.id);
+                form.appendChild(hiddenInput);
+                form.submit();
+            }
+        </script>
