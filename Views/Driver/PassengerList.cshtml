@@ -1,0 +1,36 @@
+﻿
+@model IEnumerable<YatriSewa.Models.User>
+
+
+
+@{
+    Layout = "_DriverLayout";
+}
+@{
+    ViewBag.Title = "Passenger List";
+}
+
+
+<h1>Passenger List</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone Number</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var passenger in Model)
+        {
+            <tr>
+                <td>@passenger.UserId</td>
+                <td>@passenger.Name</td>
+                <td>@passenger.Email</td>
+                <td>@passenger.PhoneNo</td>
+            </tr>
+        }
+    </tbody>
+</table>
