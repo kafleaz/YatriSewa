@@ -49,12 +49,14 @@
             <a href="#" class="nav-link">
                 <i class="fas fa-dollar-sign"></i> Ticket Price
             </a>
-            <a href="#" class="nav-link">
+            <a asp-controller="Admin" asp-action="ListPassengers" class="nav-link">
                 <i class="fas fa-users"></i> Passengers
             </a>
-            <a href="#" class="nav-link">
-                <i class="fas fa-user-tie"></i> Drivers
+            
+            <a asp-controller="Admin" asp-action="ListDrivers" class="nav-link">
+                <i class="fas fa-bus"></i> Drivers
             </a>
+           
             <a href="#" class="nav-link">
                 <i class="fas fa-hourglass-half"></i> Pending Payment
             </a>

@@ -1,36 +1,36 @@
-﻿
-@model IEnumerable<YatriSewa.Models.User>
-
-
-
-@{
-    Layout = "_DriverLayout";
-}
-@{
-    ViewBag.Title = "Passenger List";
+﻿@{
+    ViewData["Title"] = "Passenger List";
 }
 
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Passenger List</h2>
 
-<h1>Passenger List</h1>
+    <div class="input-group mb-4">
+        <input type="text" class="form-control" placeholder="Search Passenger">
+        <button class="btn btn-primary" type="button">Search</button>
+    </div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>User ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone Number</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var passenger in Model)
-        {
+    <table class="table table-bordered table-hover">
+        <thead class="table-primary text-center">
             <tr>
-                <td>@passenger.UserId</td>
-                <td>@passenger.Name</td>
-                <td>@passenger.Email</td>
-                <td>@passenger.PhoneNo</td>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone Number</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var passenger in Model)
+            {
+                <tr>
+                    <td>@passenger.Name</td>
+                    <td>@passenger.Email</td>
+                    <td>@passenger.PhoneNo</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Bootstrap from a CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
