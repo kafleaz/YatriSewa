@@ -68,6 +68,9 @@ namespace YatriSewa.Models
         // Add this to associate the user with a bus
         public int? BusId { get; set; } // Nullable if the user is not yet assigned to a bus
 
+
+        public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>(); // One-to-many with bookings
+        public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 
 

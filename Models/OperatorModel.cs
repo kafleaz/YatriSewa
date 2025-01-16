@@ -51,6 +51,8 @@ namespace YatriSewa.Models
         [StringLength(500)]
         public string? Description { get; set; }
 
+        [StringLength(255)]
+        public string? ImagePath { get; set; }
         public int SeatCapacity { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
@@ -58,6 +60,9 @@ namespace YatriSewa.Models
 
         // One-to-One relationship with Service
         public virtual Service? Service { get; set; }
+        public virtual ICollection<Schedule> Schedules { get; set; } = [];
+        public virtual ICollection<Seat> Seats { get; set; } = [];
+        public virtual ICollection<Ticket> Tickets { get; set; } = [];
 
         // Foreign Key to BusCompany (One BusCompany manages multiple buses)
         public int CompanyId { get; set; }
@@ -108,6 +113,11 @@ namespace YatriSewa.Models
         Sleeper,
         AirBus
     }
+    public enum SeatType
+    {
+        ixii,
+        iixii,
+    }
 
     public class Service
     {
@@ -124,6 +134,7 @@ namespace YatriSewa.Models
 
         public BusType? BusType { get; set; }
 
+        public SeatType? SeatType { get; set; }
         // Safety features, such as sanitization or masks
         [StringLength(255, ErrorMessage = "Safety Features cannot exceed 255 characters")]
         [Column("safety_features")]
@@ -144,6 +155,40 @@ namespace YatriSewa.Models
 
         public virtual Bus? Bus { get; set; }
     }
+
+    public class Schedule
+    {
+        [Key]
+        public int ScheduleId { get; set; }  // Primary Key
+
+        [ForeignKey("BusId")]
+        public int? BusId { get; set; }  // Foreign Key to Bus Table
+        public virtual Bus? Bus { get; set; }  // Navigation property
+
+        [ForeignKey("RouteId")]
+        public int RouteId { get; set; }  // Foreign Key to Route Table
+        public virtual Route? Route { get; set; }  // Navigation property
+
+        public DateTime DepartureTime { get; set; }  // Departure time of the schedule
+        public DateTime ArrivalTime { get; set; }  // Arrival time of the schedule
+
+        [Column(TypeName = "decimal(10, 2)")]
+        public decimal Price { get; set; }  // Ticket price
+
+        public int? AvailableSeats { get; set; }  // Number of available seats
+
+        [StringLength(50)]
+        public string? Status { get; set; }  // Status of the schedule
+
+        public int? DriverId { get; set; }  // Foreign Key to Driver Table
+        [ForeignKey("DriverId")]
+        public virtual BusDriver? Driver { get; set; }  // Navigation property
+
+        public int? BusCompanyId { get; set; }  // Foreign Key to BusCompany Table
+        [ForeignKey("BusCompanyId")]
+        public virtual BusCompany? BusCompany { get; set; }  // Navigation property
+    }
+
 
 
 }

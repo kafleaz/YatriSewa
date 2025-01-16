@@ -57,7 +57,11 @@
                         <a asp-action="Landing"><i class="icofont-stylish-right mr-2"></i> Landing</a>
                     </li>
                     <li>
-                        <a asp-action="GetStarted"><i class="icofont-ui-play mr-2"></i> Get Started</a>
+                        <form id="logoutForm" asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn p-0 m-0 align-baseline small">
+                                <i class="icofont-logout mr-2"></i>Logout
+                            </button>
+                        </form>
                     </li>
                     <li>
                         <a href="#"><i class="icofont-key mr-2"></i> Authentication</a>
@@ -67,10 +71,10 @@
                             <li><a asp-action="ForgotPassword"> Change Password</a></li>
                         </ul>
                     </li>
-                    <li><a href="home.html"><i class="icofont-ui-home mr-2"></i> Homepage</a></li>
+                    <li><a asp-controller="Passenger" asp-action="HomePage"><i class="icofont-ui-home mr-2"></i> Homepage</a></li>
+                    <li><a asp-controller="Passenger" asp-action="BusListing"><i class="icofont-list mr-2"></i> Listing</a></li>
                     <li><a href="gift-card.html"><i class="icofont-sale-discount mr-2"></i> Offers</a></li>
-                    <li><a href="listing.html"><i class="icofont-list mr-2"></i> Listing</a></li>
-                    <li><a href="bus-details.html"><i class="icofont-file-text mr-2"></i> Bus Detail</a></li>
+                    <li><a asp-controller="Passenger" asp-action="BusDetails"><i class="icofont-file-text mr-2"></i> Bus Detail</a></li>
                     <li><a href="select-seat.html"><i class="icofont-check-circled mr-2"></i> Select Seat</a></li>
                     <li><a href="payment.html"><i class="icofont-id-card mr-2"></i> Checkout</a></li>
                     <li><a href="payment-card.html"><i class="icofont-ui-v-card mr-2"></i> Payment</a></li>
@@ -160,5 +164,11 @@
     <script type="text/javascript" src="~/vendor/sidebar/hc-offcanvas-nav.js"></script>
     <!-- Custom scripts for all pages-->
     <script src="~/js/custom.js?v=@DateTime.Now.Ticks"></script>
+    <script>
+        function goBack() {
+            // Redirects to the previous page
+            window.history.back();
+        }
+    </script>
 </body>
 </html>

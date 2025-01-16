@@ -856,32 +856,6 @@ namespace YatriSewa.Controllers
             return View(busDriver);
         }
 
-
-
-        // GET: BusDrivers/Create
-        //public IActionResult AddDriver()
-        //{
-        //    ViewData["UserId"] = new SelectList(_context.User_Table, "UserId", "Name");
-        //    return View();
-        //}
-
-        // POST: BusDrivers/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[Authorize(Roles = "Operator, Admin, Driver")]
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> AddDriver([Bind("DriverId,DriverName,LicenseNumber,PhoneNumber,Address,DateOfBirth,LicensePhotoPath,IsAvailable,UserId")] BusDriver busDriver)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        _context.Add(busDriver);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(ListDrivers));
-        //    }
-        //    ViewData["UserId"] = new SelectList(_context.User_Table, "UserId", "Name", busDriver.UserId);
-        //    return View(busDriver);
-        //}
         [Authorize(Roles = "Operator, Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -928,61 +902,6 @@ namespace YatriSewa.Controllers
             return RedirectToAction(nameof(ListDrivers));
         }
 
-
-
-        // GET: BusDrivers/Edit/5
-        public async Task<IActionResult> EditDriver(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var busDriver = await _context.Driver_Table.FindAsync(id);
-            if (busDriver == null)
-            {
-                return NotFound();
-            }
-            ViewData["UserId"] = new SelectList(_context.User_Table, "UserId", "Name", busDriver.UserId);
-            return View(busDriver);
-        }
-
-        // POST: BusDrivers/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditDriver(int id, [Bind("DriverId,DriverName,LicenseNumber,PhoneNumber,Address,DateOfBirth,LicensePhotoPath,IsAvailable,UserId")] BusDriver busDriver)
-        {
-            if (id != busDriver.DriverId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(busDriver);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BusDriverExists(busDriver.DriverId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(ListDrivers));
-            }
-            ViewData["UserId"] = new SelectList(_context.User_Table, "UserId", "Name", busDriver.UserId);
-            return View(busDriver);
-        }
-
         // GET: BusDrivers/Delete/5
         public async Task<IActionResult> DeleteDriver(int? id)
         {
@@ -1024,18 +943,6 @@ namespace YatriSewa.Controllers
 
             return RedirectToAction(nameof(ListDrivers));
         }
-
-        //public async Task<IActionResult> DeleteDriver(int id)
-        //{
-        //    var busDriver = await _context.Driver_Table.FindAsync(id);
-        //    if (busDriver != null)
-        //    {
-        //        _context.Driver_Table.Remove(busDriver);
-        //    }
-
-        //    await _context.SaveChangesAsync();
-        //    return RedirectToAction(nameof(ListDrivers));
-        //}
 
         private bool BusDriverExists(int id)
         {

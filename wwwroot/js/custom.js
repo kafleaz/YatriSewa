@@ -154,7 +154,7 @@ $(function () {  // Using the shorthand version, recommended
     var Nav = $main_nav.hcOffcanvasNav(defaultOptions);
 
     // Select2
-    $('.js-example-basic-single').select2();
+    //$('.js-example-basic-single').select2();
 
 
 })(jQuery); // End of use strict

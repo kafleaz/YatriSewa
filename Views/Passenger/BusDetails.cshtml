@@ -1,0 +1,158 @@
+﻿@model BusDetailsViewModel
+
+@{
+    ViewData["Title"] = "Bus Details";
+    Layout = "~/Views/Shared/_NoFooterLayout.cshtml";
+}
+@{
+    // Generate a token for busId and journeyDate
+    var tokenService = new YatriSewa.Services.TokenService();
+    var tokenData = new YatriSewa.Models.TokenData
+            {
+                BusId = Model.BusId,
+                JourneyDate = Model.JourneyDate
+            };
+    var token = tokenService.GenerateToken(tokenData); // Generate the token
+}
+<div class="Bus-Details padding-bt">
+    <div class="osahan-header-nav shadow-sm p-3 d-flex align-items-center bg-darkblue">
+        <h5 class="font-weight-normal mb-0 text-white">
+            <a class="text-darkblue mr-3" asp-controller="Passenger" asp-action="HomePage"><i class="icofont-rounded-left"></i></a>
+            Bus Details
+        </h5>
+        <div class="ml-auto d-flex align-items-center">
+            <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#">
+                <i class="icofont-navigation-menu"></i>
+            </a>
+        </div>
+    </div>
+    <div class="list_item m-0 bg-white">
+        <div class="osahan-header-nav bg-white px-3 py-3 tic-div border-bottom d-flex">
+            <img src="~/img/@(Model.ImagePath ?? "default-bus.jpg")" class="img-fluid border rounded p-1 shape-img mr-3" loading="lazy" alt="Bus Image">
+            <div class="w-100">
+                <h6 class="my-1 d-flex l-hght-18 font-weight-bold">@Model.BusName</h6>
+                <h7 class="my-1 d-flex l-hght-18 font-weight-bold text-green">@Model.BusNumber</h7>
+                <div class="d-flex mt-2 text-left">
+                    <p class="m-0"><i class="icofont-google-map mr-1 text-darkblue"></i><span class="small">@Model.StartLocation to @Model.EndLocation</span></p>
+                    <p class="small ml-auto mb-0"><i class="icofont-bus mr-1 text-darkblue"></i> Rs. @Model.Price.ToString("N")</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white p-3">
+            <div class="row mx-0 mb-3">
+                <div class="col-6 p-0">
+                    <small class=" d-flex text-muted mb-1 f-10 pr-1">Wifi</small>
+                    <p class="text-left d-flex small mb-0 l-hght-14">@((Model.Wifi ? "Access in the Bus" : "Not Access in the Bus"))</p>
+                </div>
+                <div class="col-6 p-0">
+                    <small class="d-flex text-muted mb-1 f-10 pr-1">AC</small>
+                    <p class="text-left d-flex small mb-0 l-hght-14">@((Model.AC ? "Ac is Available" : "Ac is Not Available"))</p>
+                </div>
+            </div>
+            <div class="row mx-0 mb-3">
+                <div class="col-6 p-0">
+                    <small class="text-left d-flex text-muted mb-1 f-10 pr-1">Safety Features</small>
+                    <p class="text-left d-flex small mb-0 l-hght-14">@(!string.IsNullOrEmpty(Model.SafetyFeatures) ? Model.SafetyFeatures : "None")</p>
+
+                </div>
+                <div class="col-6 p-0">
+                    <small class="text-left d-flex text-muted mb-1 f-10 pr-1">Essentials</small>
+                    <p class="text-left d-flex small mb-0 l-hght-14">@(!string.IsNullOrEmpty(Model.Essentials) ? Model.Essentials : "None")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <ul class="nav nav-pills mb-0 nav-justified bg-white px-3 py-2 border-top border-bottom" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true"><i class="icofont-info-circle"></i> Info</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false"><i class="icofont-star"></i> Reviews</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="pills-contact-tab" data-toggle="pill" href="#pills-contact" role="tab" aria-controls="pills-contact" aria-selected="false"><i class="icofont-history "></i> Pick Up</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="pills-home" role="tabpanel">
+            <div class="bus-details pt-3 pb-0 px-3">
+                <h6 class="font-weight-normal">About @Model.BusName</h6>
+                <p class="text-muted small mb-3">@Model.Description</p>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="pills-profile" role="tabpanel">
+            <div class="bus-details pt-3 pb-0 px-3">
+                <h6 class="font-weight-normal">Reviews</h6>
+                @if (Model.Reviews != null && Model.Reviews.Any())
+                {
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <p class="small text-muted mb-0">@review</p>
+                    }
+                }
+                else
+                {
+                    <p class="small text-muted mb-0">No reviews available.</p>
+                }
+            </div>
+        </div>
+        <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
+            <div class="bus-details pt-3 pb-0 px-3">
+                <!-- Pick Up Point -->
+                <div class="pickpoint" id="pick">
+                    <div class="bg-white shadow-sm rounded-1 p-3 mb-3">
+                        <h6 class="border-bottom pb-3 mb-3">Boarding Point </h6>
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="customRadiopick1" name="customRadiopick" class="custom-control-input" checked>
+                            <label class="custom-control-label small d-flex" for="customRadiopick1">
+                                <span class="font-weight-bold mr-4 mb-0">
+                                    @if (Model.DepartureTime.HasValue)
+                                    {
+                                        <span class="text-danger">@Model.DepartureTime.Value.ToString("hh:mm tt")</span>
+                                    }
+                                    else
+                                    {
+                                        <span>N/A</span>
+                                    }
+                                </span>
+                            </label>
+                            <div class="mb-0">
+                                <b>Bus Stand @Model.StartLocation </b>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white shadow-sm rounded-1 p-3">
+                        <h6 class="border-bottom pb-3 mb-3">Dropping Point </h6>
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="customRadiodrop1" name="customRadiodrop" class="custom-control-input" checked>
+                            <label class="custom-control-label small d-flex" for="customRadiodrop1">
+                                <span class="font-weight-bold mr-4 mb-0">
+                                    @if (Model.ArrivalTime.HasValue)
+                                    {
+                                        <span class="text-danger">
+                                            @Model.ArrivalTime.Value.ToString("hh:mm tt")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>N/A</span>
+                                    }
+                                </span>
+                            </label>
+                            <div class="mb-0">
+                                <b>Bus Stand @Model.EndLocation</b>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Veiw Seat Button -->
+    <div class="osahan-fotter fixed-bottom">
+        @* <a href="@Url.Action("SeatSelection", "Passenger", new { busId = Model.BusId, journeyDate = Model.JourneyDate })" *@
+        <a href="@Url.Action("SeatSelection", "Passenger", new { token = token })"
+           class="btn btn-yatri-fotter yatri-btn">Book Your Seats Now</a>
+    </div>
+
+</div>

@@ -1,0 +1,189 @@
+﻿@model PaymentViewModel
+
+@{
+    ViewData["Title"] = "Bus Details";
+    Layout = "~/Views/Shared/_NoFooterLayout.cshtml";
+}
+@if (ViewBag.PaymentSuccess == false)
+{
+        <div class="modal" id="paymentFailureModal">
+            <div class="modal-content text-center">
+                <h3>Payment Failed</h3>
+                <p>Your payment could not be processed. Please try again.</p>
+            </div>
+        </div>
+}
+
+
+<div class="payment padding-bt">
+    <div class="osahan-header-nav shadow-sm p-3 d-flex align-items-center bg-darkblue">
+        <h5 class="font-weight-normal mb-0 text-white">
+            <a class="text-darkblue mr-3" onclick="goBack()"><i class="icofont-rounded-left"></i></a>
+            Payment
+        </h5>
+        <div class="ml-auto d-flex align-items-center">
+            <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#"><i class="icofont-navigation-menu"></i></a>
+        </div>
+    </div>
+
+    <form asp-action="ConfirmPayment" asp-controller="Passenger" method="post">
+        <input type="hidden" name="BusId" value="@Model.BusId" />
+        <!-- Ticket Information -->
+        <div class="your-ticket pt-2">
+            <div class="p-3">
+                <div class="bg-white rounded-1 shadow-sm p-2 mb-2">
+                    <div class="row mx-0 px-1">
+                        <div class="col-6 p-0">
+                            <small class="text-muted mb-1 f-10 pr-1">GOING FROM</small>
+                            <p class="small mb-0">@Model.StartLocation</p>
+                        </div>
+                        <div class="col-6 p-0">
+                            <small class="text-muted mb-1 f-10 pr-1">GOING TO</small>
+                            <p class="small mb-0">@Model.EndLocation</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="list_item d-flex col-12 mb-2 p-3 bg-white shadow-sm rounded-1 shadow-sm">
+                    <div class="d-flex w-100">
+                        <div class="bus_details w-100">
+                            <p class="mb-2 l-hght-18 font-weight-bold">Traveller’s Info.</p>
+                            <div class="l-hght-10 d-flex align-items-center my-2">
+                                <small class="text-muted mb-0 pr-1">Passenger</small>
+                                <input type="text"
+                                       class="small  custom-input f-10 py-0 ml-auto border-0 pr-0 mr-0 rounded-1 text-end"
+                                       style="text-align: right;"
+                                       placeholder="Enter Voucher Code" name="FullName" value="@Model.FullName" required>
+                            </div>
+                            <div class="l-hght-10 d-flex align-items-center my-2">
+                                <small class="text-muted mb-0 pr-1">Phone Number</small>
+                                <input type="text"
+                                       class="small  custom-input f-10 py-0 ml-auto border-0 pr-0 mr-0 rounded-1 text-end"
+                                       style="text-align: right;"
+                                       placeholder="Enter Phone Number" name="PhoneNumber" value="@Model.PhoneNumber" required>
+                            </div>
+                            <div class="l-hght-10 d-flex align-items-center my-2">
+                                <small class="text-muted mb-0 pr-1">Ticket Number</small>
+                                <p class="small mb-0 ml-auto l-hght-14">@Model.TicketNumber</p>
+                                <input type="hidden" name="TicketNumber" value="@Model.TicketNumber" />
+
+                            </div>
+                            <div class="l-hght-10 d-flex align-items-center my-2">
+                                <small class="text-muted mb-0 pr-1">Seat No</small>
+
+                                @if (Model.TokenType == "BuyReservedSeats")
+                                {
+                                    <p class="small mb-0 ml-auto l-hght-14"> @string.Join(", ", Model.ReservedSeatIds)</p>
+                                    <input type="hidden" name="SeatNumbers" value="@string.Join(",", Model.ReservedSeatIds)" />
+                                }
+                                else if (Model.TokenType == "BuySeats")
+                                {
+                                    <p class="small mb-0 ml-auto l-hght-14"> @string.Join(", ", Model.SeatNumbers)</p>
+                                    <input type="hidden" name="SeatNumbers" value="@string.Join(",", Model.SeatNumbers)" />
+                                }
+                            </div>
+                            <div class="l-hght-10 d-flex align-items-center mt-3">
+                                <p class="mb-0 pr-1 font-weight-bold">Amount To Pay</p>
+                                <p class="mb-0 ml-auto l-hght-14 text-green font-weight-bold">Rs.@Model.TotalAmount</p>
+                                <input type="hidden" name="TotalAmount" value="@Model.TotalAmount" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="list_item d-flex col-12 mb-2 p-3 bg-white shadow-sm rounded-1 shadow-sm">
+                    <div class="w-100">
+                        <div class="l-hght-10 d-flex align-items-center mb-2">
+                            <small class="text-green mb-1 f-10 pr-1">PICKUP FROM</small>
+
+                            <input type="text"
+                                   class="small  custom-input f-10 py-0 ml-auto border-0 pr-0 mr-0 rounded-1 text-end"
+                                   style="text-align: right;"
+                                   placeholder="Enter Boarding Point" name="BoardingPoint" value="@Model.BoardingPoint" required>
+                        </div>
+                        <div class="l-hght-10 d-flex align-items-center">
+                            <small class="text-green mb-1 f-10 pr-1">DROPPING AT</small>
+
+                            <input type="text"
+                                   class="small  custom-input f-10 py-0 ml-auto border-0 pr-0 mr-0 rounded-1 text-end"
+                                   style="text-align: right;"
+                                   placeholder="Enter City,District" name="DroppingPoint" value="@Model.DropingPoint" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="payment-borrad shadow-sm bg-white mt-2 rounded-1">
+                    <div class="border-bottom p-3">
+                        <div class="w-100 mastercard custom-control custom-radio custom-control-inline mr-0">
+                            <input type="radio" id="Esewa" name="PaymentMethod" value="Esewa" class="custom-control-input" checked>
+                            <label class="custom-control-label small w-100" for="Esewa">
+                                Esewa
+                            </label>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="w-100 visa custom-control custom-radio custom-control-inline mr-0">
+                            <input type="radio" id="Stripe" name="PaymentMethod" value="Stripe" class="custom-control-input">
+                            <label class="custom-control-label small w-100" for="Stripe">
+                                Stripe
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirm Button -->
+        <div class="fixed-bottom view-seatbt p-3">
+            <button type="submit" class="btn btn-darkblue btn-block d-flex align-items-center osahanbus-btn rounded-1">
+                <span class="text-left l-hght-14">
+                    Rs.@Model.TotalAmount<br>
+
+                    @if (Model.TokenType == "BuyReservedSeats")
+                    {
+                        <small class="f-10 mb-0 ml-auto text-white-50 l-hght-14">Seats Selected :  @string.Join(", ", Model.ReservedSeatIds)</small>
+                    }
+                    else if (Model.TokenType == "BuySeats")
+                    {
+                        <small class="f-10 mb-0 ml-auto text-white-50 l-hght-14">Seats Selected :  @string.Join(", ", Model.SeatNumbers)</small>
+                    }
+
+                </span>
+                <span class="font-weight-bold ml-auto">CONFIRM</span>
+            </button>
+        </div>
+        @* <div class="fixed-bottom view-seatbt p-3">
+            <button type="submit" class="btn btn-darkblue btn-block d-flex align-items-center osahanbus-btn rounded-1">
+                <span class="text-left l-hght-14">CONFIRM</span>
+                <span class="font-weight-bold ml-auto">Pay Rs.@Model.TotalAmount</span>
+            </button>
+        </div> *@
+    </form>
+</div>
+
+
+
+<style>
+    .custom-input {
+        border: none; /* Remove all borders */
+        border-bottom: 1px solid #ccc; /* Add a thin underline */
+        outline: none; /* Remove focus outline */
+        border-radius: 0; /* Remove border radius */
+        transition: border-color 0.3s; /* Add a smooth transition effect */
+    }
+
+        .custom-input:focus {
+            border-bottom: 2px solid #007bff; /* Highlight underline on focus */
+        }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentSuccess = urlParams.get("paymentSuccess");
+
+        if (paymentSuccess === "false") {
+            alert("Payment failed. Please try again.");
+        }
+    });
+</script>

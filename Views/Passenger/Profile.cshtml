@@ -1,0 +1,95 @@
+﻿@model YatriSewa.Models.User
+
+@{
+    ViewData["Title"] = "Profile";
+    Layout = "~/Views/Shared/_SidebarLayout.cshtml";
+}
+
+
+<div class="osahan-profile">
+    <div class="osahan-header-nav shadow-sm bg-darkblue p-3 d-flex align-items-center">
+        <h5 class="font-weight-normal mb-0 text-white">
+            <a class="text-darkblue mr-3" asp-controller="Passenger" asp-action="HomePage">
+                <i class="icofont-rounded-left"></i>
+            </a>
+            My Profile
+        </h5>
+        <div class="ml-auto d-flex align-items-center">
+            <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#">
+                <i class="icofont-navigation-menu"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="px-3 pt-3 pb-5">
+        <!-- Profile Picture Form -->
+        <form id="photoForm" asp-controller="Passenger" asp-action="UpdateProfilePhoto" method="post" enctype="multipart/form-data" class="text-center">
+            <img src="@(Model.ProfilePicPath ?? Url.Content("~/img/default-profile.png"))"
+                 class="rounded-pill mb-2"
+                 style="width: 100px; height: 100px; object-fit: cover;"
+                 id="profileImage" />
+            <div>
+                <label for="upload-photo" class="text-green icofont-edit-alt"> Edit Photo</label>
+                <input type="file" name="ProfilePic" id="upload-photo" class="form-control-file d-none" />
+            </div>
+        </form>
+
+        <!-- Profile Update Form -->
+        <form asp-controller="Passenger" asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
+            <div class="form-profile w-100">
+                <!-- User Name -->
+                <div class="form-group position-relative">
+                    <label class="text-muted f-10 mb-1">Name</label>
+                    <span class="icofont-edit-alt text-green position-absolute" style="top: 73%; right: 15px; cursor: pointer; transform: translateY(-50%);" id="editNameIcon"></span>
+                    <input type="text" class="form-control" name="Name" value="@Model.Name" id="nameField" disabled />
+                </div>
+
+                <!-- Email or Phone -->
+                <div class="form-group">
+                    <label class="text-muted f-10 mb-1">Contact Information</label>
+                    <input type="text" class="form-control"
+                           value="@(!string.IsNullOrEmpty(Model.Email) ? Model.Email : Model.PhoneNo)" disabled />
+                </div>
+                
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-success" role="alert">
+                    @TempData["Message"]
+                </div>
+            }
+                <!-- Update Button -->
+            </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-darkblue btn-block osahanbus-btn rounded-1">
+                        UPDATE
+                    </button>
+                </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('upload-photo').addEventListener('change', function () {
+            var form = document.getElementById('photoForm');
+            form.submit();
+        });
+        document.getElementById('editNameIcon').addEventListener('click', function () {
+            const nameField = document.getElementById('nameField');
+            if (nameField.disabled) {
+                // Enable field
+                nameField.disabled = false;
+                nameField.focus();
+            } else {
+                // Disable field
+                nameField.disabled = true;
+            }
+        });
+    </script>
+    <script>
+        setTimeout(function () {
+            const alert = document.querySelector('.alert-success');
+            if (alert) {
+                alert.style.display = 'none';
+            }
+        }, 5000); // Hide after 5 seconds
+    </script>
+</div>

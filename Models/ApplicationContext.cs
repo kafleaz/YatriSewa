@@ -32,6 +32,15 @@ namespace YatriSewa.Models
         public DbSet<BusDriver> Driver_Table { get; set; }
         public DbSet<Route> Route_Table { get; set; }
         public DbSet<DriverAssignment> DriverAssign_Table { get; set; }
+        public DbSet<Schedule> Schedule_Table { get; set; }
+        public DbSet<Seat> Seat_Table { get; set; }
+        public DbSet<Booking> Booking_Table { get; set; }
+        public DbSet<Ticket> Ticket_Table { get; set; }
+        public DbSet<Payment> Payment_Table { get; set; }
+        public DbSet<Passenger> Passenger_Table { get; set; }
+        public DbSet<Merchant> Merchant_Table { get; set; }
+        public DbSet<EsewaTransaction> EsewaTransaction_Table { get; set; }
+        public DbSet<StripeTrans> StripeTrans_Table { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -62,6 +71,13 @@ namespace YatriSewa.Models
                 .WithMany(d => d.Buses)
                 .HasForeignKey(b => b.DriverId)
                 .OnDelete(DeleteBehavior.Restrict);  // No cascading delete for drivers
+
+            modelBuilder.Entity<Bus>()
+                .HasOne(b => b.Service)
+                .WithOne(s => s.Bus)
+                .HasForeignKey<Service>(s => s.BusId)
+                .OnDelete(DeleteBehavior.Restrict);  // Prevent cascading deletes
+
 
             base.OnModelCreating(modelBuilder);
         }

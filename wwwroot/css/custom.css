@@ -607,9 +607,9 @@ h1.success-icon {
     }
 
 .shape-img {
-    width: 70px;
+    width: 100px;
     height: 70px;
-    object-fit: scale-down;
+    object-fit: cover;
 }
 
 .seat-no span {
@@ -861,9 +861,9 @@ h1.success-icon {
         color: #36A690;
     }
 
-.icofont-info-circle {
+/*.icofont-info-circle {
     color: #36A690;
-}
+}*/
 
 .btn-darkblue {
     background-color: #042F40;
@@ -887,6 +887,12 @@ h1.success-icon {
         color: rgb(181, 178, 178);
     }
 
+.text-left{
+    text-align:left;
+}
+.text-right{
+    text-align:right;
+}
 .btn-block {
     display: block;
     /* width: 100%; */
@@ -1075,7 +1081,7 @@ input[type="button"].btn-block {
 }
 
 .nav-link {
-    color: white;
+    color: #36A690;
     font-size: 15px;
     padding: 10px;
     border-radius: 5px;
@@ -1083,8 +1089,8 @@ input[type="button"].btn-block {
 }
 
     .nav-link:hover {
-        background-color: #007bff;
-        color: white;
+        background-color: none;
+        color: #398779;
     }
 
 /* Navbar Styling */

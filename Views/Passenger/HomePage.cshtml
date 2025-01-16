@@ -1,0 +1,116 @@
+﻿
+@{
+    ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_SidebarLayout.cshtml";
+}
+
+<body>
+    <!-- Verification -->
+    <div class="osahan-verification padding-bt">
+        <div class="p-3 shadow bg-darkblue danger-nav osahan-home-header">
+            <div class="font-weight-normal mb-0 d-flex align-items-center">
+                <img src="~/img/yatrilogodark.png" class="img-fluid osahan-nav-logo">
+                <div class="ml-auto d-flex align-items-center">
+                    <a asp-controller="Passenger" asp-action="Profile">
+                        <img src="@ViewBag.ProfilePicPath" class="rounded-pill" 
+                             style="width: 30px; height: 30px; object-fit: cover;">
+                    </a>
+                    <span class="mr-3"></span>
+                    <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#"><i class="icofont-navigation-menu"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="bg-darkblue px-3 pb-3">
+            <div class="bg-white rounded-1 p-3">
+                <form asp-action="BusListing" method="post">
+                    <div class="form-group border-bottom pb-2">
+                        <label class="mb-2">
+                            <span class="icofont-search-map text-green"></span> From
+                        </label>
+                        <select name="From" class="js-example-basic-single form-control dropdown-toggle text-muted" required>
+                            <option class="small" value="">Select Location</option>
+                            @foreach (var location in ViewBag.Locations)
+                            {
+                                <option value="@location">@location</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group border-bottom pb-2">
+                        <label class="mb-2">
+                            <span class="icofont-google-map text-green"></span> To
+                        </label>
+                        <select name="To" class="js-example-basic-single form-control dropdown-toggle text-muted" required>
+                            <option class="small" value="">Select Location</option>
+                            @foreach (var location in ViewBag.Locations)
+                            {
+                                <option value="@location">@location</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group border-bottom pb-1">
+                        <label class="mb-2">
+                            <span class="icofont-ui-calendar text-green"></span> Date
+                        </label>
+                        <input name="Date" class="form-control border-0 p-0" type="date" required>
+                    </div>
+                    <button type="submit" class="btn btn-darkblue btn-block osahanbus-btn">Search</button>
+                </form>
+            </div>
+        </div>
+        <!-- Additional Sections -->
+        <div class="p-3 bg-green">
+                <div class="row m-0">
+                    <div class="col-6 py-1 pr-1 pl-0">
+                        <div class="p-3 bg-white shadow-sm rounded-1">
+                            <img class="img-fluid" src="~/img/safe-vehicles.svg" alt="">
+                            <p class="mb-0 mt-4 font-weight-bold">Safe and Hygenic<br>Vehicles</p>
+                        </div>
+                    </div>
+                    <div class="col-6 py-1 pl-1 pr-0">
+                        <div class="p-3 bg-white shadow-sm rounded-1">
+                            <img class="img-fluid" src="~/img/customer-support.svg" alt="">
+                            <p class="mb-0 mt-4 font-weight-bold">Best Customer<br>Support</p>
+                        </div>
+                    </div>
+                    <div class="col-6 py-1 pr-1 pl-0">
+                        <div class="p-3 bg-white shadow-sm rounded-1">
+                            <img class="img-fluid" src="~/img/live-tracking.svg" alt="">
+                            <p class="mb-0 mt-4 font-weight-bold">Live Track your<br>Journey</p>
+                        </div>
+                    </div>
+                    <div class="col-6 py-1 pl-1 pr-0">
+                        <div class="p-3 bg-white shadow-sm rounded-1">
+                            <img class="img-fluid" src="~/img/verified-drivers.svg" alt="">
+                            <p class="mb-0 mt-4 font-weight-bold">Verified Drivers<br>and Vehicles</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-3">
+                <h6 class="text-center">Bus Discounts For You</h6>
+                <div class="row m-0">
+                    <div class="col-6 py-1 pr-1 pl-0">
+                        <a href="listing.html">
+                            <img class="img-fluid rounded-1 shadow-sm" src="~/img/offer1.jpg" alt="">
+                        </a>
+                    </div>
+                    <div class="col-6 py-1 pl-1 pr-0">
+                        <a href="listing.html">
+                            <img class="img-fluid rounded-1 shadow-sm" src="~/img/offer2.jpg" alt="">
+                        </a>
+                    </div>
+                    <div class="col-6 py-1 pr-1 pl-0">
+                        <a href="listing.html">
+                            <img class="img-fluid rounded-1 shadow-sm" src="~/img/offer3.jpg" alt="">
+                        </a>
+                    </div>
+                    <div class="col-6 py-1 pl-1 pr-0">
+                        <a href="listing.html">
+                            <img class="img-fluid rounded-1 shadow-sm" src="~/img/offer4.jpg" alt="">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</body>

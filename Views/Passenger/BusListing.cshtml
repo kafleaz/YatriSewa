@@ -1,0 +1,122 @@
+﻿@model IEnumerable<YatriSewa.Models.Schedule>
+
+@{
+    ViewData["Title"] = "Bus Listing";
+    Layout = "~/Views/Shared/_SidebarLayout.cshtml";
+}
+
+<div class="osahan-listing">
+    <div class="osahan-header-nav shadow-sm p-3 d-flex align-items-center bg-darkblue">
+        <h5 class="font-weight-normal mb-0 text-white">
+            <a class="text-darkblue" asp-controller="Passenger" asp-action="HomePage"><i class="icofont-rounded-left"></i></a>
+        </h5>
+        <div class="ml-auto d-flex align-items-center">
+            <a href="#" class="text-white h6 mb-0"><i class="icofont-search-1"></i></a>
+            <a href="#" class="mx-4 text-white h6 mb-0" data-toggle="modal" data-target="#filterModal"><i class="icofont-filter"></i></a>
+        </div>
+    </div>
+
+    <!-- Display Search Criteria -->
+    <div class="p-2 border-bottom w-100">
+        <div class="bg-white border border-warning rounded-1 shadow-sm p-2">
+            <div class="row mx-0 px-1">
+                <div class="col-6 p-0">
+                    <small class="text-muted mb-1 f-10 pr-1">GOING FROM</small>
+                    <p class="small mb-0">@Model.FirstOrDefault()?.Route?.StartLocation</p>
+                </div>
+                <div class="col-6 p-0">
+                    <small class="text-muted mb-1 f-10 pr-1">GOING TO</small>
+                    <p class="small mb-0">@Model.FirstOrDefault()?.Route?.EndLocation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bus Listings -->
+    <div class="osahan-listing p-0 m-0 row border-top">
+        @if (Model?.Any() == true)
+        {
+        var tokenService = new YatriSewa.Services.TokenService();
+            @foreach (var schedule in Model)
+            {
+                var bus = schedule.Bus;
+                var token = tokenService.GenerateToken(new YatriSewa.Models.TokenData { BusId = bus?.BusId ?? 0 });
+                <a href="@Url.Action("BusDetails", "Passenger", new { token = token })" class="text-dark col-6 px-0">
+                    <div class="list_item_gird m-0 bg-white shadow-sm listing-item border-bottom border-right">
+                        <div class="px-3 pt-3 tic-div">
+                            <div class="list-item-img">
+                                <img src="~/img/@(bus?.ImagePath ?? "default-bus.jpg")" class="img-fluid" loading="lazy">
+                            </div>
+                            <p class="mb-0 l-hght-10">@bus?.BusName</p>
+                            <span class="text-green small">@schedule.Route?.StartLocation to @schedule.Route?.EndLocation</span>
+                        </div>
+                        <div class="p-3 d-flex">
+                            <div class="bus_details w-100">
+                                <!-- Conditional Features -->
+                                <div class="d-flex">
+                                    @if (bus?.Service?.AC == true)
+                                    {
+                                        <p><i class="icofont-wind mr-2 text-darkblue"></i>AC</p>
+                                    }
+                                    @if (bus?.Service?.Wifi == true)
+                                    {
+                                        <p>  <i class="icofont-wifi ml-3 mr-2 text-darkblue"></i>WiFi</p>
+                                    }
+                                    @if (bus?.Service == null || (!bus.Service.AC && !bus.Service.Wifi))
+                                    {
+                                        <p>No service information available.</p>
+                                    }
+                                    <p class="small ml-auto">
+                                        <i class="icofont-bus mr-2 text-darkblue"></i>
+                                        @{
+                                            var seatDisplay = bus?.Service?.SeatType switch
+                                            {
+                                                SeatType.ixii => "2/1",
+                                                SeatType.iixii => "2/2",
+                                                _ => "Unknown"
+                                            };
+                                        }
+                                        @seatDisplay
+                                    </p>
+
+                                </div>
+
+                                <!-- Journey Start -->
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="icofont-clock-time text-darkblue mr-2"></i>
+                                    <div>
+                                        <small class="d-flex text-muted d-block">Journey Start</small>
+                                        <p class="small m-0">@schedule.DepartureTime.ToString("dd MMM, hh:mm tt")</p>
+                                    </div>
+                                </div>
+
+                                <!-- From - To -->
+                                <div class="d-flex align-items-center">
+                                    <i class="icofont-google-map text-darkblue mr-2"></i>
+                                    <div>
+                                        <small class="d-flex text-muted d-block">From - To</small>
+                                        <p class="small m-0">@schedule.Route?.StartLocation - @schedule.Route?.EndLocation</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            }
+        }
+        else
+        {
+            <div class="osahan-coming-soon p-4 justify-content-center align-items-center" style="width:100%">
+                <div class="osahan-text text-center">
+                    <div class="osahan-img px-3 pb-1">
+                        <img src="~/img/no-buus.svg" class="img-fluid mb-1" style="width:35%">
+                    </div>
+                    <h5 class=" font-weight-bold text-danger">Not Available</h5>
+                    <p class="lead small mb-3">No bus found for selected dates or cities.</p>
+                    @* <p class="mb-5">If you think this is a problem with us, please <a class="text-danger" href="support.html">tell us</a>.</p> *@
+                    <a asp-controller="Passenger" asp-action="HomePage" class="btn btn-green osahanbus-btn rounded-1 ">Go Back</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
