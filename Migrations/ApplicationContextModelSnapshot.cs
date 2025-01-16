@@ -704,6 +704,9 @@ namespace YatriSewa.Migrations
                     b.Property<int>("Auth_Method")
                         .HasColumnType("int");
 
+                    b.Property<int?>("BusId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("CompanyID")
                         .HasColumnType("int");
 

@@ -5,9 +5,6 @@ namespace YatriSewa.Services.Interfaces
 {
     public interface IDriverService
     {
-        BusDetails GetBusDetails();
-        List<PassengerListForDay> GetPassengerListForTwoDays();
-        List<Route> GetRoutes();
-        Location GetCurrentLocation();
+        
     }
 }

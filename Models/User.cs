@@ -35,7 +35,7 @@ namespace YatriSewa.Models
 
         [Required]
         [DataType(DataType.Password)]
-        public required string Password { get; set; }
+        public required string Password { get; set; } = "DefaultPassword123";
 
         public string? PhoneNo { get; set; }
 
@@ -65,6 +65,9 @@ namespace YatriSewa.Models
 
         public int? DriverId { get; set; }
         public virtual BusDriver? BusDriver { get; set; }
+        // Add this to associate the user with a bus
+        public int? BusId { get; set; } // Nullable if the user is not yet assigned to a bus
+
 
         public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>(); // One-to-many with bookings
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
