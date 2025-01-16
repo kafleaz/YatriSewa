@@ -26,6 +26,14 @@ namespace YatriSewa.Services
                 .ToListAsync();
         }
 
+
+        public async Task<IEnumerable<BusCompany>> GetAllOperatorAsync()
+        {
+            return await _context.Company_Table.ToListAsync(); // Fetch BusCompany data
+        }
+
+
+
         public async Task<User?> GetOperatorByIdAsync(int id)
         {
             return await _context.User_Table.FindAsync(id); // Fetch operator by ID
@@ -86,6 +94,36 @@ namespace YatriSewa.Services
                 .ToListAsync();
         }
 
+        public async Task<User?> GetCurrentUserWithCompanyAsync(string userId)
+        {
+            if (!int.TryParse(userId, out int parsedUserId))
+                return null;
+
+            return await _context.User_Table.Include(u => u.BusCompany)
+                .FirstOrDefaultAsync(u => u.UserId == parsedUserId);
+        }
+        public async Task<List<Bus>> GetBusesByCompanyIdAsync(int companyId)
+        {
+            return await _context.Bus_Table
+                .Where(bus => bus.CompanyId == companyId)
+                .Include(bus => bus.Route) // Optional: Include related data
+                .Include(bus => bus.BusDriver) // Optional: Include related data
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Route>> GetRoutesByCompanyIdAsync(int companyId)
+        {
+            return await _context.Route_Table
+                .Where(r => r.CompanyID == companyId).ToListAsync();
+        }
+
+        public async Task<IEnumerable<BusDriver>> GetDriversByCompanyIdAsync(int companyId)
+        {
+            return await _context.Driver_Table.Where(d => d.CompanyId == companyId).ToListAsync();
+        }
+
+
+
         public async Task<Route?> GetRouteDetailsAsync(int id)
         {
             return await _context.Route_Table.FindAsync(id);
@@ -103,5 +141,16 @@ namespace YatriSewa.Services
                 await _context.SaveChangesAsync();
             }
         }
+
+        public Task<(bool success, string message)> AddBusDetailsAsync(Bus bus, string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<BusCompany?> GetCompanyByIdAsync(int companyId)
+        {
+            return await _context.Company_Table.FirstOrDefaultAsync(c => c.CompanyId == companyId);
+        }
+
     }
 }

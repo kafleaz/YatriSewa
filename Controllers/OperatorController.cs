@@ -44,34 +44,11 @@ namespace YatriSewa.Controllers
             }
 
             // Retrieve the logged-in user from the User_Table with their associated company
-            var user = await _context.User_Table
-                .Include(u => u.BusCompany) // Assuming User_Table has a relation with BusCompany
-                .FirstOrDefaultAsync(u => u.UserId == userId);
-
-            if (user == null || user.BusCompany == null)
-            {
-                return Unauthorized(); // Handle unauthorized access
-            }
-
-            var companyId = user.BusCompany.CompanyId;
-
-            // Fetch only buses associated with the user's company
-            var buses = await _context.Bus_Table
-                .Include(b => b.BusCompany)
-                .Include(b => b.BusDriver)
-                .Include(b => b.Route)
-                .Where(b => b.CompanyId == companyId) // Filter by company ID
-                .ToListAsync();
-
-            // Set the company name based on the user's company
-            ViewBag.CompanyName = user.BusCompany.CompanyName;
-
-            return View(buses);
+            var buses = await _operatorService.GetBusesByUserIdAsync(userId.ToString()); // Adjusted based on user ID type
+            return View(buses); // Pass buses to view
         }
 
-
-
-
+          
         [Authorize(Roles = "Admin, Operator, Driver")]
         public async Task<IActionResult> BusDetails(int? id)
         {
@@ -92,51 +69,32 @@ namespace YatriSewa.Controllers
 
             return View(bus);
         }
-
+        [HttpGet]
         [Authorize(Roles = "Admin, Operator")]
         public async Task<IActionResult> AddBus()
         {
             // Get the current user ID
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            // Convert the user ID to an integer
-            if (!int.TryParse(userIdString, out int userId))
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized();
+                return Unauthorized(); // Handle unauthorized access
             }
 
             // Retrieve the user's associated company
-            var user = await _context.User_Table
-                .Include(u => u.BusCompany)
-                .FirstOrDefaultAsync(u => u.UserId == userId);
-
+            var user = await _operatorService.GetCurrentUserWithCompanyAsync(userId);
             if (user == null || user.BusCompany == null)
             {
                 return Unauthorized();
             }
 
+
             var companyId = user.BusCompany.CompanyId;
 
             // Fetch routes associated with the user's company
-            var routes = _context.Route_Table
-                .Where(r => r.CompanyID == companyId)
-                .Select(r => new {
-                    r.RouteID,
-                    RouteDescription = r.StartLocation + " - " + r.Stops + " - " + r.EndLocation
-                })
-                .ToList();
+            var routes = await _operatorService.GetRoutesByCompanyIdAsync(companyId);
+            var drivers = await _operatorService.GetDriversByCompanyIdAsync(companyId); ;
 
-            // Fetch drivers indirectly associated with the user's company through Bus
-            // Fetch drivers assigned to the user's company
-            var drivers = _context.Driver_Table
-                .Where(d => d.CompanyId == companyId) // Check for assigned drivers
-                .Select(d => new {
-                    d.DriverId,
-                    d.DriverName
-                })
-                .ToList();
 
-            
 
             // Populate ViewData with filtered routes and drivers
             ViewData["RouteId"] = new SelectList(routes, "RouteID", "RouteDescription");

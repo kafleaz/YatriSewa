@@ -1,0 +1,38 @@
+﻿@model IEnumerable<YatriSewa.Models.Bus>
+@{
+    ViewData["Title"] = "List of Buses";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h3>Buses Registered Under: @ViewBag.CompanyName</h3>
+
+@if (!Model.Any())
+{
+    <p>No buses found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.BusId)</th>
+                <th>@Html.DisplayNameFor(model => model.BusName)</th>
+                <th>@Html.DisplayNameFor(model => model.BusNumber)</th>
+                <th>@Html.DisplayNameFor(model => model.Route)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var bus in Model)
+            {
+                <tr>
+                    <td>@bus.BusId</td>
+                    <td>@bus.BusName</td>
+                    <td>@bus.BusNumber</td>
+                    <td>@bus.Route</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-controller ="Admin" asp-action="AddBus" class="btn btn-primary">Add New Bus</a> <!-- Button to add a new bus -->

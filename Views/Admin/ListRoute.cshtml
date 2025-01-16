@@ -1,0 +1,115 @@
+﻿@model IEnumerable<YatriSewa.Models.Route>
+
+@{
+    ViewData["Title"] = "ListRoute";
+    Layout = "~/Views/Shared/_OperatorLayout.cshtml";
+}
+<h3>Routes Managed by <span class="text-success">@ViewBag.CompanyName</span></h3>
+<p>
+    <a asp-controller="Operator" asp-action="AddRoute">Create New</a>
+</p>
+<table id="routeTable" class="table">
+    <thead>
+        <tr>
+            <th onclick="sortTable(0)" style="cursor:pointer;">
+                @* @Html.DisplayNameFor(model => model.StartLocation)  *@
+                Start Location
+
+            </th>
+            <th onclick="sortTable(1)" style="cursor:pointer;">
+                @* @Html.DisplayNameFor(model => model.Stops)  *@
+                Stops
+
+            </th>
+            <th onclick="sortTable(2)" style="cursor:pointer;">
+                @* @Html.DisplayNameFor(model => model.EndLocation) *@
+                End Location
+
+            </th>
+            <th onclick="sortTable(3)" style="cursor:pointer;">
+                @* @Html.DisplayNameFor(model => model.EstimatedTime) *@
+                Estimated Time
+
+            </th>
+            @* <th onclick="sortTable(0)" style="cursor:pointer;">
+            @Html.DisplayNameFor(model => model.BusCompany)
+            </th> *@
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartLocation)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Stops)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndLocation)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EstimatedTime) <text>Hours</text>
+                </td>
+                @* <td>
+            @Html.DisplayFor(modelItem => item.BusCompany.CompanyName)
+            </td> *@
+                <td>
+                    <a asp-action="EditRoute" asp-route-id="@item.RouteID">Edit</a> |
+                    <a asp-action="RouteDetails" asp-route-id="@item.RouteID">Details</a> |
+                    <a asp-action="DeleteRoute" asp-route-id="@item.RouteID">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        function sortTable(columnIndex) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("routeTable");  // Ensure this references the correct table ID
+            switching = true;
+            // Set the sorting direction to ascending:
+            dir = "asc";
+            // Make a loop that will continue until no switching has been done:
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                // Loop through all table rows (except the first, which contains the headers):
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    // Get the two elements to compare, one from current row and the next:
+                    x = rows[i].getElementsByTagName("TD")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
+                    // Check if the two rows should switch place, based on the direction, asc or desc:
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    // Perform the switch:
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    // If no switching has been done AND the direction is "asc", set the direction to "desc" and run the loop again.
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+}

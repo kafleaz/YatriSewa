@@ -1,4 +1,79 @@
 ﻿@{
     Layout = "_AdminLayout";
 }
-<h2>This is Admin Dashboard</h2>
+
+<div class="container mt-4">
+    <h1>Admin Dashboard</h1>
+
+    <!-- Real-Time Stats Boxes -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <h3 id="totalUsers">0</h3> <!-- Ensure this matches the JavaScript -->
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Buses</h5>
+                    <h3 id="totalBuses">0</h3> <!-- Ensure this matches the JavaScript -->
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Operators</h5>
+                    <h3 id="totalOperators">0</h3> <!-- Ensure this matches the JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Graph Section -->
+    <div class="row mt-5">
+        <div class="chart-container" style="position: relative; max-width: 600px; margin: 0 auto;">
+            <canvas id="usersChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+
+async function fetchDashboardStats() {
+    try {
+        // Fetch data from API
+        const response = await fetch('/api/getstats');
+        if (!response.ok) {
+            console.error('Failed to fetch stats:', response.statusText);
+            return;
+        }
+
+        // Parse the JSON response
+        const data = await response.json();
+
+        // Debugging: Log the API response to the console
+        console.log('API Response:', data);
+
+        // Check if the keys match the response structure
+        if (data.users !== undefined && data.buses !== undefined && data.operators !== undefined) {
+            // Update the DOM with fetched data
+            document.getElementById('totalUsers').innerText = data.users;
+            document.getElementById('totalBuses').innerText = data.buses;
+            document.getElementById('totalOperators').innerText = data.operators;
+        } else {
+            console.error('API response structure does not match. Ensure keys are named correctly: users, buses, operators.');
+        }
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+    }
+}
+
+// Call the function
+fetchDashboardStats();
+</script>
+

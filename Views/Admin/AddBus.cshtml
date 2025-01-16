@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "AddBus";
-    Layout = "~/Views/Shared/_OperatorLayout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <h1>Create</h1>
@@ -11,7 +11,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-controller="Operator" asp-action="AddBus" >
+        <form asp-controller="Admin" asp-action="AddBus">
             @Html.AntiForgeryToken() <!-- CSRF token for form validation -->
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
@@ -53,6 +53,12 @@
                 </select>
             </div>
             <div class="form-group">
+                <label asp-for="CompanyId" class="control-label"></label>
+                <input asp-for="CompanyId" class="form-control" />
+                <span asp-validation-for="CompanyId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
@@ -60,11 +66,11 @@
 </div>
 
 <div>
-    <a asp-controller="Operator" asp-action="ListBus">Back to List</a>
+    <a asp-action="ListBus">Back to List</a>
 </div>
 
-@section Scripts {
+ 
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-}
+
