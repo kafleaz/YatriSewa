@@ -65,6 +65,9 @@ namespace YatriSewa.Models
 
         public int? DriverId { get; set; }
         public virtual BusDriver? BusDriver { get; set; }
+
+        public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>(); // One-to-many with bookings
+        public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 
 

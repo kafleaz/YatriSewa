@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Net.Mail;
+using YatriSewa.Migrations;
 using YatriSewa.Models;
 using YatriSewa.Services;
 using YatriSewa.Services.Interfaces;
@@ -27,6 +28,8 @@ builder.Services.AddTransient<IOperatorService, OperatorService>();
 // Register email service
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<ISMSService, SMSService>();
+builder.Services.AddHostedService<SeatReservationCleanupService>();
+
 
 
 

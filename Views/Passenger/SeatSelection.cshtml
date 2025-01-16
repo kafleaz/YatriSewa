@@ -1,197 +1,521 @@
-﻿@{
-    ViewData["Title"] = "Bus Details";
+﻿@model YatriSewa.Models.BusDetailsViewModel
+
+@{
+    ViewData["Title"] = "Bus Seat Layout";
     Layout = "~/Views/Shared/_NoFooterLayout.cshtml";
+
+    int seatsPerRow = Model.SeatType == SeatType.iixii ? 4 : 3; // Seats per row for 2x2 or 2x1
+    int lastRowSeats = Model.SeatType == SeatType.iixii ? 5 : 4; // Last row seat count
+    int totalRows = (int)Math.Ceiling((double)(Model.SeatCapacity - lastRowSeats) / seatsPerRow); // Rows excluding last row
+    int gridColumns = seatsPerRow + 1; // Add 1 column for the passage
+    int seatCounter = Model.SeatCapacity; // Start seat numbering from the max seat number
 }
 
-<!-- Bus Seat Select -->
 <div class="seat-select padding-bt">
+    <!-- Header -->
     <div class="osahan-header-nav shadow-sm p-3 d-flex align-items-center bg-darkblue">
         <h5 class="font-weight-normal mb-0 text-white">
-            <a class="text-darkblue mr-3" asp-controller="Passenger" asp-action="BusDetails"><i class="icofont-rounded-left"></i></a>
-            Bus Seat Select
+            <a class="text-green mr-3" onclick="goBack()">
+                <i class="icofont-rounded-left"></i>
+            </a>
+            Bus Seat Selection
         </h5>
-        <div class="ml-auto d-flex align-items-center">
-            <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#"><i class="icofont-navigation-menu"></i></a>
+    </div>
+
+    <!-- Ticket Information -->
+    <div class="ticket pb-3 pt-1 px-3">
+        <h6 class="mb-1 font-weight-bold text-dark">@Model.BusName</h6>
+        <h7 class="my-1 l-hght-18 font-weight-bold text-green">@Model.BusNumber</h7>
+        <div class="bg-white rounded-1 shadow-sm p-3 mt-2 w-100">
+            <div class="bg-white">
+                <div class=" d-flex row mx-0 mb-3">
+                    <div class="col-6 p-0">
+                        <small class=" d-flex text-muted mb-1 f-10 pr-1">Wifi</small>
+                        <p class="text-left d-flex small mb-0 l-hght-14">@((Model.Wifi ? "Access in the Bus" : "Not Access in the Bus"))</p>
+                    </div>
+                    <div class="col-6 p-0">
+                        <small class="d-flex text-muted mb-1 f-10 pr-1">AC</small>
+                        <p class="text-left d-flex small mb-0 l-hght-14">@((Model.AC ? "AC is Available" : "AC is Not Available"))</p>
+                    </div>
+                </div>
+                <div class="d-flex row mx-0">
+                    <div class="col-6 p-0">
+                        <small class="text-left d-flex text-muted mb-1 f-10 pr-1">Safety Features</small>
+                        <p class="text-left d-flex small mb-0 l-hght-14">@(!string.IsNullOrEmpty(Model.SafetyFeatures) ? Model.SafetyFeatures : "None")</p>
+                    </div>
+                    <div class="col-6 p-0">
+                        <small class="text-left d-flex text-muted mb-1 f-10 pr-1">Essentials</small>
+                        <p class="text-left d-flex small mb-0 l-hght-14">@(!string.IsNullOrEmpty(Model.Essentials) ? Model.Essentials : "None")</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <!-- Ticket -->
-    <div class="ticket p-3">
-        <h6 class="mb-1 font-weight-bold text-dark">Travellers ISO 9002- 2009 Certified</h6>
-        <div class="start-rating f-10 mb-3">
-            <i class="icofont-star text-green"></i>
-            <i class="icofont-star text-green"></i>
-            <i class="icofont-star text-green"></i>
-            <i class="icofont-star text-green"></i>
-            <i class="icofont-star text-muted"></i>
-            <span class="text-dark">4.0</span>
-        </div>
-        <div class="bg-white rounded-1 shadow-sm p-3 mb-3 w-100">
-            <div class="row mx-0 mb-3">
-                <div class="col-6 p-0">
-                    <small class="text-muted mb-1 f-10 pr-1">Wifi</small>
-                    <p class="small mb-0 l-hght-14"> Access in the bus</p>
-                </div>
-                <div class="col-6 p-0">
-                    <small class="text-muted mb-1 f-10 pr-1">AC</small>
-                    <p class="small mb-0 l-hght-14"> Ac is available</p>
-                </div>
-            </div>
-            <div class="row mx-0 mb-3">
-                <div class="col-6 p-0">
-                    <small class="text-muted mb-1 f-10 pr-1">Dinner / Lunch</small>
-                    <p class="small mb-0 l-hght-14"> Yes</p>
-                </div>
-                <div class="col-6 p-0">
-                    <small class="text-muted mb-1 f-10 pr-1">Safety Features</small>
-                    <p class="small mb-0 l-hght-14"> Sanitized, Masks</p>
-                </div>
-            </div>
-            <div class="row mx-0">
-                <div class="col-6 p-0">
-                    <small class="text-muted mb-1 f-10 pr-1">Essentials</small>
-                    <p class="small mb-0 l-hght-14"> Pillow, Water</p>
-                </div>
-                <div class="col-6 p-0">
-                    <small class="text-muted mb-1 f-10 pr-1">Snacks</small>
-                    <p class="small mb-0 l-hght-14">Juice / shake </p>
-                </div>
-            </div>
-        </div>
-        <!-- Select Seat -->
-        <div class="select-seat bg-white mx-0 px-3 pt-3 pb-1 mb-3 rounded-1 shadow-sm">
-            <div class="pl-0">
-                <div class="d-flex">
-                    <div class="sold text-center">
-                        <img src="~/img/sold-seat.png" class="img-fluid mb-1">
-                        <p class="small f-10">Sold Out</p>
-                    </div>
-                    <div class="sold text-center mx-3">
-                        <img src="~/img/available-seat.png" class="img-fluid mb-1">
+    <input type="hidden" id="ReservedSeats" value="@Newtonsoft.Json.JsonConvert.SerializeObject(Model.ReservedSeats)" />
+    <input type="hidden" id="ReservedSeats" value="[]" />
+    <!-- Seat Selection Section -->
+    <div class="ticket pb-3 pr-3 pl-3">
+        <form id="seatForm" method="post">
+            <input type="hidden" name="BusId" value="@Model.BusId" />
+            <input type="hidden" name="SelectedSeats" />
+            <input type="hidden" name="TotalAmount" />
+            <input type="hidden" name="ScheduleId" id="ScheduleId" value="@Model.ScheduleId"/>
+            <input type="hidden"  name="Price" id="Price" value="@Model.Price" />
+            
+            <div class="select-seat bg-white mx-0 p-3 mb-3 rounded-1 shadow-sm">
+                <!-- Legend -->
+                <div class="d-flex justify-content-center">
+                    <div class="seat-box text-center mr-2 " >
+                        <div class="seat available mb-1" style="background-color:#36A690"></div>
                         <p class="small f-10">Available</p>
                     </div>
-                    <div class="sold text-center">
-                        <img src="~/img/selected-seat.png" class="img-fluid mb-1">
+                    <div class="seat-box selected text-center mr-2" >
+                        <div class="seat green mb-1" style="background-color: #c7590e"></div>
                         <p class="small f-10">Selected</p>
                     </div>
-                </div>
-                <div class="select-seat-container bg-white p-3 rounded shadow-sm">
-                    <!-- Seat Configuration Selector -->
-                    <div class="seat-config mb-3">
-                        <label for="seatConfig" class="form-label">Select Seat Configuration:</label>
-                        <select id="seatConfig" class="form-control">
-                            <option value="2/2">2/2 (4 seats per row)</option>
-                            <option value="1/2">1/2 (3 seats per row)</option>
-                        </select>
+                    <div class="seat-box reserved text-center mr-2" >
+                        <div class="seat yellow mb-1" style="background-color:#ffc107"></div>
+                        <p class="small f-10">Reserved</p>
                     </div>
-
-                    <!-- Dynamic Seat Layout -->
-                    <div id="seatLayout" class="seat-layout">
-                        <!-- Seats will be dynamically inserted here -->
+                    <div class="seat-box sold text-center mr-2" >
+                        <div class="seat red mb-1" style="background-color:#dc3545"></div>
+                        <p class="small f-10">SoldOut</p>
                     </div>
                 </div>
 
-                <script>
-                    document.getElementById("seatConfig").addEventListener("change", function () {
-                        const layout = this.value;
-                        const seatLayout = document.getElementById("seatLayout");
-                        seatLayout.innerHTML = ""; // Clear existing layout
+                <div class="seat-container">
+                    <div class="mirror"> </div>
+                    <img src="~/img/string.png" class="string_img"/>
+                </div>
+                <div id="bus-container">
+                
+                    <!-- Generate Seat Layout -->
+                    @for (int row = totalRows; row >= 0; row--) // From last row upwards
+                    {
+                        @:<div class="row">
+                        for (int col = gridColumns; col >= 1; col--) // Right to left for columns
+                        {
+                            string seatNumber = null;
+                            bool isPassage = col == (seatsPerRow / 2 + 1); // Middle column for passage
 
-                        const totalSeats = 21;
-                        const seatsPerRow = layout === "2/2" ? 4 : 3;
-                        const totalRows = Math.ceil(totalSeats / seatsPerRow);
+                            if (seatCounter < 1) // If no more seats left, make the remaining boxes as passage
+                            {
+                                @:<div class="seat passage"></div>
+                                continue;
+                            }
 
-                        let seatCounter = 1;
-
-                        for (let i = 0; i < totalRows; i++) {
-                            const row = document.createElement("div");
-                            row.className = "row mb-2 align-items-center";
-
-                            // Left side seats
-                            const leftCol = document.createElement("div");
-                            leftCol.className = "col-auto d-flex";
-                            for (let j = 0; j < (layout === "2/2" ? 2 : 1); j++) {
-                                if (seatCounter <= totalSeats) {
-                                    leftCol.appendChild(createSeatButton(seatCounter++));
+                            if (row == totalRows) // Last row logic
+                            {
+                                if (col <= lastRowSeats) // Only process valid last-row columns
+                                {
+                                    seatNumber = seatCounter.ToString();
+                                    seatCounter--;
                                 }
                             }
-                            row.appendChild(leftCol);
-
-                            // Aisle
-                            const aisle = document.createElement("div");
-                            aisle.className = "col";
-                            row.appendChild(aisle);
-
-                            // Right side seats
-                            const rightCol = document.createElement("div");
-                            rightCol.className = "col-auto d-flex";
-                            for (let j = 0; j < (layout === "2/2" ? 2 : 2); j++) {
-                                if (seatCounter <= totalSeats) {
-                                    rightCol.appendChild(createSeatButton(seatCounter++));
-                                }
+                            else if (isPassage) // Passage column logic
+                            {
+                                seatNumber = null;
                             }
-                            row.appendChild(rightCol);
+                            else if (col <= seatsPerRow / 2 || col > seatsPerRow / 2 + 1) // Regular seat placement
+                            {
+                                seatNumber = seatCounter.ToString();
+                                seatCounter--;
+                            }
 
-                            seatLayout.appendChild(row);
+                            if (seatNumber == "0") // Skip seat with number 0
+                            {
+                                continue;
+                            }
+
+                            if (seatNumber == null) // Handle passage or empty seats
+                            {
+                                @:<div class="seat passage"></div>
+                            }
+                            else
+                            {
+                                var seats = (IEnumerable<Seat>)Model.Seats;
+                
+                                var seat = seats.FirstOrDefault(s => s.SeatNumber == seatNumber);
+
+                                var seatClass = seat?.Status switch
+                                {
+                                    SeatStatus.Available => "seat available",
+                                    SeatStatus.Reserved => "seat reserved",
+                                    SeatStatus.Booked => "seat sold",
+                                    _ => "seat available"
+                                };
+
+                                @:<div class="@seatClass" title="@seatNumber" data-seatnumber="@seatNumber">@seatNumber</div>
+                            }
                         }
-                    });
-
-                    function createSeatButton(seatNumber) {
-                        const label = document.createElement("label");
-                        label.className = "btn check-seat btn-success small btn-sm rounded mr-2";
-                        label.innerHTML = `
-                                <input type="checkbox" name="seat${seatNumber}" autocomplete="off">
-                                ${seatLabel(seatNumber)}
-                            `;
-                        return label;
+                        @:</div>
                     }
+                
+                </div>
 
-                    function seatLabel(seatNumber) {
-                        const row = Math.floor((seatNumber - 1) / 4) + 65; // ASCII A = 65
-                        const col = ((seatNumber - 1) % 4) + 1;
-                        return String.fromCharCode(row) + col;
-                    }
+            </div>
+            <!-- Modal for Reservation/Buy -->
+            <div class="modal" id="seatModal" data-backdrop="static" tabindex="-1" data-keyboard="false">
+                   <div class="modal-dialog modal-dialog-centered">
+                      <div class="modal-content mx-4 rounded-2">
+                         <!-- Close Icon -->
+                         <div class="pt-3" style="margin-right:-75%">
+                            <button type="button" class="close" id="closeModal" aria-label="Close">
+                               <span aria-hidden="true">&times;</span>
+                            </button>
+                         </div>
+                         <div class="modal-body text-center pt-1 pb-4">
+                            <h4>Selected Seats</h4>
+                            <h6 id="selectedSeats"></h6>
+                            <div class="d-flex justify-content-between">
+                               <button type="button" id="reserveButton" class="btn btn-warning mr-2">Reserve</button>
+                               <button type="button" id="buyButton" class="btn btn-success">Buy</button>
+                            </div>
+                         </div>
+                         <div class="modal-footer d-none"></div>
+                      </div>
+                   </div>
+            </div>
+        </form>
 
-                    // Trigger default layout rendering
-                    document.getElementById("seatConfig").dispatchEvent(new Event("change"));
-                </script>
-
+    </div>
+            
+    <div class="footer-fixed-bottom view-seatbt px-3 pb-2 justify-content-between">
+        <!-- NEXT Button -->
+        <div id="reservedButtons" style="display: none;">
+            <div class="d-flex mb-1">
+                <!-- Buy Seat Button -->
+                <button type="button" id="buyReservedSeatsButton" class="btn btn-success align-items-center rounded-1">
+                    <span class="text-left l-hght-14">Buy Reserved Seats</span>
+                </button>
+                <!-- Cancel Reservation Button -->
+                <button type="button" id="cancelReservationButton" class="btn btn-danger ml-auto align-items-center rounded-1">
+                    <span class="text-left l-hght-14">Cancel Reservation</span>
+                </button>
             </div>
         </div>
-        <div class="list_item d-flex col-12 m-0 p-3 bg-white shadow-sm rounded-1 shadow-sm">
-            <div class="d-flex mb-auto">
-                <img src="~/img/qr-code.png" class="img-fluid osahan-qr">
-            </div>
-            <div class="d-flex w-100">
-                <div class="bus_details w-100 pl-3">
-                    <p class="mb-2 l-hght-18 font-weight-bold">More info.</p>
-                    <div class="l-hght-10 d-flex align-items-center my-2">
-                        <small class="text-muted mb-0 pr-1">Passenger</small>
-                        <p class="small mb-0 ml-auto l-hght-14"> Joan Rase</p>
-                    </div>
-                    <div class="l-hght-10 d-flex align-items-center my-2">
-                        <small class="text-muted mb-0 pr-1">Ticket Number</small>
-                        <p class="small mb-0 ml-auto l-hght-14"> 1313</p>
-                    </div>
-                    <div class="l-hght-10 d-flex align-items-center my-2">
-                        <small class="text-muted mb-0 pr-1">PNR Number</small>
-                        <p class="small mb-0 ml-auto l-hght-14"> 56276-32324</p>
-                    </div>
-                    <div class="l-hght-10 d-flex align-items-center mt-3">
-                        <p class="mb-0 pr-1 font-weight-bold text">Amount Paid</p>
-                        <p class="mb-0 ml-auto l-hght-14 text-darkblue font-weight-bold">$700</p>
-                    </div>
-                </div>
-            </div>
+        <div>
+            <button type="button" id="nextButton" class="btn btn-darkblue btn-block d-flex align-items-center osahanbus-btn rounded-1">
+                <span class="text-left l-hght-14">
+                    Total Amount: Rs.<span id="totalAmount">0000.00</span><br>
+                    <small class="f-10 text-white">Seats Selected: <span id="selectedSeatsCount">0</span></small>
+                </span>
+                <span class="font-weight-bold ml-auto">NEXT</span>
+            </button>
         </div>
     </div>
-</div>
-<!-- Continue Booking -->
-<div class="fixed-bottom view-seatbt p-3">
-    <a href="payment.html" class="btn btn-darkblue btn-block d-flex align-items-center osahanbus-btn rounded-1">
-        <span class="text-left l-hght-14">
-            TOTAL $700<br>
-            <small class="f-10 text-white-50">Seats Selected : 3</small>
-        </span>
-        <span class="font-weight-bold ml-auto">NEXT</span>
-    </a>
-</div>
+    
+ </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const selectedSeats = [];
+    const maxSeats = 6; // Max seats per user
+    const pricePerSeat = parseFloat(document.getElementById('Price').value);
+    const reservedSeats = JSON.parse(document.getElementById('ReservedSeats').value || '[]'); // Reserved seats from server
+    const reservedButtons = document.getElementById('reservedButtons');
+    const buyButton = document.getElementById('buyButton');
+    const nextButton = document.getElementById('nextButton');
+    const seatModal = document.getElementById('seatModal');
+    const closeModal = document.getElementById('closeModal');
+    const reservationTimers = {};
+    const reserveDuration = 20 * 60 * 1000; // 20 minutes in milliseconds
+
+    // Disable NEXT button initially
+    nextButton.disabled = true;
+
+    // Highlight reserved seats and disable interaction
+    function highlightReservedSeats() {
+        reservedSeats.forEach(seatNumber => {
+            const seatElement = document.querySelector(`#bus-container .seat[data-seatnumber="${seatNumber}"]`);
+            if (seatElement) {
+                seatElement.classList.remove('available');
+                seatElement.classList.add('reserved');
+                seatElement.setAttribute('title', 'Reserved');
+                seatElement.removeEventListener('click', handleSeatClick); // Prevent interaction
+            }
+        });
+    }
+
+    // Show reserved buttons if there are reserved seats
+    if (reservedSeats.length > 0) {
+        reservedButtons.style.display = 'block';
+        highlightReservedSeats();
+    }
+
+    // Update total amount and selected seat count
+    function updateTotalAmount() {
+        const totalAmount = selectedSeats.length * pricePerSeat;
+        document.getElementById('totalAmount').innerText = totalAmount.toFixed(2);
+        document.getElementById('selectedSeatsCount').innerText = selectedSeats.length;
+
+        // Enable NEXT button only if seats are selected
+        nextButton.disabled = selectedSeats.length === 0;
+    }
+
+    // Handle seat click for available seats
+    function handleSeatClick(event) {
+        const seatNumber = event.target.getAttribute('data-seatnumber');
+        if (selectedSeats.includes(seatNumber)) {
+            event.target.classList.remove('selected');
+            selectedSeats.splice(selectedSeats.indexOf(seatNumber), 1);
+        } else if (selectedSeats.length < maxSeats) {
+            event.target.classList.add('selected');
+            selectedSeats.push(seatNumber);
+        } else {
+            alert('You can select a maximum of 6 seats.');
+        }
+        updateTotalAmount();
+    }
+
+    // Buy seats
+    document.getElementById('buyButton').addEventListener('click', function () {
+        if (selectedSeats.length === 0) {
+            alert("Please select at least one seat to buy.");
+            return;
+        }
+
+        const busIdInput = document.querySelector('input[name="BusId"]');
+        const scheduleIdInput = document.querySelector('input[name="ScheduleId"]');
+
+        if (!busIdInput || !scheduleIdInput) {
+            console.error("BusId or ScheduleId input not found in the DOM");
+            alert("An error occurred while processing your request. Please try again.");
+            return;
+        }
+
+        const busId = parseInt(busIdInput.value, 10);
+        const scheduleId = parseInt(scheduleIdInput.value, 10);
+
+        fetch('/Passenger/BuySeats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scheduleId: scheduleId, busId: busId, seatNumbers: selectedSeats })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect to the payment page
+                    window.location.href = data.redirectUrl;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error buying seats:', error);
+                alert("An error occurred while processing your request. Please try again later.");
+            });
+    });
+
+
+    document.querySelectorAll('#bus-container .seat.available').forEach(seat => {
+        seat.addEventListener('click', handleSeatClick);
+    });
+
+    // Show modal
+    nextButton.addEventListener('click', function () {
+        if (selectedSeats.length === 0) {
+            alert("Please select at least one seat.");
+            return;
+        }
+        document.getElementById('selectedSeats').innerText = selectedSeats.join(', ');
+        seatModal.style.display = 'block';
+    });
+
+    // Close modal
+    closeModal.addEventListener('click', function () {
+        seatModal.style.display = 'none';
+    });
+
+    // Reserve seats
+    document.getElementById('reserveButton').addEventListener('click', function () {
+        if (selectedSeats.length === 0) {
+            alert("Please select at least one seat to reserve.");
+            return;
+        }
+
+        const busId = parseInt(document.querySelector('input[name="BusId"]').value, 10);
+
+        fetch('@Url.Action("ReserveSeats", "Passenger")', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ busId, seatNumbers: selectedSeats })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload(); // Reload page after successful reservation
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error reserving seats:', error);
+                alert("An error occurred while reserving seats.");
+            });
+    });
+
+    // Cancel reservation
+    document.getElementById('cancelReservationButton').addEventListener('click', function () {
+        const busId = document.querySelector('input[name="BusId"]').value;
+
+        fetch('@Url.Action("CancelReservation", "Passenger")', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ busId })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload(); // Reload page after canceling reservation
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error canceling reservation:', error);
+                alert("An error occurred while canceling reservation.");
+            });
+    });
+
+    // Buy reserved seats
+   document.getElementById('buyReservedSeatsButton').addEventListener('click', function () {
+    const busId = document.querySelector('input[name="BusId"]').value;
+
+    if (reservedSeats.length === 0) {
+        alert("You have no reserved seats to buy.");
+        return;
+    }
+
+    // Prepare payload for backend
+    const payload = {
+        busId: busId,
+        seatNumbers: reservedSeats
+    };
+
+    // Make POST request to generate the token
+    fetch('/Passenger/BuyReservedSeats', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect using the tokenized URL
+                window.location.href = data.redirectUrl;
+            } else {
+                alert(data.message || "An error occurred while processing your request.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("An unexpected error occurred.");
+        });
+    });
+
+});
+
+
+
+</script>
+
+<!-- CSS -->
+<style>
+#bus-container {
+    display: table;
+    max-width: 300px;
+    min-width: 230px;
+    margin: 0 auto;
+    background-color: #f5f5f5;
+    border-top-right-radius: 5px;
+    border-top-left-radius:5px;
+    padding: 10px;
+    border: 2px solid black;
+    transform: rotate(180deg); /* Flip upside down and mirror horizontally */
+                }
+.seat-container {
+    display: table;
+    max-width: 300px;
+    min-width: 230px;
+    margin: 0 auto;
+    background-color: #f5f5f5;
+    border-top-right-radius: 15px;
+    border-top-left-radius:15px;
+    padding: 10px;
+    border: 2px solid black;                
+}
+.mirror{
+border: 2px solid gray;
+border-radius: 20%;
+margin: -5px 10px 0 10px;
+}
+.string_img{
+    width:33px;
+    margin-top:3px;
+    margin-bottom:3px;
+    margin-right:-160px;
+}
+
+.row {
+    display: table-row;
+}
+
+.seat {
+    width: 35px;
+    height: 35px;
+    background-color: #ddd;
+    display: inline-block;
+    text-align: center;
+    /* vertical-align: middle; */
+    border-radius: 5px;
+    font-size: 12px;
+    margin: 2px;
+    transform: rotate(180deg); /* Correct text alignment for flipped seats */
+}                
+.modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background-color: #ffffff59;
+    padding: 20px;
+    border-radius: 10px;
+    /* box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); */
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0px 4px 10px rgb(0 0 0 / 50%);
+}
+
+.modal.show {
+    display: block;
+}
+.close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #000;
+    cursor: pointer;
+    margin-right: -10px;
+    margin-top: -10px;
+}
+.close:hover {
+    color: #dc3545;
+}
+.seat.available { background-color: #36A690; color: white; }
+.seat.selected{ background-color: #c7590e; color: white;}
+.seat.reserved { background-color: #ffc107; color: white; }
+.seat.sold { background-color: #dc3545; color: white; }
+.seat.passage { background-color: transparent; }
+</style>

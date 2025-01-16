@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YatriSewa.Models;
 
@@ -11,9 +12,11 @@ using YatriSewa.Models;
 namespace YatriSewa.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20241213160807_PassengerTicket")]
+    partial class PassengerTicket
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,7 +60,9 @@ namespace YatriSewa.Migrations
 
                     b.HasIndex("BusId");
 
-                    b.HasIndex("PassengerId");
+                    b.HasIndex("PassengerId")
+                        .IsUnique()
+                        .HasFilter("[PassengerId] IS NOT NULL");
 
                     b.HasIndex("UserId");
 
@@ -242,100 +247,6 @@ namespace YatriSewa.Migrations
                     b.ToTable("DriverAssign_Table");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.EsewaTransaction", b =>
-                {
-                    b.Property<int>("TransactionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
-
-                    b.Property<string>("BookingId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("MerchantCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("PaidAmount")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<string>("PaymentId")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("ProductCharge")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<string>("ReferenceId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("ServiceCharge")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<decimal>("TaxAmount")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("TransactionId");
-
-                    b.ToTable("EsewaTransaction_Table");
-                });
-
-            modelBuilder.Entity("YatriSewa.Models.Merchant", b =>
-                {
-                    b.Property<int>("MerchantId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MerchantId"));
-
-                    b.Property<int?>("CompanyId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DriverId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MerchantCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("ProductCharge")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<decimal>("ServiceCharge")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<decimal>("TaxAmount")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.HasKey("MerchantId");
-
-                    b.HasIndex("CompanyId");
-
-                    b.HasIndex("DriverId");
-
-                    b.ToTable("Merchant_Table");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.OTP", b =>
                 {
                     b.Property<int>("OtpId")
@@ -424,12 +335,6 @@ namespace YatriSewa.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("int");
 
-                    b.Property<int?>("StripeTransId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TransactionId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("UserId")
                         .HasColumnType("int");
 
@@ -438,10 +343,6 @@ namespace YatriSewa.Migrations
                     b.HasIndex("BookingId");
 
                     b.HasIndex("PassengerId");
-
-                    b.HasIndex("StripeTransId");
-
-                    b.HasIndex("TransactionId");
 
                     b.HasIndex("UserId");
 
@@ -617,36 +518,6 @@ namespace YatriSewa.Migrations
                     b.ToTable("Service_Table");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.StripeTrans", b =>
-                {
-                    b.Property<int>("TransactionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
-
-                    b.Property<int>("BookingId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StripeTransactionId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("TransactionId");
-
-                    b.ToTable("StripeTrans_Table");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.Ticket", b =>
                 {
                     b.Property<int>("TicketId")
@@ -762,8 +633,8 @@ namespace YatriSewa.Migrations
                         .HasForeignKey("BusId");
 
                     b.HasOne("YatriSewa.Models.Passenger", "Passenger")
-                        .WithMany("Bookings")
-                        .HasForeignKey("PassengerId");
+                        .WithOne("Booking")
+                        .HasForeignKey("YatriSewa.Models.Booking", "PassengerId");
 
                     b.HasOne("YatriSewa.Models.User", "User")
                         .WithMany("Bookings")
@@ -835,21 +706,6 @@ namespace YatriSewa.Migrations
                     b.Navigation("BusDriver");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.Merchant", b =>
-                {
-                    b.HasOne("YatriSewa.Models.BusCompany", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId");
-
-                    b.HasOne("YatriSewa.Models.BusDriver", "Driver")
-                        .WithMany()
-                        .HasForeignKey("DriverId");
-
-                    b.Navigation("Company");
-
-                    b.Navigation("Driver");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.OTP", b =>
                 {
                     b.HasOne("YatriSewa.Models.User", "User_Table")
@@ -873,27 +729,13 @@ namespace YatriSewa.Migrations
                         .WithMany()
                         .HasForeignKey("PassengerId");
 
-                    b.HasOne("YatriSewa.Models.StripeTrans", "StripeTrans")
-                        .WithMany()
-                        .HasForeignKey("StripeTransId");
-
-                    b.HasOne("YatriSewa.Models.EsewaTransaction", "EsewaTransaction")
-                        .WithMany()
-                        .HasForeignKey("TransactionId");
-
-                    b.HasOne("YatriSewa.Models.User", "User")
+                    b.HasOne("YatriSewa.Models.User", null)
                         .WithMany("Payments")
                         .HasForeignKey("UserId");
 
                     b.Navigation("Booking");
 
-                    b.Navigation("EsewaTransaction");
-
                     b.Navigation("Passenger");
-
-                    b.Navigation("StripeTrans");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("YatriSewa.Models.Route", b =>
@@ -1036,7 +878,7 @@ namespace YatriSewa.Migrations
 
             modelBuilder.Entity("YatriSewa.Models.Passenger", b =>
                 {
-                    b.Navigation("Bookings");
+                    b.Navigation("Booking");
                 });
 
             modelBuilder.Entity("YatriSewa.Models.Route", b =>

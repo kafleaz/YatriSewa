@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YatriSewa.Models;
 
@@ -11,9 +12,11 @@ using YatriSewa.Models;
 namespace YatriSewa.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20241214164243_EsewaTransid11")]
+    partial class EsewaTransid11
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -424,9 +427,6 @@ namespace YatriSewa.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("int");
 
-                    b.Property<int?>("StripeTransId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("TransactionId")
                         .HasColumnType("int");
 
@@ -438,8 +438,6 @@ namespace YatriSewa.Migrations
                     b.HasIndex("BookingId");
 
                     b.HasIndex("PassengerId");
-
-                    b.HasIndex("StripeTransId");
 
                     b.HasIndex("TransactionId");
 
@@ -615,36 +613,6 @@ namespace YatriSewa.Migrations
                         .IsUnique();
 
                     b.ToTable("Service_Table");
-                });
-
-            modelBuilder.Entity("YatriSewa.Models.StripeTrans", b =>
-                {
-                    b.Property<int>("TransactionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
-
-                    b.Property<int>("BookingId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StripeTransactionId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("TransactionId");
-
-                    b.ToTable("StripeTrans_Table");
                 });
 
             modelBuilder.Entity("YatriSewa.Models.Ticket", b =>
@@ -873,10 +841,6 @@ namespace YatriSewa.Migrations
                         .WithMany()
                         .HasForeignKey("PassengerId");
 
-                    b.HasOne("YatriSewa.Models.StripeTrans", "StripeTrans")
-                        .WithMany()
-                        .HasForeignKey("StripeTransId");
-
                     b.HasOne("YatriSewa.Models.EsewaTransaction", "EsewaTransaction")
                         .WithMany()
                         .HasForeignKey("TransactionId");
@@ -890,8 +854,6 @@ namespace YatriSewa.Migrations
                     b.Navigation("EsewaTransaction");
 
                     b.Navigation("Passenger");
-
-                    b.Navigation("StripeTrans");
 
                     b.Navigation("User");
                 });
