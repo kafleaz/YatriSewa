@@ -17,16 +17,19 @@ namespace YatriSewa.Controllers
         private readonly ApplicationContext _context;
         private readonly ILogger<AdminController> _logger;
         private readonly IOperatorService _operatorService;
+        private readonly IDriverService _driverService;
 
         // Modify the constructor to accept ILogger<OperatorController>
-        public AdminController(ApplicationContext context, IOperatorService operatorService, ILogger<AdminController> logger)
+        public AdminController(ApplicationContext context, IOperatorService operatorService, IDriverService driverService, ILogger<AdminController> logger)
         {
             _context = context; // Assigning the database context
             _operatorService = operatorService; // Assigning the operator service
+            _driverService = driverService;
             _logger = logger; // Assigning the logger
+
         }
 
-       
+
         [HttpGet("api/getstats")]
         public IActionResult GetStats()
         {
@@ -45,15 +48,15 @@ namespace YatriSewa.Controllers
             });
         }
 
-            [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public IActionResult AdminDashboard()
         {
             return View();
         }
 
         [Authorize(Roles = "Operator, Admin")]
-  
-       
+
+
 
         // GET: Admin/Operators
         public async Task<IActionResult> ListOperators()
@@ -183,7 +186,7 @@ namespace YatriSewa.Controllers
             try
             {
                 var userId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
-               
+
                 if (string.IsNullOrEmpty(userId))
                 {
                     return RedirectToAction("Login", "Account");
@@ -221,7 +224,7 @@ namespace YatriSewa.Controllers
         [Route("Admin/AddBus")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin, Operator")]
-        public async Task<IActionResult> AddBus([Bind("BusName, BusNumber, Description, SeatCapacity, Price, RouteId, DriverId")] Bus bus )
+        public async Task<IActionResult> AddBus([Bind("BusName, BusNumber, Description, SeatCapacity, Price, RouteId, DriverId")] Bus bus)
         {
             if (!ModelState.IsValid)
             {
@@ -249,7 +252,7 @@ namespace YatriSewa.Controllers
             }
         }
 
-            public async Task<IActionResult> ListRoutes(string userId)
+        public async Task<IActionResult> ListRoutes(string userId)
         {
             var routes = await _operatorService.GetRoutesByUserIdAsync(userId); // Get routes for a specific user
             return View(routes); // Pass routes to view
@@ -272,7 +275,10 @@ namespace YatriSewa.Controllers
                 return View("Error", new { message = "Unable to fetch route details. Please try again later." });
             }
         }
-    }
 
+        //passengerList
+
+    }
 }
+
 

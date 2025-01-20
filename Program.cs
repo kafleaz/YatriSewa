@@ -25,6 +25,8 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 });
 
 builder.Services.AddTransient<IOperatorService, OperatorService>();
+builder.Services.AddTransient<IDriverService, DriverService>();
+
 // Register email service
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<ISMSService, SMSService>();

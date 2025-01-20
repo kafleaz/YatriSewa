@@ -13,11 +13,7 @@ namespace YatriSewa.Migrations
         {
             migrationBuilder.AddColumn<int>(
                 name: "StripeTransId",
-<<<<<<< HEAD
-               table: "Payment_Table",
-=======
-                table: "Payment_Table",
->>>>>>> 493b2434cb37442d2441fa9472feafdffb03a18c
+       table: "Payment_Table",
                 type: "int",
                 nullable: true);
 
@@ -39,15 +35,11 @@ namespace YatriSewa.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-<<<<<<< HEAD
+
              name: "IX_Payment_Table_StripeTransId",
               table: "Payment_Table",
             column: "StripeTransId");
-=======
-                name: "IX_Payment_Table_StripeTransId",
-                table: "Payment_Table",
-                column: "StripeTransId");
->>>>>>> 493b2434cb37442d2441fa9472feafdffb03a18c
+
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Payment_Table_StripeTrans_Table_StripeTransId",

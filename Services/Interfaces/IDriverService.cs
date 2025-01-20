@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using YatriSewa.Models;
 
-namespace YatriSewa.Services.Interfaces
+public interface IDriverService
 {
-    public interface IDriverService
-    {
-        
-    }
+    Task<IEnumerable<Schedule>> GetSchedulesForDriverAsync(int driverId, DateTime date);
+    Task<IEnumerable<Passenger>> GetPassengersByScheduleIdAsync(int scheduleId);
+    Task<Schedule> GetScheduleDetailsAsync(int scheduleId);
 }

@@ -22,6 +22,9 @@ namespace YatriSewa.Models
         [StringLength(50)]
         public string DroppingPoint { get; set; } = string.Empty;
         public virtual ICollection<Booking>? Bookings { get; set; }
+        public int BusId { get; set; }  // Foreign Key to Bus Table
+        [ForeignKey("BusId")]
+        public virtual Bus Bus { get; set; }
     }
 
     public class BusDetailsViewModel
