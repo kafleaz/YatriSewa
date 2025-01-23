@@ -276,8 +276,12 @@ namespace YatriSewa.Controllers
             }
         }
 
-        //passengerList
-
+        //DriverList
+        public async Task<IActionResult>ListDrivers()
+        {
+            var drivers = await _driverService.GetAllDriversAsync(); // Fetch all drivers
+            return View(drivers); // Pass data to the view
+        }
     }
 }
 

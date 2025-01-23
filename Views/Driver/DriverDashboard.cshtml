@@ -39,7 +39,7 @@
                     <td>@schedule.Status </td>
                     <td>
                         <a href="@Url.Action("PassengerList", "Driver", new { scheduleId = schedule.ScheduleId })" class="btn btn-primary">Passengers</a>
-                        <a href="@Url.Action("Journey", "Driver", new { scheduleId = schedule.ScheduleId })" class="btn btn-secondary">Journey</a>
+                        <a href="@Url.Action("JourneyList", "Driver", new { scheduleId = schedule.ScheduleId })" class="btn btn-secondary">Journey</a>
                     </td>
                 </tr>
             }

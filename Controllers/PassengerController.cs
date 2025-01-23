@@ -951,8 +951,8 @@ namespace YatriSewa.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmPayment(PaymentConfirmationRequest request)
         {
-            try
-            {
+            //try
+            //{
                 // Step 1: Validate input
                 if (request == null ||
                     string.IsNullOrEmpty(request.PhoneNumber) ||
@@ -982,7 +982,8 @@ namespace YatriSewa.Controllers
                         Name = request.FullName,
                         PhoneNumber = request.PhoneNumber,
                         BoardingPoint = request.BoardingPoint,
-                        DroppingPoint = request.DroppingPoint
+                        DroppingPoint = request.DroppingPoint,
+                        BusId = request.BusId
                     };
                     _context.Passenger_Table.Add(passenger);
                     await _context.SaveChangesAsync();
@@ -1056,12 +1057,12 @@ namespace YatriSewa.Controllers
                 }
 
                 return Redirect(redirectUrl);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in ConfirmPayment: {ex.Message}");
-                return Json(new { success = false, message = "An error occurred while processing your request." });
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine($"Error in ConfirmPayment: {ex.Message}");
+            //    return Json(new { success = false, message = "An error occurred while processing your request." });
+            //}
         }
 
         [HttpGet]

@@ -56,16 +56,19 @@ namespace YatriSewa.Controllers
         }
 
         // Journey: Display journey details for a specific schedule
-        public async Task<IActionResult> Journey(int scheduleId)
-        {
-            var schedule = await _driverService.GetScheduleDetailsAsync(scheduleId);
 
-            if (schedule == null)
+
+        public async Task<IActionResult> JourneyList()
+        {
+            var journeys = await _driverService.GetJourneyListAsync();
+
+            if (!journeys.Any())
             {
-                return NotFound("Schedule not found.");
+                ViewBag.Message = "No journeys found.";
+                return View(new List<object>());
             }
 
-            return View(schedule);
+            return View(journeys);
         }
     }
 }

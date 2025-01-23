@@ -58,4 +58,30 @@ public class DriverService : IDriverService
             .Include(s => s.Driver) // Include Driver details
             .FirstOrDefaultAsync(s => s.ScheduleId == scheduleId);
     }
+    //fetch all bus drivers
+    public async Task<IEnumerable<BusDriver>> GetAllDriversAsync()
+    {
+        // Fetch all drivers from the database
+        return await _context.Driver_Table.ToListAsync();
+    }
+    public async Task<IEnumerable<object>> GetJourneyListAsync()
+    {
+        return await _context.Schedule_Table
+            .Include(s => s.Route)
+               .Include(s => s.Bus) // Include the Route table
+            .Select(schedule => new
+            {
+                StartLocation = schedule.Route.StartLocation, // Assuming Route has this property
+                StopLocations = schedule.Route.Stops,        // Assuming Stops is a string or list
+                EndLocation = schedule.Route.EndLocation,    // Assuming Route has this property
+                BusId = schedule.BusId,
+                BusName = schedule.Bus.BusName,
+                DepartureTime = schedule.DepartureTime,
+                ArrivalTime = schedule.ArrivalTime
+            })
+            .ToListAsync();
+    }
+
+
+
 }
