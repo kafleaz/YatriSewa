@@ -86,7 +86,7 @@ namespace YatriSewa.Controllers
             {
                 return Unauthorized();
             }
-
+            Console.WriteLine("RouteId");
 
             var companyId = user.BusCompany.CompanyId;
 

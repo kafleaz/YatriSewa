@@ -82,6 +82,25 @@ public class DriverService : IDriverService
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<object>> GetTodayJourneysAsync()
+    {
+        return await _context.Schedule_Table
+            .Include(s => s.Route) // Include Route table
+            .Include(s => s.Bus)   // Include Bus table
+            .Where(s => s.DepartureTime == DateTime.Today) // Filter for today's date
+            .Select(schedule => new
+            {
+                StartLocation = schedule.Route.StartLocation,
+                StopLocations = schedule.Route.Stops,
+                EndLocation = schedule.Route.EndLocation,
+                BusName = schedule.Bus.BusName,
+                BusId = schedule.BusId,
+                DepartureTime = schedule.DepartureTime,
+                ArrivalTime = schedule.ArrivalTime
+            })
+            .ToListAsync();
+    }
+
 
 
 }

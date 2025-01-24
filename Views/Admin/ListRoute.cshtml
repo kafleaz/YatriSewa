@@ -2,12 +2,10 @@
 
 @{
     ViewData["Title"] = "ListRoute";
-    Layout = "~/Views/Shared/_OperatorLayout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
-<h3>Routes Managed by <span class="text-success">@ViewBag.CompanyName</span></h3>
-<p>
-    <a asp-controller="Operator" asp-action="AddRoute">Create New</a>
-</p>
+<h3>Routes Added for Journeys By Operator</h3>
+
 <table id="routeTable" class="table">
     <thead>
         <tr>

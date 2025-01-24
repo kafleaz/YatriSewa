@@ -205,8 +205,13 @@ namespace YatriSewa.Controllers
                 var routes = await _operatorService.GetRoutesByCompanyIdAsync(companyId);
                 var drivers = await _operatorService.GetDriversByCompanyIdAsync(companyId);
 
-                ViewData["RouteID"] = new SelectList(routes, "RouteID", "RouteDescription");
-                ViewData["DriverID"] = new SelectList(drivers, "DriverID", "DriverName");
+                 ViewData["RouteID"] = routes != null && routes.Any()
+            ? new SelectList(routes, "RouteID", "RouteDescription")
+            : new SelectList(Enumerable.Empty<SelectListItem>(), "RouteID", "RouteDescription");
+
+        ViewData["DriverID"] = drivers != null && drivers.Any()
+            ? new SelectList(drivers, "DriverID", "DriverName")
+            : new SelectList(Enumerable.Empty<SelectListItem>(), "DriverID", "DriverName");
 
                 return View();
             }
@@ -254,8 +259,16 @@ namespace YatriSewa.Controllers
 
         public async Task<IActionResult> ListRoutes(string userId)
         {
-            var routes = await _operatorService.GetRoutesByUserIdAsync(userId); // Get routes for a specific user
-            return View(routes); // Pass routes to view
+            try
+            {
+                var routes = await _context.Route_Table.ToListAsync();
+                return View(routes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching routes: {ex.Message}");
+                return View("Error", new { message = "Unable to fetch routes. Please try again later." });
+            }
         }
 
         public async Task<IActionResult> RouteDetails(int id)
@@ -282,6 +295,24 @@ namespace YatriSewa.Controllers
             var drivers = await _driverService.GetAllDriversAsync(); // Fetch all drivers
             return View(drivers); // Pass data to the view
         }
+
+        [Route("Admin/JourneyList")]
+        public async Task<IActionResult> TodayJourneys()
+        {
+            var journeys = await _driverService.GetTodayJourneysAsync();
+
+            if (!journeys.Any())
+            {
+                ViewBag.Message = "No journeys scheduled for today.";
+                return View(new List<object>());
+            }
+
+            return View(journeys);
+        }
+
+
+        //fetching passengerlist
+
     }
 }
 

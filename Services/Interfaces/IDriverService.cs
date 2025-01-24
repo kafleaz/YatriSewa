@@ -9,4 +9,7 @@ public interface IDriverService
     Task<Schedule> GetScheduleDetailsAsync(int scheduleId);
     Task<IEnumerable<BusDriver>> GetAllDriversAsync();
     Task<IEnumerable<object>> GetJourneyListAsync();
+    Task<IEnumerable<object>> GetTodayJourneysAsync();
 }
+
+

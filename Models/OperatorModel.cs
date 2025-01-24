@@ -83,7 +83,7 @@ namespace YatriSewa.Models
     public class Route
     {
         [Key]
-        public int RouteID { get; set; }
+        public int  RouteID { get; set; }
 
         [Required]
         [StringLength(255)]

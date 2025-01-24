@@ -63,7 +63,7 @@ namespace YatriSewa.Services
                 .Include(b => b.BusCompany)
                 .Include(b => b.BusDriver)
                 .Include(b => b.Route)
-                .FirstOrDefaultAsync(m => m.BusId == id);
+                .FirstOrDefaultAsync(b => b.BusId == id);
         }
 
         public async Task AddBusAsync(Bus bus, string userId)
@@ -73,11 +73,17 @@ namespace YatriSewa.Services
 
             if (currentUser?.BusCompany != null)
             {
+                throw new Exception("User is not associated with a company.");
+            }
                 bus.CompanyId = currentUser.BusCompany.CompanyId;
-                _context.Add(bus);
+            if (!await _context.Route_Table.AnyAsync(r => r.RouteID == bus.RouteId))
+            {
+                throw new Exception($"Invalid RouteID: {bus.RouteId}");
+            }
+            _context.Add(bus);
                 await _context.SaveChangesAsync();
             }
-        }
+        
 
         public async Task<IEnumerable<Route>> GetRoutesByUserIdAsync(string userId)
         {
@@ -97,7 +103,9 @@ namespace YatriSewa.Services
         public async Task<User?> GetCurrentUserWithCompanyAsync(string userId)
         {
             if (!int.TryParse(userId, out int parsedUserId))
+            {
                 return null;
+            }
 
             return await _context.User_Table.Include(u => u.BusCompany)
                 .FirstOrDefaultAsync(u => u.UserId == parsedUserId);
@@ -134,12 +142,15 @@ namespace YatriSewa.Services
             var currentUser = await _context.User_Table.Include(u => u.BusCompany)
                 .FirstOrDefaultAsync(u => u.UserId.ToString() == userId);
 
-            if (currentUser?.BusCompany != null)
+            if (currentUser?.BusCompany == null)
             {
+                throw new Exception("User is not associated with a company.");
+            }
+            
                 route.CompanyID = currentUser.BusCompany.CompanyId;
                 _context.Add(route);
                 await _context.SaveChangesAsync();
-            }
+            
         }
 
         public Task<(bool success, string message)> AddBusDetailsAsync(Bus bus, string userId)
@@ -151,6 +162,8 @@ namespace YatriSewa.Services
         {
             return await _context.Company_Table.FirstOrDefaultAsync(c => c.CompanyId == companyId);
         }
+      
+
 
     }
 }
