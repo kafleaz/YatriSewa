@@ -76,7 +76,10 @@ namespace YatriSewa.Models
         public int TransactionId { get; set; }
 
         [Required]
-        public string StripeTransactionId { get; set; } = string.Empty; // Stripe-specific transaction ID
+        public string StripeTransactionId { get; set; } = string.Empty; // ✅ Stores PaymentIntent ID for refunds
+
+        [Required]
+        public string ChargeId { get; set; } = string.Empty; // ✅ Stores Charge ID for reference
 
         [Required]
         public int BookingId { get; set; } // Associated booking ID
@@ -90,6 +93,7 @@ namespace YatriSewa.Models
 
         public DateTime TransactionDate { get; set; } = DateTime.UtcNow; // Transaction timestamp
     }
+
 
 
 }

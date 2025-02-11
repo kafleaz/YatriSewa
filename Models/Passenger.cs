@@ -60,6 +60,7 @@ namespace YatriSewa.Models
     {
         public int BusId { get; set; }
         public string? BusName { get; set; }
+        public string? BusNumber { get; set; }
         public decimal Price { get; set; }
         public string SelectedSeats { get; set; } = string.Empty; // Comma-separated seat numbers
         public decimal TotalAmount { get; set; }
@@ -129,5 +130,28 @@ namespace YatriSewa.Models
         public string? BookingStatus { get; set; }
         public string? PaymentMethod { get; set; }
     }
+
+    public class TicketDetailsViewModel
+    {
+        public string? TicketNumber { get; set; }
+        public string? PNR { get; set; }
+        public string? PassengerName { get; set; }
+        public string? StartLocation { get; set; }
+        public string? EndLocation { get; set; }
+        public DateTime DepartureTime { get; set; }
+        public DateTime ArrivalTime { get; set; }
+        public string? BusName { get; set; }
+        public string? BusNumber { get; set; }
+        public List<string>? SeatNumbers { get; set; }
+        public decimal TotalAmount { get; set; }
+        public string? PickupPoint { get; set; }
+        public string? DropPoint { get; set; }
+        public string? DeviceIdentifier { get; set; } // Unique identifier, e.g., ESP8266-12345
+        public decimal? Latitude { get; set; } // Latitude of the device
+        public decimal? Longitude { get; set; } // Longitude of the device
+        public decimal? Speed { get; set; } // Speed of the device
+        public DateTime? LastUpdated { get; set; } // Timestamp of the last update
+    }
+
 
 }

@@ -24,8 +24,11 @@
             <a href="#" class="nav-link">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
-            <a href="#" class="nav-link">
+            @* <a href="#" class="nav-link">
                 <i class="fas fa-bus"></i> Active Users
+            </a> *@
+            <a asp-controller="Users" asp-action="Index" class="nav-link">
+                <i class="fas fa-users"></i> Users
             </a>
             <a href="#" class="nav-link">
                 <i class="fas fa-bus"></i> Block Users
@@ -167,6 +170,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 
 </html>

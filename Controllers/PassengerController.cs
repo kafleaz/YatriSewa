@@ -11,6 +11,7 @@ using YatriSewa.Services;
 using Stripe;
 using TokenService = YatriSewa.Services.TokenService;
 using PaymentMethod = YatriSewa.Models.PaymentMethod;
+using System.Net.Sockets;
 
 
 namespace YatriSewa.Controllers
@@ -975,8 +976,8 @@ namespace YatriSewa.Controllers
                 // Fetch or create passenger
                 var passenger = await _context.Passenger_Table
                     .FirstOrDefaultAsync(p => p.PhoneNumber == request.PhoneNumber);
-                if (passenger == null)
-                {
+                //if (passenger == null)
+                //{
                     passenger = new Passenger
                     {
                         Name = request.FullName,
@@ -986,7 +987,7 @@ namespace YatriSewa.Controllers
                     };
                     _context.Passenger_Table.Add(passenger);
                     await _context.SaveChangesAsync();
-                }
+                //}
 
                 // Create a new booking
                 var booking = new Booking
@@ -1096,8 +1097,8 @@ namespace YatriSewa.Controllers
                 return BadRequest("Merchant information not found.");
             }
 
-            var esewaPaymentUrl = "https://uat.esewa.com.np/epay/main"; // Test environment URL
-
+            /*var esewaPaymentUrl = "https://uat.esewa.com.np/epay/main";*/ // Test environment URL
+            var esewaPaymentUrl = "https://rc.esewa.com.np/epay/main";
             // Generate absolute success and failure URLs
             var successUrl = Url.Action("EsewaSuccess", "Passenger", new { bookingId, totalAmount }, Request.Scheme, Request.Host.Value);
             var failureUrl = Url.Action("EsewaFailure", "Passenger", new { bookingId }, Request.Scheme, Request.Host.Value);
@@ -1127,7 +1128,7 @@ namespace YatriSewa.Controllers
         [HttpGet]
         public async Task<IActionResult> EsewaSuccess(int bookingId, string refId, decimal totalAmount)
         {
-            var esewaVerificationUrl = "https://uat.esewa.com.np/epay/transrec"; // Test environment URL
+            var esewaVerificationUrl = "https://rc.esewa.com.np/epay/transrec"; // Test environment URL
 
             // Fetch booking and related bus
             var booking = await _context.Booking_Table
@@ -1327,21 +1328,64 @@ namespace YatriSewa.Controllers
             }
         }
 
+        //[HttpPost]
+        //public async Task<IActionResult> StripePaymentSuccess(string stripeToken, int bookingId, decimal totalAmount)
+        //{
+        //    try
+        //    {
+        //        StripeConfiguration.ApiKey = "sk_test_51PNIqUB3UNeeoGIf1BwZwOzVjkkGUopjyJgVaTeP57NJhJNNqZNjFLfzQgK1W5kMinCZnaTN8iugH3qLXlxEgcgm00VBFEoCPp";
+
+        //        var paymentIntentOptions = new PaymentIntentCreateOptions
+        //        {
+        //            Amount = (long)(totalAmount * 100), // Convert to cents
+        //            Currency = "npr",
+        //            PaymentMethod = stripeToken,
+        //            Confirm = true
+        //        };
+
+        //        var paymentIntentService = new PaymentIntentService();
+        //        PaymentIntent paymentIntent = paymentIntentService.Create(paymentIntentOptions);
+
+        //        if (paymentIntent.Status == "succeeded")
+        //        {
+        //            // ✅ Retrieve the charge from PaymentIntent
+        //            var chargeId = paymentIntent.LatestChargeId; // Get charge ID
+
+        //            await ProcessPaymentSuccess(bookingId, totalAmount, paymentIntent.Id, chargeId);
+        //            return RedirectToAction("TicketDetails", "Passenger", new { bookingId, paymentSuccess = true });
+        //        }
+        //        else
+        //        {
+        //            return BadRequest("Payment failed.");
+        //        }
+        //    }
+        //    catch (StripeException ex)
+        //    {
+        //        Console.WriteLine($"Stripe error: {ex.Message}");
+        //        return BadRequest("An error occurred while processing the payment.");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"General error: {ex.Message}");
+        //        return BadRequest("An unexpected error occurred.");
+        //    }
+        //}
+
         [HttpPost]
         public async Task<IActionResult> StripePaymentSuccess(string stripeToken, int bookingId, decimal totalAmount)
         {
-            //try
-            //{
-                // Ensure API key is set
+            try
+            {
+                // ✅ Set Stripe API key
                 StripeConfiguration.ApiKey = "sk_test_51PNIqUB3UNeeoGIf1BwZwOzVjkkGUopjyJgVaTeP57NJhJNNqZNjFLfzQgK1W5kMinCZnaTN8iugH3qLXlxEgcgm00VBFEoCPp";
 
-                // Create a charge
+                // ✅ Create a charge request
                 var options = new ChargeCreateOptions
                 {
                     Amount = (long)(totalAmount * 100), // Convert to cents
                     Currency = "npr",
                     Description = "Bus Ticket Payment",
-                    Source = stripeToken, // Token from the frontend
+                    Source = stripeToken, // Token from frontend
                     Metadata = new Dictionary<string, string>
             {
                 { "BookingId", bookingId.ToString() }
@@ -1351,36 +1395,201 @@ namespace YatriSewa.Controllers
                 var service = new ChargeService();
                 var charge = service.Create(options);
 
+                // ✅ Check if the payment succeeded
                 if (charge.Status == "succeeded")
                 {
-                    // Process booking, ticket, and payment logic
+                    // ✅ Process the booking, ticket, and payment logic
                     await ProcessPaymentSuccess(bookingId, totalAmount, charge.Id);
 
-                //return RedirectToAction("Ticket", "Passenger", new { bookingId, paymentSuccess = true });
-                return RedirectToAction("Ticket", "Passenger", new { bookingId, paymentSuccess = true });
-            }
+                    // ✅ Redirect to ticket page after successful payment
+                    return RedirectToAction("Ticket", "Passenger", new { bookingId, paymentSuccess = true });
+                }
                 else
                 {
-                    return BadRequest("Payment failed.");
+                    Console.WriteLine("❌ Payment failed with status: " + charge.Status);
+                    return BadRequest("Payment failed. Status: " + charge.Status);
                 }
-            //}
-            //catch (StripeException ex)
-            //{
-            //    Console.WriteLine($"Stripe error: {ex.Message}");
-            //    return BadRequest("An error occurred while processing the payment.");
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine($"Error: {ex.Message}");
-            //    return BadRequest("An error occurred while processing the payment.");
-            //}
+            }
+            catch (StripeException ex)
+            {
+                Console.WriteLine("❌ Stripe API Error: " + ex.Message);
+                return BadRequest("Stripe error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❌ General Error: " + ex.Message);
+                return BadRequest("An unexpected error occurred: " + ex.Message);
+            }
         }
 
-        private async Task ProcessPaymentSuccess(int bookingId, decimal totalAmount, string stripeTransactionId)
+        //[HttpPost]
+        //public async Task<IActionResult> StripePaymentSuccess(string stripeToken, int bookingId, decimal totalAmount)
+        //{
+        //    //try
+        //    //{
+        //        // Ensure API key is set
+        //        StripeConfiguration.ApiKey = "sk_test_51PNIqUB3UNeeoGIf1BwZwOzVjkkGUopjyJgVaTeP57NJhJNNqZNjFLfzQgK1W5kMinCZnaTN8iugH3qLXlxEgcgm00VBFEoCPp";
+
+        //    // Create a charge
+        //    //var options = new ChargeCreateOptions
+        //    //{
+        //    //    Amount = (long)(totalAmount * 100), // Convert to cents
+        //    //    Currency = "npr",
+        //    //    Description = "Bus Ticket Payment",
+        //    //    Source = stripeToken, // Token from the frontend
+        //    //    Metadata = new Dictionary<string, string>
+        //    //{
+        //    //{ "BookingId", bookingId.ToString() }
+        //    //}
+        //    //};
+
+        //    //var service = new ChargeService();
+        //    //var charge = service.Create(options);
+
+        //    //if (charge.Status == "succeeded")
+        //    //{
+        //    //    // Process booking, ticket, and payment logic
+        //    //    await ProcessPaymentSuccess(bookingId, totalAmount, charge.Id);
+
+        //    ////return RedirectToAction("Ticket", "Passenger", new { bookingId, paymentSuccess = true });
+        //    //return RedirectToAction("Ticket", "Passenger", new { bookingId, paymentSuccess = true });
+        //    //}
+        //    //else
+        //    //{
+        //    //    return BadRequest("Payment failed.");
+        //    //}
+
+        //    //try
+        //    //{
+        //    //    StripeConfiguration.ApiKey = "sk_test_YOUR_SECRET_KEY";
+
+        //    //    // Create a PaymentIntent instead of a Charge
+        //    //    var paymentIntentOptions = new PaymentIntentCreateOptions
+        //    //    {
+        //    //        Amount = (long)(totalAmount * 100), // Convert to cents
+        //    //        Currency = "npr",
+        //    //        PaymentMethod = stripeToken, // Payment method from frontend
+        //    //        Confirm = true
+        //    //    };
+
+        //    //    var paymentIntentService = new PaymentIntentService();
+        //    //    PaymentIntent paymentIntent = paymentIntentService.Create(paymentIntentOptions);
+
+        //    //    if (paymentIntent.Status == "succeeded")
+        //    //    {
+        //    //        await ProcessPaymentSuccess(bookingId, totalAmount, paymentIntent.Id); // ✅ Store PaymentIntent ID
+        //    //        return RedirectToAction("Ticket", "Passenger", new { bookingId, paymentSuccess = true });
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        return BadRequest("Payment failed.");
+        //    //    }
+        //    //}
+        //    //catch (StripeException ex)
+        //    //{
+        //    //    Console.WriteLine($"Stripe error: {ex.Message}");
+        //    //    return BadRequest("An error occurred while processing the payment.");
+        //    //}
+        //    //}
+        //    //catch (StripeException ex)
+        //    //{
+        //    //    Console.WriteLine($"Stripe error: {ex.Message}");
+        //    //    return BadRequest("An error occurred while processing the payment.");
+        //    //}
+        //    //catch (Exception ex)
+        //    //{
+        //    //    Console.WriteLine($"Error: {ex.Message}");
+        //    //    return BadRequest("An error occurred while processing the payment.");
+        //    //}
+        //}
+
+        //private async Task ProcessPaymentSuccess(int bookingId, decimal totalAmount, string stripeTransactionId)
+        //{
+        //    try
+        //    {
+        //        // Fetch the booking details
+        //        var booking = await _context.Booking_Table
+        //            .Include(b => b.Bus)
+        //            .Include(b => b.Passenger)
+        //            .FirstOrDefaultAsync(b => b.BookingId == bookingId);
+
+        //        if (booking == null)
+        //        {
+        //            throw new Exception("Booking not found.");
+        //        }
+
+        //        // Fetch seats related to the booking
+        //        var seats = await _context.Seat_Table
+        //            .Where(s => s.BookingId == bookingId)
+        //            .ToListAsync();
+
+        //        if (!seats.Any())
+        //        {
+        //            throw new Exception("No seats found for this booking.");
+        //        }
+
+        //        // Update booking status to Paid
+        //        booking.Status = BookingStatus.Paid;
+        //        _context.Booking_Table.Update(booking);
+
+        //        // Update seat statuses to Booked
+        //        foreach (var seat in seats)
+        //        {
+        //            seat.Status = SeatStatus.Booked;
+        //        }
+
+        //        // Generate tickets for each seat
+        //        foreach (var seat in seats)
+        //        {
+        //            var ticket = new Ticket
+        //            {
+        //                BookingId = booking.BookingId,
+        //                SeatId = seat.SeatId,
+        //                Price = totalAmount / booking.TotalSeats.Value, // Divide total amount by total seats
+        //                TicketNo = Guid.NewGuid().ToString("N").Substring(0, 9).ToUpper(),
+        //                PNR = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper()
+        //            };
+        //            _context.Ticket_Table.Add(ticket);
+        //        }
+
+        //        var stripeTransaction = new StripeTrans
+        //        {
+        //            StripeTransactionId = stripeTransactionId,
+        //            BookingId = bookingId,
+        //            TotalAmount = totalAmount,
+        //            Status = "Successed",
+        //            TransactionDate = DateTime.UtcNow
+
+        //        };
+        //        _context.StripeTrans_Table.Add(stripeTransaction);
+        //        await _context.SaveChangesAsync();
+        //        // Log the payment in the Payment table
+        //        var payment = new Payment
+        //        {
+        //            UserId = booking.UserId,
+        //            PassengerId = booking.PassengerId,
+        //            BookingId = bookingId,
+        //            AmountPaid = totalAmount,
+        //            PaymentDate = DateTime.UtcNow,
+        //            PaymentMethod = PaymentMethod.Stripe,
+        //            Status = PaymentStatus.Successful,
+        //            StripeTransId = stripeTransaction.TransactionId
+        //        };
+        //        _context.Payment_Table.Add(payment);
+
+        //        // Save all changes to the database
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Error in ProcessPaymentSuccess: {ex.Message}");
+        //        throw; // Rethrow exception to handle it at a higher level
+        //    }
+        //}
+        private async Task ProcessPaymentSuccess(int bookingId, decimal totalAmount, string chargeId)
         {
             try
             {
-                // Fetch the booking details
                 var booking = await _context.Booking_Table
                     .Include(b => b.Bus)
                     .Include(b => b.Passenger)
@@ -1391,7 +1600,6 @@ namespace YatriSewa.Controllers
                     throw new Exception("Booking not found.");
                 }
 
-                // Fetch seats related to the booking
                 var seats = await _context.Seat_Table
                     .Where(s => s.BookingId == bookingId)
                     .ToListAsync();
@@ -1401,42 +1609,43 @@ namespace YatriSewa.Controllers
                     throw new Exception("No seats found for this booking.");
                 }
 
-                // Update booking status to Paid
+                //  Update booking and seat statuses
                 booking.Status = BookingStatus.Paid;
                 _context.Booking_Table.Update(booking);
 
-                // Update seat statuses to Booked
                 foreach (var seat in seats)
                 {
                     seat.Status = SeatStatus.Booked;
                 }
 
-                // Generate tickets for each seat
+                //  Generate tickets
                 foreach (var seat in seats)
                 {
                     var ticket = new Ticket
                     {
                         BookingId = booking.BookingId,
                         SeatId = seat.SeatId,
-                        Price = totalAmount / booking.TotalSeats.Value, // Divide total amount by total seats
+                        Price = totalAmount / booking.TotalSeats.Value,
                         TicketNo = Guid.NewGuid().ToString("N").Substring(0, 9).ToUpper(),
                         PNR = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper()
                     };
                     _context.Ticket_Table.Add(ticket);
                 }
 
+                //  Store Charge ID in StripeTrans (No PaymentIntent needed)
                 var stripeTransaction = new StripeTrans
                 {
-                    StripeTransactionId = stripeTransactionId,
+                    StripeTransactionId = chargeId, // Store Charge ID
+                    ChargeId = chargeId, //  Store Charge ID for reference
                     BookingId = bookingId,
                     TotalAmount = totalAmount,
                     Status = "Successed",
                     TransactionDate = DateTime.UtcNow
-
                 };
                 _context.StripeTrans_Table.Add(stripeTransaction);
                 await _context.SaveChangesAsync();
-                // Log the payment in the Payment table
+
+                //  Save Payment with Charge ID
                 var payment = new Payment
                 {
                     UserId = booking.UserId,
@@ -1446,19 +1655,21 @@ namespace YatriSewa.Controllers
                     PaymentDate = DateTime.UtcNow,
                     PaymentMethod = PaymentMethod.Stripe,
                     Status = PaymentStatus.Successful,
-                    StripeTransId = stripeTransaction.TransactionId
+                    StripeTransId = stripeTransaction.TransactionId //  Reference StripeTrans
                 };
                 _context.Payment_Table.Add(payment);
 
-                // Save all changes to the database
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in ProcessPaymentSuccess: {ex.Message}");
-                throw; // Rethrow exception to handle it at a higher level
+                throw;
             }
         }
+
+
+
 
         [HttpGet]
         [Authorize(Roles = "Passenger")]
@@ -1472,39 +1683,130 @@ namespace YatriSewa.Controllers
                 return Unauthorized("User not authorized.");
             }
 
-            // Fetch tickets related to the user's bookings
             var tickets = await _context.Ticket_Table
-                .Include(t => t.Booking) // Include the booking details
-                .ThenInclude(b => b.Bus) // Include the bus details
-                .ThenInclude(bus => bus.Route) // Include the route details
-                .Where(t => t.Booking.UserId == userId) // Filter tickets by logged-in user
+                .Include(t => t.Seat)
+                .Include(t => t.Booking)
+                    .ThenInclude(b => b.Bus)
+                        .ThenInclude(bus => bus.Route)
+                .Include(t => t.Booking.Bus.Schedules)
+                .Where(t => t.Booking.UserId == userId)
                 .ToListAsync();
 
             // Transform the tickets into view models
             var ticketViewModels = tickets.Select(t => new BookingViewModel
             {
                 BookingId = t.BookingId,
-                BusId = t.Booking.BusId ?? 0, // Handle nullable BusId
-                BusName = t.Booking.Bus?.BusName ?? "Unknown Bus",
-                StartLocation = t.Booking.Bus?.Route?.StartLocation ?? "Unknown Start",
-                EndLocation = t.Booking.Bus?.Route?.EndLocation ?? "Unknown End",
-                JourneyDate = t.Booking.BookingDate.Date,
-                SelectedSeats = t.SeatId.ToString(), // Assuming SeatId is used; replace with actual seat number logic if needed
-                TotalAmount = t.Booking.TotalAmount
+                BusNumber = t.Booking?.Bus?.BusNumber ?? "Unknown", // Check for null and provide a default value
+                BusName = t.Booking?.Bus?.BusName ?? "Unknown Bus",
+                StartLocation = t.Booking?.Bus?.Route?.StartLocation ?? "Unknown Start",
+                EndLocation = t.Booking?.Bus?.Route?.EndLocation ?? "Unknown End",
+                JourneyDate = t.Booking?.Bus?.Schedules.FirstOrDefault()?.DepartureTime.Date ?? DateTime.MinValue, // Use a default value for DateTime
+                SelectedSeats = t.Seat.SeatNumber, // SeatId is assumed to be always present
+                TotalAmount = t.Booking?.TotalAmount ?? 0 // Use 0 as a fallback for null TotalAmount
             }).ToList();
-
             // Pass the data to the view
             return View(ticketViewModels);
         }
 
-
-
-
-
-        //public IActionResult Ticket()
+        //[HttpGet]
+        //public async Task<IActionResult> TicketDetails(int bookingId)
         //{
-        //    return View();
+        //    // Fetch the ticket details using the ID
+        //   var ticket = await _context.Ticket_Table
+        //    .Include(t => t.Booking)
+        //    .ThenInclude(b => b.Passenger)
+        //    .Include(t => t.Booking.Bus)
+        //    .FirstOrDefaultAsync(t => t.BookingId == bookingId); // Match bookingId
+
+
+        //    // Fetch Schedule details using BusId
+        //    var schedule = await _context.Schedule_Table
+        //        .Include(s => s.Route)
+        //        .FirstOrDefaultAsync(s => s.BusId == ticket.Booking.BusId);
+
+        //    // Create the ViewModel
+        //    var ticketDetailsViewModel = new TicketDetailsViewModel
+        //    {
+        //        TicketNumber = ticket.TicketNo,
+        //        PNR = ticket.PNR,
+        //        PassengerName = ticket.Booking.Passenger.Name,
+        //        StartLocation = schedule?.Route?.StartLocation ?? "Unknown",
+        //        EndLocation = schedule?.Route?.EndLocation ?? "Unknown",
+        //        DepartureTime = schedule?.DepartureTime ?? DateTime.MinValue,
+        //        ArrivalTime = schedule?.ArrivalTime ?? DateTime.MinValue,
+        //        BusName = ticket.Booking.Bus.BusName,
+        //        BusNumber = ticket.Booking.Bus.BusNumber,
+        //        SeatNumbers = ticket.Booking.Bus.Seats.Select(s => s.SeatNumber).ToList(),
+        //        TotalAmount = ticket.Price,
+        //        PickupPoint = ticket.Booking.Passenger.BoardingPoint,
+        //        DropPoint = ticket.Booking.Passenger.DroppingPoint
+
+        //    };
+        //    ViewBag.BookingId = bookingId;
+        //    ViewBag.TicketId = ticket.TicketId;
+        //    return View(ticketDetailsViewModel);
         //}
+
+        [HttpGet]
+        public async Task<IActionResult> TicketDetails(int bookingId)
+        {
+            // Fetch the ticket and related booking, bus, and passenger details
+            var ticket = await _context.Ticket_Table
+                .Include(t => t.Booking)
+                    .ThenInclude(b => b.Passenger)
+                .Include(t => t.Booking.Bus)
+                .FirstOrDefaultAsync(t => t.BookingId == bookingId);
+
+            if (ticket == null)
+            {
+                return NotFound("Ticket not found.");
+            }
+
+            // Fetch the IoT device linked to the bus
+            var iotDevice = await _context.IoTDevices
+                .Where(d => d.BusId == ticket.Booking.BusId)
+                .FirstOrDefaultAsync();
+
+            if (iotDevice == null)
+            {
+                ViewBag.NoDeviceConnected = true;
+            }
+            else
+            {
+                ViewBag.NoDeviceConnected = false;
+            }
+            // Fetch Schedule details using BusId
+            var schedule = await _context.Schedule_Table
+                .Include(s => s.Route)
+                .FirstOrDefaultAsync(s => s.BusId == ticket.Booking.BusId);
+
+            var ticketDetailsViewModel = new TicketDetailsViewModel
+            {
+                TicketNumber = ticket.TicketNo,
+                PNR = ticket.PNR,
+                PassengerName = ticket.Booking.Passenger.Name,
+                StartLocation = schedule?.Route?.StartLocation ?? "Unknown",
+                EndLocation = schedule?.Route?.EndLocation ?? "Unknown",
+                DepartureTime = schedule?.DepartureTime ?? DateTime.MinValue,
+                ArrivalTime = schedule?.ArrivalTime ?? DateTime.MinValue,
+                BusName = ticket.Booking.Bus.BusName,
+                BusNumber = ticket.Booking.Bus.BusNumber,
+                SeatNumbers = ticket.Booking.Bus.Seats.Select(s => s.SeatNumber).ToList(),
+                TotalAmount = ticket.Price,
+                PickupPoint = ticket.Booking.Passenger.BoardingPoint,
+                DropPoint = ticket.Booking.Passenger.DroppingPoint,
+                Latitude = iotDevice?.Latitude ?? (decimal)27.7614,
+                Longitude = iotDevice?.Longitude ?? (decimal)85.3156,
+                DeviceIdentifier = iotDevice?.DeviceIdentifier ?? "No Device",
+                LastUpdated = iotDevice?.LastUpdated ?? DateTime.MinValue
+            };
+            ViewBag.BookingId = bookingId;
+            ViewBag.TicketId = ticket.TicketId;
+
+            return View(ticketDetailsViewModel);
+        }
+
+
         public IActionResult Notification()
         {
             return View();

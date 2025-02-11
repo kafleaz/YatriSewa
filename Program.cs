@@ -27,7 +27,9 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<ISMSService, SMSService>();
 builder.Services.AddHostedService<SeatReservationCleanupService>();
-
+builder.Services.AddSignalR();
+builder.Services.AddHostedService<RealTimeBusLocationService>();
+builder.Services.AddScoped<FirebaseToDatabaseService>();
 
 
 
@@ -66,7 +68,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
+app.MapHub<BusLocationHub>("/busLocationHub");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

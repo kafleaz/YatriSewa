@@ -11,11 +11,11 @@ namespace YatriSewa.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.AddColumn<int>(
-            //    name: "StripeTransId",
-            //    table: "Payment_Table",
-            //    type: "int",
-            //    nullable: true);
+            migrationBuilder.AddColumn<int>(
+               name: "StripeTransId",
+                table: "Payment_Table",
+               type: "int",
+                nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "StripeTrans_Table",
@@ -34,10 +34,10 @@ namespace YatriSewa.Migrations
                     table.PrimaryKey("PK_StripeTrans_Table", x => x.TransactionId);
                 });
 
-            //migrationBuilder.CreateIndex(
-            //    name: "IX_Payment_Table_StripeTransId",
-            //    table: "Payment_Table",
-            //    column: "StripeTransId");
+            migrationBuilder.CreateIndex(
+               name: "IX_Payment_Table_StripeTransId",
+               table: "Payment_Table",
+               column: "StripeTransId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Payment_Table_StripeTrans_Table_StripeTransId",
