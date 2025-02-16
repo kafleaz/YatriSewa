@@ -71,19 +71,27 @@ namespace YatriSewa.Services
             var currentUser = await _context.User_Table.Include(u => u.BusCompany)
                 .FirstOrDefaultAsync(u => u.UserId.ToString() == userId);
 
-            if (currentUser?.BusCompany != null)
+            if (currentUser?.BusCompany == null)
             {
                 throw new Exception("User is not associated with a company.");
             }
-                bus.CompanyId = currentUser.BusCompany.CompanyId;
+
+            bus.CompanyId = currentUser.BusCompany.CompanyId;
+
             if (!await _context.Route_Table.AnyAsync(r => r.RouteID == bus.RouteId))
             {
                 throw new Exception($"Invalid RouteID: {bus.RouteId}");
             }
-            _context.Add(bus);
-                await _context.SaveChangesAsync();
+
+            if (!await _context.Driver_Table.AnyAsync(d => d.DriverId == bus.DriverId))
+            {
+                throw new Exception($"Invalid DriverID: {bus.DriverId}");
             }
-        
+
+            _context.Add(bus);
+            await _context.SaveChangesAsync();
+        }
+
 
         public async Task<IEnumerable<Route>> GetRoutesByUserIdAsync(string userId)
         {
@@ -92,7 +100,7 @@ namespace YatriSewa.Services
 
             if (user?.BusCompany == null)
             {
-                return Enumerable.Empty<Route>();
+                return Enumerable.Empty<YatriSewa.Models.Route>();
             }
 
             return await _context.Route_Table
@@ -121,8 +129,10 @@ namespace YatriSewa.Services
 
         public async Task<IEnumerable<Route>> GetRoutesByCompanyIdAsync(int companyId)
         {
-            return await _context.Route_Table
-                .Where(r => r.CompanyID == companyId).ToListAsync();
+                return await _context.Route_Table
+                    .Where(r => r.CompanyID == companyId)
+                    .ToListAsync();
+
         }
 
         public async Task<IEnumerable<BusDriver>> GetDriversByCompanyIdAsync(int companyId)
@@ -137,7 +147,7 @@ namespace YatriSewa.Services
             return await _context.Route_Table.FindAsync(id);
         }
 
-        public async Task AddRouteAsync(Route route, string userId)
+        public async Task AddRouteAsync(YatriSewa.Models.Route route, string userId)
         {
             var currentUser = await _context.User_Table.Include(u => u.BusCompany)
                 .FirstOrDefaultAsync(u => u.UserId.ToString() == userId);

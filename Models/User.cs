@@ -20,6 +20,11 @@ namespace YatriSewa.Models
         Driver
         // Add more roles as necessary
     }
+    public class RoleApprovalRequest
+    {
+        public int UserId { get; set; }
+        public string Role { get; set; }
+    }
     public class User
     {
         [Key]

@@ -1,0 +1,30 @@
+﻿@model YatriSewa.Models.BusCompany
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title text-green">Operator Details</h5>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-3">Company Name</dt>
+            <dd class="col-sm-9">@Model.CompanyName</dd>
+
+            <dt class="col-sm-3">Contact Info</dt>
+            <dd class="col-sm-9">@Model.ContactInfo</dd>
+
+            <dt class="col-sm-3">Address</dt>
+            <dd class="col-sm-9">@Model.CompanyAddress</dd>
+
+            <dt class="col-sm-3">Registration Number</dt>
+            <dd class="col-sm-9">@Model.Reg_No</dd>
+        </dl>
+
+        <form asp-action="AssignRole" method="post">
+            <input type="hidden" name="userId" value="@Model.UserId" />
+            <input type="hidden" name="role" value="Operator" />
+            <button type="submit" class="btn btn-primary">Assign Role</button>
+        </form>
+    </div>
+</div>

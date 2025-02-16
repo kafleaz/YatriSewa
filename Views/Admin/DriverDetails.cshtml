@@ -1,0 +1,26 @@
+﻿@model YatriSewa.Models.BusDriver
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1>Details</h1>
+@* 
+@model YatriSewa.Models.BusDriver *@
+
+<div class="card">
+    <div class="card-body">
+        <h5>Driver Details</h5>
+        <p><strong>Driver Name:</strong> @Model.DriverName</p>
+        <p><strong>License Number:</strong> @Model.LicenseNumber</p>
+        <p><strong>Phone Number:</strong> @Model.PhoneNumber</p>
+        <p><strong>Address:</strong> @Model.Address</p>
+        <form asp-action="AssignRole" method="post">
+            <input type="hidden" name="userId" value="@Model.UserId" />
+            <input type="hidden" name="role" value="Driver" />
+            <button type="submit" class="btn btn-primary">Assign Role</button>
+        </form>
+    </div>
+</div>
+

@@ -25,8 +25,11 @@ namespace YatriSewa.Models
         public string? VAT_PAN { get; set; }
 
         public string? VAT_PAN_PhotoPath { get; set; }
-
+        [ForeignKey("UserId")]
         public int UserId { get; set; }
+       
+        public virtual User? User { get; set; }
+
 
 
         // One-to-Many relationship: A company can have multiple buses

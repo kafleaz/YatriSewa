@@ -104,6 +104,8 @@
                     </a>
                 </li>
 
+            
+
                 <!-- Notification Icon with Badge -->
                 <li class="nav-item">
                     <a class="nav-link" href="#" id="notificationDropdown" role="button">
@@ -216,6 +218,27 @@
         // Render the chart on page load
         fetchChartData();
     </script>
+    <script>
+        function showOperatorRequests() {
+            fetch('/Admin/OperatorRequest')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("roleRequestContainer").innerHTML = data;
+                })
+                .catch(error => console.error("Error loading Operator Requests:", error));
+        }
+
+        function showDriverRequests() {
+            fetch('/Admin/DriverRequest')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("roleRequestContainer").innerHTML = data;
+                })
+                .catch(error => console.error("Error loading Driver Requests:", error));
+        }
+    </script>
+
+    
 
 </body>
 

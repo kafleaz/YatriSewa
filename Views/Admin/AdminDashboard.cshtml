@@ -11,7 +11,7 @@
             <div class="card text-center">
                 <div class="card-body">
                     <h5 class="card-title">Total Users</h5>
-                    <h3 id="totalUsers">0</h3> <!-- Ensure this matches the JavaScript -->
+                    <h3 id="totalUsers">0</h3>
                 </div>
             </div>
         </div>
@@ -19,7 +19,7 @@
             <div class="card text-center">
                 <div class="card-body">
                     <h5 class="card-title">Total Buses</h5>
-                    <h3 id="totalBuses">0</h3> <!-- Ensure this matches the JavaScript -->
+                    <h3 id="totalBuses">0</h3>
                 </div>
             </div>
         </div>
@@ -27,53 +27,161 @@
             <div class="card text-center">
                 <div class="card-body">
                     <h5 class="card-title">Total Operators</h5>
-                    <h3 id="totalOperators">0</h3> <!-- Ensure this matches the JavaScript -->
+                    <h3 id="totalOperators">0</h3>
                 </div>
             </div>
         </div>
     </div>
 
-
     <!-- Graph Section -->
     <div class="row mt-5">
-        <div class="chart-container" style="position: relative; max-width: 600px; margin: 0 auto;">
+        <div class="chart-container" style="position: relative; max-width: 800px; margin: 0 auto;">
             <canvas id="usersChart"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        async function fetchChartData() {
+            try {
+                const response = await fetch('/api/getstats');
+                const data = await response.json();
+
+                const ctx = document.getElementById('usersChart').getContext('2d');
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Total Users', 'Total Buses', 'Total Operators'],
+                        datasets: [{
+                            label: 'Count',
+                            data: [data.users, data.buses, data.operators],
+                            backgroundColor: ['#4CAF50', '#FF9800', '#2196F3'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.dataset.label}: ${context.raw}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Count'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Categories'
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching chart data:', error);
+            }
+        }
+        fetchChartData();
+    </script>
+
+
+    <!-- Pending Requests Section -->
+    <h3 class="mt-5">Pending Requests</h3>
+    <ul class="nav nav-tabs" id="requestTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="operator-tab" data-toggle="tab" href="#operatorRequests" role="tab" aria-controls="operatorRequests" aria-selected="true">Operator Requests</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="driver-tab" data-toggle="tab" href="#driverRequests" role="tab" aria-controls="driverRequests" aria-selected="false">Driver Requests</a>
+        </li>
+    </ul>
+    <div class="tab-content mt-4">
+        <!-- Operator Requests -->
+        <div class="tab-pane fade show active" id="operatorRequests" role="tabpanel" aria-labelledby="operator-tab">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Contact Info</th>
+                        <th>Requested By</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="operatorRequestList">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Driver Requests -->
+        <div class="tab-pane fade" id="driverRequests" role="tabpanel" aria-labelledby="driver-tab">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Driver Name</th>
+                        <th>Phone Number</th>
+                        <th>Requested By</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="driverRequestList">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <script>
-
-async function fetchDashboardStats() {
-    try {
-        // Fetch data from API
+    async function fetchDashboardStats() {
         const response = await fetch('/api/getstats');
-        if (!response.ok) {
-            console.error('Failed to fetch stats:', response.statusText);
+        const data = await response.json();
+        document.getElementById('totalUsers').innerText = data.users;
+        document.getElementById('totalBuses').innerText = data.buses;
+        document.getElementById('totalOperators').innerText = data.operators;
+    }
+    fetchDashboardStats();
+
+    async function fetchRequests() {
+        const response = await fetch('/api/getrequests');
+        const data = await response.json();
+        populateRequests('operatorRequestList', data.operatorRequests, 'Operator');
+        populateRequests('driverRequestList', data.driverRequests, 'Driver');
+    }
+
+    function populateRequests(tableId, requests, role) {
+        const tableBody = document.getElementById(tableId);
+        tableBody.innerHTML = '';
+        if (requests.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="4" class="text-center">No requests found</td></tr>`;
             return;
         }
-
-        // Parse the JSON response
-        const data = await response.json();
-
-        // Debugging: Log the API response to the console
-        console.log('API Response:', data);
-
-        // Check if the keys match the response structure
-        if (data.users !== undefined && data.buses !== undefined && data.operators !== undefined) {
-            // Update the DOM with fetched data
-            document.getElementById('totalUsers').innerText = data.users;
-            document.getElementById('totalBuses').innerText = data.buses;
-            document.getElementById('totalOperators').innerText = data.operators;
-        } else {
-            console.error('API response structure does not match. Ensure keys are named correctly: users, buses, operators.');
-        }
-    } catch (error) {
-        console.error('Error fetching stats:', error);
+        requests.forEach(request => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${request.name}</td>
+                <td>${request.contactInfo}</td>
+                <td>${request.requestedBy}</td>
+                <td>
+                    <a class="btn btn-primary" href="/Admin/ApproveRequest?requestId=${request.id}&role=${role}">Details</a>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
     }
-}
-
-// Call the function
-fetchDashboardStats();
+    fetchRequests();
 </script>
-
