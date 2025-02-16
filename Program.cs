@@ -30,8 +30,7 @@ builder.Services.AddHostedService<SeatReservationCleanupService>();
 builder.Services.AddSignalR();
 builder.Services.AddHostedService<RealTimeBusLocationService>();
 builder.Services.AddScoped<FirebaseToDatabaseService>();
-
-
+builder.Services.AddHttpClient<QrCodeService>();
 
 
 // Configure and register the SMTP client

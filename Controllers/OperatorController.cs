@@ -431,39 +431,67 @@ namespace YatriSewa.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Operator, Admin")]
+        //[Authorize(Roles = "Operator, Admin")]
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+
+        //public async Task<IActionResult> AddRoute([Bind("RouteID,StartLocation,Stops,EndLocation,EstimatedTime")] Route route)  // Removed CompanyID from the Bind
+        //{
+        //    // Retrieve UserId from claims
+        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        //    // Get the current user, including the BusCompany based on the UserId
+        //    var currentUser = await _context.User_Table
+        //        .Include(u => u.BusCompany)  // Load the associated BusCompany
+        //        .FirstOrDefaultAsync(u => u.UserId.ToString() == userId);  // Find user by UserId
+
+        //    if (currentUser?.BusCompany == null)
+        //    {
+        //        return NotFound("Operator's company not found.");
+        //    }
+
+        //    // Automatically set the route's CompanyID to the operator's company
+        //    route.CompanyID = currentUser.BusCompany.CompanyId;  // Assign the current user's company ID
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        // Save the new route with the operator's company ID
+        //        _context.Add(route);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(ListRoute));
+        //    }
+
+        //    // If there's an error, reload the view
+        //    return View(route);
+        //}
+
         [HttpPost]
+        [Authorize(Roles = "Operator, Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddRoute([Bind("RouteID,StartLocation,Stops,EndLocation,EstimatedTime")] Route route)  // Removed CompanyID from the Bind
+        public async Task<IActionResult> AddRoute([Bind("RouteID,StartLocation,Stops,EndLocation,EstimatedTime,EndLongitude,EndLatitude,StartLongitude,StartLatitude")] Route route)
         {
-            // Retrieve UserId from claims
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Get the current user, including the BusCompany based on the UserId
             var currentUser = await _context.User_Table
-                .Include(u => u.BusCompany)  // Load the associated BusCompany
-                .FirstOrDefaultAsync(u => u.UserId.ToString() == userId);  // Find user by UserId
+                .Include(u => u.BusCompany)
+                .FirstOrDefaultAsync(u => u.UserId.ToString() == userId);
 
             if (currentUser?.BusCompany == null)
             {
                 return NotFound("Operator's company not found.");
             }
 
-            // Automatically set the route's CompanyID to the operator's company
-            route.CompanyID = currentUser.BusCompany.CompanyId;  // Assign the current user's company ID
+            route.CompanyID = currentUser.BusCompany.CompanyId;
 
             if (ModelState.IsValid)
             {
-                // Save the new route with the operator's company ID
                 _context.Add(route);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(ListRoute));
             }
 
-            // If there's an error, reload the view
             return View(route);
         }
-
 
 
         // GET: Routes/Edit/5

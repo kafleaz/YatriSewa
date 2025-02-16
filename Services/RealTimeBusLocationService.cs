@@ -40,21 +40,15 @@ public class RealTimeBusLocationService : BackgroundService
                         decimal latitude = (decimal)device.Object.latitude;
                         decimal longitude = (decimal)device.Object.longitude;
                         decimal speed = (decimal)device.Object.speed;
+
                         Console.WriteLine($"Device: {deviceIdentifier}, Latitude: {latitude}, Longitude: {longitude}, Speed: {speed}");
+
                         var existingDevice = await context.IoTDevices
+                            .Include(d => d.Bus)  // Include the related Bus entity
                             .FirstOrDefaultAsync(d => d.DeviceIdentifier == deviceIdentifier);
 
                         if (existingDevice == null)
                         {
-                            //context.IoTDevices.Add(new IoTDevice
-                            //{
-                            //    DeviceName = "New IoT Device",
-                            //    DeviceIdentifier = deviceIdentifier,
-                            //    Latitude = latitude,
-                            //    Longitude = longitude,
-                            //    Speed = speed,
-                            //    LastUpdated = DateTime.UtcNow
-                            //});
                             var newDevice = new IoTDevice
                             {
                                 DeviceIdentifier = deviceIdentifier,
@@ -78,7 +72,9 @@ public class RealTimeBusLocationService : BackgroundService
 
                         await context.SaveChangesAsync();
 
-                        await _hubContext.Clients.All.SendAsync("UpdateBusLocation", deviceIdentifier, latitude, longitude, speed);
+                        // Use BusName if available, otherwise send "Unknown Bus"
+                        string busName = existingDevice?.Bus?.BusName ?? "Unknown Bus";
+                        await _hubContext.Clients.All.SendAsync("UpdateBusLocation", deviceIdentifier, busName, latitude, longitude, speed);
                     }
                 }
 
@@ -91,4 +87,3 @@ public class RealTimeBusLocationService : BackgroundService
         }
     }
 }
-

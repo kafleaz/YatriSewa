@@ -12,6 +12,11 @@
 <div class="row">
     <div class="col-md-4">
         <form asp-controller="Operator" asp-action="AddRoute">
+            <input type="hidden" id="startLatitude" name="StartLatitude" />
+            <input type="hidden" id="startLongitude" name="StartLongitude" />
+            <input type="hidden" id="endLatitude" name="EndLatitude" />
+            <input type="hidden" id="endLongitude" name="EndLongitude" />
+
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             @Html.AntiForgeryToken()
             <div class="form-group">
@@ -31,7 +36,7 @@
                 <span asp-validation-for="EndLocation" class="text-danger"></span>
             </div>
 
-             <div class="form-group">
+             <div class="form-group mb-3">
                 <label asp-for="EstimatedTime" class="control-label">Estimated Time</label>
                 <select asp-for="EstimatedTime" id="hours" class="form-control">
                 <option value="">Select Hours</option>
@@ -42,10 +47,15 @@
                 </select>
                 <span asp-validation-for="EstimatedTime" class="text-danger"></span>
             </div>
-            @* <div class="form-group">
-                 <label asp-for="CompanyID" class="control-label"></label>
-                 <select asp-for="CompanyID" class="form-control" asp-items="ViewBag.CompanyID"></select>
-            </div> *@
+            <div class="form-group mb-3">
+                <label class="control-label">Start Location</label>
+                <input class="form-control" id="startLocationSearch" />
+                <label class="control-label">End Location</label>
+                <input class="form-control" id="endLocationSearch" />
+            </div>
+
+            <div  id="map" style="width: 100%; height: 400px; margin-bottom: 20px;"></div>
+
             <input type="hidden" asp-for="CompanyID" value="@ViewBag.CompanyID" />
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
@@ -66,3 +76,128 @@
 
 
 
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+<style>
+    .suggestion-list {
+        border: 1px solid #ccc;
+        max-height: 150px;
+        top: 50px;
+        overflow-y: auto;
+        position: absolute;
+        background-color: white;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+    }
+
+    .suggestion-item {
+        padding: 5px;
+        cursor: pointer;
+    }
+
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+</style>
+
+
+<script>
+    const map = L.map('map').setView([27.7172, 85.3240], 7); // Default to Kathmandu
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let startMarker, endMarker;
+    const startIcon = L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png', iconSize: [32, 32] });
+    const endIcon = L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png', iconSize: [32, 32] });
+
+    // Fetch location suggestions from Nominatim API
+    async function getLocationSuggestions(query) {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=np`);
+        return response.json();
+    }
+        function showSuggestions(inputId, suggestions) {
+        const inputElement = document.getElementById(inputId);
+        let suggestionList = document.getElementById(`${inputId}-suggestions`);
+
+        if (!suggestionList) {
+            suggestionList = document.createElement('div');
+            suggestionList.id = `${inputId}-suggestions`;
+            suggestionList.className = 'suggestion-list';
+
+            // Use position: relative for the parent element
+            inputElement.parentNode.style.position = 'relative';
+            suggestionList.style.position = 'absolute';
+            /* suggestionList.style.top = `${inputElement.offsetHeight}px`; */ // Position below the input
+            suggestionList.style.left = '0';
+            suggestionList.style.width = '100%';
+            suggestionList.style.zIndex = '1000'; // Ensure it's above the map
+            inputElement.parentNode.appendChild(suggestionList);
+        }
+
+        suggestionList.innerHTML = '';
+        suggestions.forEach(suggestion => {
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            item.textContent = suggestion.display_name;
+            item.onclick = () => {
+                inputElement.value = suggestion.display_name;
+                suggestionList.innerHTML = '';
+                setMarker(inputId, suggestion.lat, suggestion.lon, suggestion.display_name);
+            };
+            suggestionList.appendChild(item);
+        });
+
+        // Show the suggestion list
+        suggestionList.style.display = suggestions.length > 0 ? 'block' : 'none';
+    }
+
+    // Place a marker on the map
+    function setMarker(inputId, lat, lng, label) {
+        const latFieldId = inputId === 'startLocationSearch' ? 'startLatitude' : 'endLatitude';
+        const lngFieldId = inputId === 'startLocationSearch' ? 'startLongitude' : 'endLongitude';
+        const markerType = inputId === 'startLocationSearch' ? 'start' : 'end';
+
+        if (markerType === 'start') {
+            if (startMarker) map.removeLayer(startMarker);
+            startMarker = L.marker([lat, lng], { icon: startIcon, draggable: true }).addTo(map).bindPopup(`Start Location: ${label}`).openPopup();
+            startMarker.on('dragend', function (e) {
+                const position = e.target.getLatLng();
+                document.getElementById('startLatitude').value = position.lat;
+                document.getElementById('startLongitude').value = position.lng;
+            });
+        } else {
+            if (endMarker) map.removeLayer(endMarker);
+            endMarker = L.marker([lat, lng], { icon: endIcon, draggable: true }).addTo(map).bindPopup(`End Location: ${label}`).openPopup();
+            endMarker.on('dragend', function (e) {
+                const position = e.target.getLatLng();
+                document.getElementById('endLatitude').value = position.lat;
+                document.getElementById('endLongitude').value = position.lng;
+            });
+        }
+
+        document.getElementById(latFieldId).value = lat;
+        document.getElementById(lngFieldId).value = lng;
+
+        map.setView([lat, lng], 14); // Adjust map to focus on the location
+    }
+
+    // Add event listeners for real-time suggestions and marker placement
+    document.getElementById('startLocationSearch').addEventListener('input', async function () {
+        const query = this.value;
+        if (query.length >= 5) {
+            const suggestions = await getLocationSuggestions(query);
+            showSuggestions('startLocationSearch', suggestions);
+        }
+    });
+
+    document.getElementById('endLocationSearch').addEventListener('input', async function () {
+        const query = this.value;
+        if (query.length >= 5) {
+            const suggestions = await getLocationSuggestions(query);
+            showSuggestions('endLocationSearch', suggestions);
+        }
+    });
+</script>
