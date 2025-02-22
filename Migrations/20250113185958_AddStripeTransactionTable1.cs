@@ -12,9 +12,9 @@ namespace YatriSewa.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
-                name: "StripeTransId",
-       table: "Payment_Table",
-                type: "int",
+               name: "StripeTransId",
+                table: "Payment_Table",
+               type: "int",
                 nullable: true);
 
             migrationBuilder.CreateTable(
@@ -40,6 +40,10 @@ namespace YatriSewa.Migrations
               table: "Payment_Table",
             column: "StripeTransId");
 
+            migrationBuilder.CreateIndex(
+               name: "IX_Payment_Table_StripeTransId",
+               table: "Payment_Table",
+               column: "StripeTransId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Payment_Table_StripeTrans_Table_StripeTransId",

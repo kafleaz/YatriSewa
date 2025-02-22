@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YatriSewa.Models;
 
@@ -11,9 +12,11 @@ using YatriSewa.Models;
 namespace YatriSewa.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250214151109_AddRouteGeolocation")]
+    partial class AddRouteGeolocation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -456,9 +459,6 @@ namespace YatriSewa.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("BusId")
-                        .HasColumnType("int");
-
                     b.Property<string>("DroppingPoint")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -475,8 +475,6 @@ namespace YatriSewa.Migrations
                         .HasColumnType("nvarchar(15)");
 
                     b.HasKey("PassengerId");
-
-                    b.HasIndex("BusId");
 
                     b.ToTable("Passenger_Table");
                 });
@@ -845,9 +843,6 @@ namespace YatriSewa.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
                     b.Property<int>("Auth_Method")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("BusId")
                         .HasColumnType("int");
 
                     b.Property<int?>("CompanyID")

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YatriSewa.Models;
 
@@ -11,9 +12,11 @@ using YatriSewa.Models;
 namespace YatriSewa.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250121142953_IotDevicesupdatebus")]
+    partial class IotDevicesupdatebus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -456,9 +459,6 @@ namespace YatriSewa.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("BusId")
-                        .HasColumnType("int");
-
                     b.Property<string>("DroppingPoint")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -475,8 +475,6 @@ namespace YatriSewa.Migrations
                         .HasColumnType("nvarchar(15)");
 
                     b.HasKey("PassengerId");
-
-                    b.HasIndex("BusId");
 
                     b.ToTable("Passenger_Table");
                 });
@@ -541,12 +539,6 @@ namespace YatriSewa.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("RefundDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("RefundTransactionId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Status")
                         .HasMaxLength(20)
                         .HasColumnType("int");
@@ -586,30 +578,18 @@ namespace YatriSewa.Migrations
                     b.Property<int>("CompanyID")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("EndLatitude")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("EndLocation")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<decimal?>("EndLongitude")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("EstimatedTime")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("StartLatitude")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("StartLocation")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<decimal?>("StartLongitude")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Stops")
                         .HasMaxLength(255)
@@ -767,10 +747,6 @@ namespace YatriSewa.Migrations
                     b.Property<int>("BookingId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ChargeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -845,9 +821,6 @@ namespace YatriSewa.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
                     b.Property<int>("Auth_Method")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("BusId")
                         .HasColumnType("int");
 
                     b.Property<int?>("CompanyID")

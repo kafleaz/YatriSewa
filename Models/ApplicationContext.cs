@@ -41,6 +41,10 @@ namespace YatriSewa.Models
         public DbSet<Merchant> Merchant_Table { get; set; }
         public DbSet<EsewaTransaction> EsewaTransaction_Table { get; set; }
         public DbSet<StripeTrans> StripeTrans_Table { get; set; }
+        public DbSet<IoTDevice> IoTDevices { get; set; }
+        public DbSet<IoTDeviceLocationLog> IoTDeviceLocationLogs { get; set; }
+        public DbSet<PassengerLocationLog> PassengerLocationLogs { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

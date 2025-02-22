@@ -31,9 +31,10 @@ builder.Services.AddTransient<IDriverService, DriverService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<ISMSService, SMSService>();
 builder.Services.AddHostedService<SeatReservationCleanupService>();
-
-
-
+builder.Services.AddSignalR();
+builder.Services.AddHostedService<RealTimeBusLocationService>();
+builder.Services.AddScoped<FirebaseToDatabaseService>();
+builder.Services.AddHttpClient<QrCodeService>();
 
 
 // Configure and register the SMTP client
@@ -70,7 +71,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
+app.MapHub<BusLocationHub>("/busLocationHub");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

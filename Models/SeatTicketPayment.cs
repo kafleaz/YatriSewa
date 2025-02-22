@@ -27,7 +27,8 @@ namespace YatriSewa.Models
     {
         Pending,     // Payment is in process
         Successful,  // Payment completed successfully
-        Failed       // Payment failed
+        Failed,     // Payment failed     
+        Refunded
     }
 
     public class Seat
@@ -155,6 +156,14 @@ namespace YatriSewa.Models
         [ForeignKey("StripeTrans")]
         public int? StripeTransId { get; set; } // Foreign key to EsewaTransaction
         public virtual StripeTrans? StripeTrans { get; set; }
+        public string? RefundTransactionId { get; set; } // Stores Stripe refund ID
+        public DateTime? RefundDate { get; set; } // Stores refund date
+    }
+    public class RefundRequestModel
+    {
+        public int BookingId { get; set; }
+        public int TicketId { get; set; }
+        public int Status { get; set; }
     }
 
 

@@ -3,18 +3,47 @@ using System.ComponentModel.DataAnnotations;
 
 namespace YatriSewa.Models
 {
+    //public class IoTDevice
+    //{
+    //    [Key]
+    //    public int DeviceId { get; set; } // Unique ID for each device record
+
+    //    [MaxLength(50)]
+    //    public string? SerialNumber { get; set; } // Unique serial number of the IoT device
+
+    //    [ForeignKey("BusId")]
+    //    public int? BusId { get; set; } // Associated BusId
+    //    public virtual Bus? Bus { get; set; } // Navigation property to Bus
+    //}
     public class IoTDevice
     {
+
         [Key]
-        public int DeviceId { get; set; } // Unique ID for each device record
+        public int DeviceId { get; set; } // Primary Key for IoT device
 
-        [MaxLength(50)]
-        public string? SerialNumber { get; set; } // Unique serial number of the IoT device
+        [Required]
+        [StringLength(100)]
+        public string? DeviceName { get; set; } // Name or identifier for the IoT device
 
+        [Required]
+        [StringLength(255)]
+        public string? DeviceIdentifier { get; set; } // Unique identifier, e.g., ESP8266-12345
+
+        [Column(TypeName = "decimal(10, 6)")]
+        public decimal Latitude { get; set; } // Latitude of the device
+
+        [Column(TypeName = "decimal(10, 6)")]
+        public decimal Longitude { get; set; } // Longitude of the device
+
+        [Column(TypeName = "decimal(10, 2)")]
+        public decimal Speed { get; set; } // Speed of the device
         [ForeignKey("BusId")]
         public int? BusId { get; set; } // Associated BusId
         public virtual Bus? Bus { get; set; } // Navigation property to Bus
+
+        public DateTime LastUpdated { get; set; } = DateTime.UtcNow; // Timestamp of the last update
     }
+
 
     public class IoTDeviceLocationLog
     {
@@ -22,8 +51,8 @@ namespace YatriSewa.Models
         public int LocationId { get; set; }
 
         [Required]
-        public int BusId { get; set; }
         [ForeignKey("BusId")]
+        public int BusId { get; set; }
         public virtual Bus? Bus { get; set; }
 
         [Required]
@@ -54,8 +83,8 @@ namespace YatriSewa.Models
         public int LocationId { get; set; }
 
         [Required]
-        public int PassengerId { get; set; }
         [ForeignKey("PassengerId")]
+        public int PassengerId { get; set; }
         public virtual Passenger? Passenger { get; set; }
 
         [Required]

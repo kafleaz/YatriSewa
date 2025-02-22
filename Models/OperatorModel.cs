@@ -100,7 +100,11 @@ namespace YatriSewa.Models
         public required string EndLocation { get; set; }
 
         public string? EstimatedTime { get; set; }
-
+        // New properties for geolocation
+        public decimal? StartLatitude { get; set; }
+        public decimal? StartLongitude { get; set; }
+        public decimal? EndLatitude { get; set; }
+        public decimal? EndLongitude { get; set; }
         // Foreign Key to BusCompany (Route belongs to a bus company)
         public int CompanyID { get; set; }
         [ForeignKey("CompanyID")]
