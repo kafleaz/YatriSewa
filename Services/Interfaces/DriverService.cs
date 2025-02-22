@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using YatriSewa.Models;
 
@@ -62,44 +63,64 @@ public class DriverService : IDriverService
     public async Task<IEnumerable<BusDriver>> GetAllDriversAsync()
     {
         // Fetch all drivers from the database
-        return await _context.Driver_Table.ToListAsync();
+        var drivers = await _context.Driver_Table.ToListAsync();
+
+        // Optionally, you can include related entities or perform some transformation if necessary
+        return drivers;
     }
     public async Task<IEnumerable<object>> GetJourneyListAsync()
     {
         return await _context.Schedule_Table
             .Include(s => s.Route)
-               .Include(s => s.Bus) // Include the Route table
+            .Include(s => s.Bus)
             .Select(schedule => new
             {
-                StartLocation = schedule.Route.StartLocation, // Assuming Route has this property
-                StopLocations = schedule.Route.Stops,        // Assuming Stops is a string or list
-                EndLocation = schedule.Route.EndLocation,    // Assuming Route has this property
+                StartLocation = schedule.Route.StartLocation, // Start location
+                StopLocations = schedule.Route.Stops,        // Intermediate stops
+                EndLocation = schedule.Route.EndLocation,    // End location
                 BusId = schedule.BusId,
                 BusName = schedule.Bus.BusName,
-                DepartureTime = schedule.DepartureTime,
-                ArrivalTime = schedule.ArrivalTime
+                JourneyDate = schedule.DepartureTime.Date.ToString("yyyy-MM-dd") // ✅ Extract only the date
             })
             .ToListAsync();
     }
+    public async Task<IEnumerable<object>> GetJourneyListByDateAsync(DateTime date)
+{
+    return await _context.Schedule_Table
+        .Include(s => s.Route)
+        .Include(s => s.Bus)
+        .Where(s => s.DepartureTime.Date == date.Date) // Filter by selected date
+        .Select(schedule => new
+        {
+            StartLocation = schedule.Route.StartLocation,
+            StopLocations = schedule.Route.Stops,
+            EndLocation = schedule.Route.EndLocation,
+            BusId = schedule.BusId,
+            BusName = schedule.Bus.BusName,
+            JourneyDate = schedule.DepartureTime.Date.ToString("yyyy-MM-dd")
+        })
+        .ToListAsync();
+}
 
-    public async Task<IEnumerable<object>> GetTodayJourneysAsync()
-    {
-        return await _context.Schedule_Table
-            .Include(s => s.Route) // Include Route table
-            .Include(s => s.Bus)   // Include Bus table
-            .Where(s => s.DepartureTime == DateTime.Today) // Filter for today's date
-            .Select(schedule => new
-            {
-                StartLocation = schedule.Route.StartLocation,
-                StopLocations = schedule.Route.Stops,
-                EndLocation = schedule.Route.EndLocation,
-                BusName = schedule.Bus.BusName,
-                BusId = schedule.BusId,
-                DepartureTime = schedule.DepartureTime,
-                ArrivalTime = schedule.ArrivalTime
-            })
-            .ToListAsync();
-    }
+
+    //public async Task<IEnumerable<object>> GetTodayJourneysAsync()
+    //{
+    //    return await _context.Schedule_Table
+    //        .Include(s => s.Route) // Include Route table
+    //        .Include(s => s.Bus)   // Include Bus table
+    //        .Where(s => s.DepartureTime == DateTime.Today) // Filter for today's date
+    //        .Select(schedule => new
+    //        {
+    //            StartLocation = schedule.Route.StartLocation,
+    //            StopLocations = schedule.Route.Stops,
+    //            EndLocation = schedule.Route.EndLocation,
+    //            BusName = schedule.Bus.BusName,
+    //            BusId = schedule.BusId,
+    //            DepartureTime = schedule.DepartureTime,
+    //            ArrivalTime = schedule.ArrivalTime
+    //        })
+    //        .ToListAsync();
+    //}
 
 
 

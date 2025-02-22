@@ -1,26 +1,117 @@
-﻿@model YatriSewa.Models.BusDriver
+﻿@model List<YatriSewa.Models.BusDriver>
 
-@{
-    ViewData["Title"] = "Details";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
-}
+<h2 class="text-center my-4">Pending Driver Approvals</h2>
 
-<h1>Details</h1>
-@* 
-@model YatriSewa.Models.BusDriver *@
-
-<div class="card">
-    <div class="card-body">
-        <h5>Driver Details</h5>
-        <p><strong>Driver Name:</strong> @Model.DriverName</p>
-        <p><strong>License Number:</strong> @Model.LicenseNumber</p>
-        <p><strong>Phone Number:</strong> @Model.PhoneNumber</p>
-        <p><strong>Address:</strong> @Model.Address</p>
-        <form asp-action="AssignRole" method="post">
-            <input type="hidden" name="userId" value="@Model.UserId" />
-            <input type="hidden" name="role" value="Driver" />
-            <button type="submit" class="btn btn-primary">Assign Role</button>
-        </form>
-    </div>
+<div class="table-responsive">
+    <table class="table table-hover table-bordered shadow">
+        <thead class="table-dark">
+            <tr>
+                <th>Driver Name</th>
+                <th>Phone Number</th>
+                <th>License Number</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="driverRequestList"></tbody>
+    </table>
 </div>
 
+<!-- Driver Details Modal -->
+<div class="modal fade" id="driverDetailsModal" tabindex="-1" aria-labelledby="driverDetailsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="driverDetailsLabel">Driver Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Driver Name:</strong> <span id="drvName"></span></p>
+                <p><strong>Phone Number:</strong> <span id="drvPhone"></span></p>
+                <p><strong>License Number:</strong> <span id="drvLicense"></span></p>
+                <p><strong>Address:</strong> <span id="drvAddress"></span></p>
+                <p><strong>Date of Birth:</strong> <span id="drvDob"></span></p>
+                <p>
+                    <strong>License Photo:</strong><br>
+                    <img id="drvLicensePhoto" target="_blank" src="" class="img-fluid" style="max-width: 300px;" alt="License Photo">
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+<a asp-action="AdminDashboard">Back to List</a>
+</div>
+<script>
+    async function fetchDriverRequests() {
+        try {
+            const response = await fetch('/api/getrequests');
+            const data = await response.json();
+
+            if (!data.driverRequests) {
+                console.error("Invalid API response:", data);
+                return;
+            }
+
+            const tableBody = document.getElementById("driverRequestList");
+            tableBody.innerHTML = "";
+
+            data.driverRequests.forEach(request => {
+                // Ensure license number exists in the API response
+                const licenseNumber = request.licenseNumber ? request.licenseNumber : "Not Provided";
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                        <td>${request.name}</td>
+                        <td>${request.contactInfo}</td>
+                        <td>${licenseNumber}</td>
+                        
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="fetchDriverDetails(${request.id})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                                <form method="post" action="/Admin/ApproveDriver?driverId=${request.id}" class="d-inline">
+                                <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i> Approve</button>
+                            </form>
+                        </td>
+                    `;
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error("Error fetching driver requests:", error);
+        }
+    }
+    fetchDriverRequests();
+    </script>
+    
+     <script>
+    async function fetchDriverDetails(driverId) {
+        try {
+            const response = await fetch(`/Admin/GetDriverDetails?driverId=${driverId}`);
+            if (!response.ok) {
+                alert("Driver not found.");
+                return;
+            }
+
+            const data = await response.json();
+
+            document.getElementById("drvName").innerText = data.name || "Not Provided";
+            document.getElementById("drvPhone").innerText = data.phoneNumber || "Not Provided";
+            document.getElementById("drvLicense").innerText = data.licenseNumber || "Not Provided";
+            document.getElementById("drvAddress").innerText = data.address || "Not Provided";
+            document.getElementById("drvDob").innerText = data.dateOfBirth || "Not Provided";
+
+            const licensePhoto = data.licensePhotoPath ? data.licensePhotoPath : "default-image.jpg";
+            document.getElementById("drvLicensePhoto").src = licensePhoto;
+
+            var myModal = new bootstrap.Modal(document.getElementById("driverDetailsModal"));
+            myModal.show();
+        } catch (error) {
+            console.error("Error fetching driver details:", error);
+        }
+    }
+
+  
+</script>
+
+<!-- FontAwesome for Icons -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>

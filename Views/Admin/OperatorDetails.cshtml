@@ -1,30 +1,119 @@
-﻿@model YatriSewa.Models.BusCompany
-@{
-    ViewData["Title"] = "Details";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
-}
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title text-green">Operator Details</h5>
-        <hr />
-        <dl class="row">
-            <dt class="col-sm-3">Company Name</dt>
-            <dd class="col-sm-9">@Model.CompanyName</dd>
+﻿@model List<YatriSewa.Models.BusCompany>
 
-            <dt class="col-sm-3">Contact Info</dt>
-            <dd class="col-sm-9">@Model.ContactInfo</dd>
+<h2 class="text-center my-4">Pending Operator Approvals</h2>
 
-            <dt class="col-sm-3">Address</dt>
-            <dd class="col-sm-9">@Model.CompanyAddress</dd>
+<div class="table-responsive">
+    <table class="table table-hover table-bordered shadow">
+        <thead class="table-dark">
+            <tr>
+                <th>Company Name</th>
+                <th>Owner</th>
+                <th>Contact</th>
+                <th>Reg No</th>
+                <th>VAT/PAN</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="operatorRequestList"></tbody>
+    </table>
+</div>
 
-            <dt class="col-sm-3">Registration Number</dt>
-            <dd class="col-sm-9">@Model.Reg_No</dd>
-        </dl>
-
-        <form asp-action="AssignRole" method="post">
-            <input type="hidden" name="userId" value="@Model.UserId" />
-            <input type="hidden" name="role" value="Operator" />
-            <button type="submit" class="btn btn-primary">Assign Role</button>
-        </form>
+<!-- Operator Details Modal -->
+<div class="modal fade" id="operatorDetailsModal" tabindex="-1" aria-labelledby="operatorDetailsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="operatorDetailsLabel">Operator Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Company Name:</strong> <span id="opCompanyName"></span></p>
+                <p><strong>Owner:</strong> <span id="opOwner"></span></p>
+                <p><strong>Contact Info:</strong> <span id="opContact"></span></p>
+                <p><strong>Reg No:</strong> <span id="opRegNo"></span></p>
+                <p><strong>VAT/PAN:</strong> <span id="opVatPan"></span></p>
+                <p><strong>Company Address:</strong> <span id="opAddress"></span></p>
+                <p><strong>Company Email:</strong> <span id="opEmail"></span></p>
+                <p>
+                    <strong>VAT/PAN Document:</strong><br>
+                    <img id="opVatPhoto" src="" class="img-fluid" style="max-width: 300px;" alt="VAT Document">
+                </p>
+            </div>
+        </div>
     </div>
 </div>
+<div>
+    <a asp-action="AdminDashboard">Back to List</a>
+</div>
+<script>
+    async function fetchOperatorRequests() {
+        try {
+            const response = await fetch('/api/getrequests');
+            const data = await response.json();
+
+            const tableBody = document.getElementById("operatorRequestList");
+            tableBody.innerHTML = "";
+
+            data.operatorRequests.forEach(request => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                        <td>${request.name}</td>
+                        <td>${request.owner}</td>
+                        <td>${request.contactInfo}</td>
+                        <td>${request.regNo}</td>
+                        <td>${request.vatPan}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="fetchOperatorDetails(${request.id})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <form method="post" action="/Admin/ApproveOperator?companyId=${request.id}" class="d-inline">
+                                <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i> Approve</button>
+                            </form>
+                        </td>
+                    `;
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error("Error fetching operator requests:", error);
+        }
+    }
+
+    fetchOperatorRequests();
+</script>
+
+<script>
+    async function fetchOperatorDetails(companyId) {
+        try {
+            const response = await fetch(`/Admin/GetOperatorDetails?companyId=${companyId}`);
+            if (!response.ok) {
+                alert("Operator not found.");
+                return;
+            }
+
+            const data = await response.json();
+
+            // ✅ Set modal data
+            document.getElementById("opCompanyName").innerText = data.name || "Not Provided";
+            document.getElementById("opOwner").innerText = data.owner || "Not Provided";
+            document.getElementById("opContact").innerText = data.contactInfo || "Not Provided";
+            document.getElementById("opRegNo").innerText = data.regNo || "Not Provided";
+            document.getElementById("opVatPan").innerText = data.vatPan || "Not Provided";
+            document.getElementById("opAddress").innerText = data.address || "Not Provided";
+            document.getElementById("opEmail").innerText = data.email || "Not Provided";
+            document.getElementById("opDescription").innerText = data.description || "Not Provided";
+
+            const vatPhoto = data.vatPanPhotoPath ? data.vatPanPhotoPath : "default-image.jpg";
+            document.getElementById("opVatPhoto").src = vatPhoto;
+
+            // ✅ Show modal
+            var myModal = new bootstrap.Modal(document.getElementById("operatorDetailsModal"));
+            myModal.show();
+        } catch (error) {
+            console.error("Error fetching operator details:", error);
+        }
+    }
+</script>
+
+
+<!-- FontAwesome for Icons -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>

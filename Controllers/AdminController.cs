@@ -9,6 +9,8 @@ using YatriSewa.Models;
 using YatriSewa.Services;
 using YatriSewa.Services.Interfaces;
 using Route = YatriSewa.Models.Route;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Globalization;
 
 namespace YatriSewa.Controllers
 {
@@ -253,7 +255,7 @@ namespace YatriSewa.Controllers
             }
         }
 
-        public async Task<IActionResult> ListRoutes(string userId)
+        public async Task<IActionResult> ListRoute(string userId)
         {
             try
             {
@@ -288,14 +290,15 @@ namespace YatriSewa.Controllers
         //DriverList
         public async Task<IActionResult>ListDrivers()
         {
+        
             var drivers = await _driverService.GetAllDriversAsync(); // Fetch all drivers
             return View(drivers); // Pass data to the view
         }
 
-        [Route("Admin/JourneyList")]
+      
         public async Task<IActionResult> TodayJourneys()
         {
-            var journeys = await _driverService.GetTodayJourneysAsync();
+            var journeys = await _driverService.GetJourneyListAsync();
 
             if (!journeys.Any())
             {
@@ -330,6 +333,7 @@ namespace YatriSewa.Controllers
                         id = r.DriverId,
                         name = r.DriverName,
                         contactInfo = r.PhoneNumber,
+                        licenseNumber = r.LicenseNumber,
                         userId = r.DriverId // Just store the DriverId for lookup later
                     })
                     .ToListAsync();
@@ -341,7 +345,7 @@ namespace YatriSewa.Controllers
                         r.id,
                         r.name,
                         r.contactInfo,
-                        requestedBy = _context.User_Table.FirstOrDefault(u => u.UserId == r.userId)?.Name ?? "Unknown"
+                      
                     })
                     .ToList();
 
@@ -351,7 +355,7 @@ namespace YatriSewa.Controllers
                         r.id,
                         r.name,
                         r.contactInfo,
-                        requestedBy = _context.User_Table.FirstOrDefault(u => u.UserId == r.userId)?.Name ?? "Unknown"
+                        r.licenseNumber,
                     })
                     .ToList();
 
@@ -387,49 +391,239 @@ namespace YatriSewa.Controllers
                 {
                     id = driverRequest.DriverId,
                     name = driverRequest.DriverName,
-                    contactInfo = driverRequest.PhoneNumber
+                    contactInfo = driverRequest.PhoneNumber,
+                    licenseNumber = driverRequest.LicenseNumber
                 });
             }
 
             return NotFound("Request not found.");
         }
-
-        [HttpGet("Admin/ApproveRequest")]
-        public async Task<IActionResult> ApproveRequest(int requestId, string role)
+        [HttpGet]
+        public async Task<IActionResult> OperatorDetails()
         {
-            if (role == "Operator")
-            {
-                var company = await _context.Company_Table.FirstOrDefaultAsync(c => c.CompanyId == requestId);
-                if (company == null) return NotFound("Operator request not found.");
+            var operatorRequests = await _context.Company_Table
+                .Include(c => c.User)
+                .Where(c => c.User.Role == UserRole.Passenger)
+                .ToListAsync();
 
-                return View("OperatorDetails", company); // Show Operator details
-            }
-            else if (role == "Driver")
-            {
-                var driver = await _context.Driver_Table.FirstOrDefaultAsync(d => d.DriverId == requestId);
-                if (driver == null) return NotFound("Driver request not found.");
-
-                return View("DriverDetails", driver); // Show Driver details
-            }
-
-            return BadRequest("Invalid role.");
+            return View(operatorRequests);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AssignRole(int userId, string role)
+        // ✅ Driver Details Page (Renders UI)
+        [HttpGet]
+        public async Task<IActionResult> DriverDetails()
         {
-            var user = await _context.User_Table.FirstOrDefaultAsync(u => u.UserId == userId);
-            if (user == null) return NotFound("User not found.");
+            var driverRequests = await _context.Driver_Table
+                .Include(d => d.User)
+                .Where(d => d.User.Role == UserRole.Passenger)
+                .ToListAsync();
 
-            user.Role = role == "Operator" ? UserRole.Operator : UserRole.Driver;
+            return View(driverRequests);
+        }
+
+        // ✅ API: Get Operator Details
+        [HttpGet]
+        [Route("Admin/GetOperatorDetails")]
+        public async Task<IActionResult> GetOperatorDetails(int companyId)
+        {
+            var operatorDetails = await _context.Company_Table
+                .Include(c => c.User)
+                .Where(c => c.CompanyId == companyId)
+                .Select(c => new
+                {
+                    id = c.CompanyId,
+                    name = c.CompanyName,
+                    owner = c.User.Name,
+                    contactInfo = c.ContactInfo,
+                    regNo = c.Reg_No,
+                    vatPan = c.VAT_PAN,
+                    address = c.CompanyAddress,
+                    email = c.User.Email,
+                    vatPanPhotoPath = c.VAT_PAN_PhotoPath
+                })
+                .FirstOrDefaultAsync();
+
+            if (operatorDetails == null)
+            {
+                return NotFound("Operator not found.");
+            }
+
+            return Json(operatorDetails);
+        }
+
+        // ✅ API: Get Driver Details
+        [HttpGet]
+        [Route("Admin/GetDriverDetails")]
+        public async Task<IActionResult> GetDriverDetails(int driverId)
+        {
+            var driverDetails = await _context.Driver_Table
+                .Include(d => d.User)
+                .Where(d => d.DriverId == driverId)
+                .Select(d => new
+                {
+                    id = d.DriverId,
+                    name = d.DriverName,
+                    phoneNumber = d.PhoneNumber,
+                    licenseNumber = d.LicenseNumber,
+                    address = d.Address,
+                    dateOfBirth = d.DateOfBirth.ToString("yyyy-MM-dd"),
+                    licensePhotoPath = d.LicensePhotoPath
+                })
+                .FirstOrDefaultAsync();
+
+            if (driverDetails == null)
+            {
+                return NotFound("Driver not found.");
+            }
+
+            return Json(driverDetails);
+        }
+
+        // ✅ Approve Operator Request
+        [HttpPost]
+        public async Task<IActionResult> ApproveOperator(int companyId)
+        {
+            var company = await _context.Company_Table.FirstOrDefaultAsync(c => c.CompanyId == companyId);
+            if (company == null)
+            {
+                return NotFound("Operator request not found.");
+            }
+
+            // ✅ Fetch the correct UserId from Company_Table
+            var user = await _context.User_Table.FirstOrDefaultAsync(u => u.UserId == company.UserId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // ✅ Step 1: Assign role first
+            user.Role = UserRole.Operator;
+
+            // ✅ Step 2: Assign CompanyID only if it's NULL
+            if (user.CompanyID == null)
+            {
+                user.CompanyID = company.CompanyId;
+            }
+
+            _context.Update(user);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Role successfully assigned.";
-            return RedirectToAction("AdminDashboard");
+            return RedirectToAction("OperatorDetails");
         }
 
 
+        // ✅ Approve Driver Request
+        [HttpPost]
+        public async Task<IActionResult> ApproveDriver(int driverId)
+        {
+            var driver = await _context.Driver_Table.FirstOrDefaultAsync(d => d.DriverId == driverId);
+            if (driver == null)
+            {
+                return NotFound("Driver request not found.");
+            }
 
+            // ✅ Fetch the correct UserId from Driver_Table
+            var user = await _context.User_Table.FirstOrDefaultAsync(u => u.UserId == driver.UserId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // ✅ Step 1: Assign role first
+            user.Role = UserRole.Driver;
+
+            // ✅ Step 2: Assign DriverID only if it's NULL
+            if (user.DriverId == null)
+            {
+                user.DriverId = driver.DriverId;
+            }
+            // ✅ Step 3: Set IsAvailable to true (since driver is approved)
+            driver.IsAvailable = true;
+
+            _context.Update(user);
+            _context.Update(driver);
+            _context.Entry(driver).Property(d => d.IsAvailable).IsModified = true;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("DriverDetails");
+        }
+
+        // Action to render the EditBus view
+        [HttpGet]
+        public async Task<IActionResult> EditBus(int id)
+        {
+            // Fetch the bus with the given id
+            var bus = await _context.Bus_Table.FindAsync(id);
+            if (bus == null)
+            {
+                return NotFound(); // If bus not found, return 404
+            }
+
+            // Populate ViewBag with available data for the dropdowns
+            ViewBag.CompanyId = new SelectList(_context.Company_Table, "CompanyId", "CompanyName", bus.CompanyId);
+            ViewBag.DriverId = new SelectList(_context.Driver_Table, "DriverId", "DriverName", bus.DriverId);
+            ViewBag.RouteId = new SelectList(_context.Route_Table, "RouteId", "EndLocation", bus.RouteId);
+
+            return View(bus); // Pass the bus object to the EditBus view
+        }
+
+        // Action to save the edited bus (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditBus(int id, Bus bus)
+        {
+            if (id != bus.BusId)
+            {
+                return NotFound();  // If id does not match, return 404
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Update the bus details in the database
+                    _context.Update(bus);
+                    await _context.SaveChangesAsync();  // Save the changes
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!BusExists(bus.BusId))
+                    {
+                        return NotFound(); // If bus does not exist
+                    }
+                    else
+                    {
+                        throw; // If error happens, throw the error
+                    }
+                }
+                return RedirectToAction(nameof(ListBus));  // Redirect to the ListBus view after saving changes
+            }
+
+            // Repopulate the dropdown lists in case of validation failure
+            ViewBag.CompanyId = new SelectList(_context.Company_Table, "CompanyId", "CompanyName", bus.CompanyId);
+            ViewBag.DriverId = new SelectList(_context.Driver_Table, "DriverId", "DriverName", bus.DriverId);
+            ViewBag.RouteId = new SelectList(_context.Route_Table, "RouteId", "EndLocation", bus.RouteId);
+
+            return View(bus);  // Return to the view with the current bus data if validation fails
+        }
+
+        // Helper method to check if a bus exists
+        private bool BusExists(int id)
+        {
+            return _context.Bus_Table.Any(e => e.BusId == id);
+        }
+        //fetching all users of system 
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ActiveUsers()
+        {
+            var users = await _context.User_Table
+                .Include(u => u.BusCompany) // Include bus company information
+                .Where(u => u.IsVerified == true) // Filter active users
+                .ToListAsync();
+
+            return View(users);
+        }
     }
 
 

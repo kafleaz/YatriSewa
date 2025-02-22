@@ -165,7 +165,7 @@ namespace YatriSewa.Controllers
             {
                 // New request submission
                 model.CompanyId = null;
-                model.IsAvailable = false;
+                model.IsAvailable = true;
                 model.IsAssigned = false;
 
                 _context.Driver_Table.Add(model);

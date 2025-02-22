@@ -70,80 +70,138 @@ namespace YatriSewa.Controllers
 
             return View(bus);
         }
-        [HttpGet]
+
+        //adding bus section
+        [Authorize(Roles = "Admin, Operator")]
         public async Task<IActionResult> AddBus()
         {
-            var userId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
+            // Get the current user ID
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // Convert the user ID to an integer
+            if (!int.TryParse(userIdString, out int userId))
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
 
-            var user = await _operatorService.GetCurrentUserWithCompanyAsync(userId);
-            if (user?.BusCompany == null)
+            // Retrieve the user's associated company
+            var user = await _context.User_Table
+                .Include(u => u.BusCompany)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null || user.BusCompany == null)
             {
-                ViewData["RouteId"] = new SelectList(Enumerable.Empty<SelectListItem>(), "RouteID", "EndLocation");
-                ViewData["DriverId"] = new SelectList(Enumerable.Empty<SelectListItem>(), "DriverId", "DriverName");
-                ModelState.AddModelError("", "You are not associated with any company.");
-                return View();
+                return Unauthorized();
             }
 
             var companyId = user.BusCompany.CompanyId;
 
-            // Fetch all routes and drivers associated with the user's company
-            var routes = await _operatorService.GetRoutesByCompanyIdAsync(companyId);
-            var drivers = await _operatorService.GetDriversByCompanyIdAsync(companyId);
+            // Fetch routes associated with the user's company
+            var routes = _context.Route_Table
+                .Where(r => r.CompanyID == companyId)
+                .Select(r => new {
+                    r.RouteID,
+                    RouteDescription = r.StartLocation + " - " + r.Stops + " - " + r.EndLocation
+                })
+                .ToList();
 
-            // Populate the dropdown lists
-            ViewData["RouteId"] = new SelectList(routes, "RouteID", "EndLocation");
+            // Fetch drivers indirectly associated with the user's company through Bus
+            // Fetch drivers assigned to the user's company
+            var drivers = _context.Driver_Table
+                .Where(d => d.CompanyId == companyId) // Check for assigned drivers
+                .Select(d => new {
+                    d.DriverId,
+                    d.DriverName
+                })
+                .ToList();
+
+
+
+            // Populate ViewData with filtered routes and drivers
+            ViewData["RouteId"] = new SelectList(routes, "RouteID", "RouteDescription");
             ViewData["DriverId"] = new SelectList(drivers, "DriverId", "DriverName");
+
+            // Pre-fill the CompanyId for the logged-in user’s company
+            ViewData["CompanyId"] = companyId;
 
             return View();
         }
 
+
+
         [HttpPost]
+        [Authorize(Roles = "Admin, Operator")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddBus([Bind("BusName, BusNumber, Description, SeatCapacity, Price, RouteId, DriverId")] Bus bus)
+        public async Task<IActionResult> AddBus([Bind("BusId,BusName,BusNumber,Description,SeatCapacity,Price,RouteId,DriverId")] Bus bus)
         {
-            if (!ModelState.IsValid)
-            {
-                // Repopulate dropdowns if validation fails
-                var userId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
-                var user = await _operatorService.GetCurrentUserWithCompanyAsync(userId);
-                if (user?.BusCompany != null)
-                {
-                    var routes = await _operatorService.GetRoutesByCompanyIdAsync(user.BusCompany.CompanyId);
-                    var drivers = await _operatorService.GetDriversByCompanyIdAsync(user.BusCompany.CompanyId);
+            // Get the current user's UserId from claims
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Retrieve UserId from claims
 
-                    ViewData["RouteId"] = new SelectList(routes, "RouteID", "EndLocation", bus.RouteId);
-                    ViewData["DriverId"] = new SelectList(drivers, "DriverId", "DriverName", bus.DriverId);
+            if (userId == null)
+            {
+                return Unauthorized("User is not authenticated.");
+            }
+
+            // Get the current user including the BusCompany based on the UserId
+            var currentUser = await _context.User_Table
+                .Include(u => u.BusCompany)  // Load the associated BusCompany
+                .FirstOrDefaultAsync(u => u.UserId.ToString() == userId);  // Find user by UserId
+
+            if (currentUser?.BusCompany == null)
+            {
+                return NotFound("Operator's company not found.");
+            }
+
+            // Automatically set the bus's company to the operator's company
+            bus.CompanyId = currentUser.CompanyID ?? 0;  // Assign the current user's company ID
+
+            // Check if a bus with the same BusNumber already exists in any company
+            var existingBus = await _context.Bus_Table
+                .Include(b => b.BusCompany)  // Include BusCompany to get the company name
+                .FirstOrDefaultAsync(b => b.BusNumber == bus.BusNumber);
+
+            if (existingBus != null)
+            {
+                var companyName = existingBus.BusCompany?.CompanyName ?? "Unknown";
+                ModelState.AddModelError("BusNumber", $"The bus is already being managed by {companyName}.");
+            }
+
+            if (ModelState.IsValid)
+            {
+                // Optional assignment of RouteId and DriverId
+                if (bus.RouteId == 0)
+                {
+                    bus.RouteId = null; // Allow assigning the route later
+                }
+                if (bus.DriverId == 0)
+                {
+                    bus.DriverId = null; // Allow assigning the driver later
                 }
 
-                return View(bus);
-            }
-
-            try
-            {
-                var userId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
+                try
                 {
-                    return RedirectToAction("Login", "Account");
+                    _context.Add(bus);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(ListBus));
                 }
+                catch (DbUpdateException ex)
+                {
+                    _logger.LogError(ex, "Error occurred while saving the bus.");
+                    ModelState.AddModelError("", "Unable to save changes.");
+                }
+            }
 
-                await _operatorService.AddBusAsync(bus, userId);
-                TempData["SuccessMessage"] = "Bus added successfully!";
-                return RedirectToAction("ListBus");
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", ex.Message);
-                return View(bus);
-            }
+            // Repopulate dropdowns if form validation fails
+            ViewData["RouteId"] = new SelectList(_context.Route_Table, "RouteID", "EndLocation", bus.RouteId);
+            ViewData["DriverId"] = new SelectList(_context.Driver_Table, "DriverId", "DriverName");
+
+            return View(bus);
         }
 
 
-    // GET: Buses/Edit/5
-    [Authorize(Roles = "Operator, Admin")]
+
+        // GET: Buses/Edit/5
+        [Authorize(Roles = "Operator, Admin")]
         public async Task<IActionResult> EditBus(int? id)
         {
             if (id == null)
@@ -358,39 +416,67 @@ namespace YatriSewa.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Operator, Admin")]
+        //[Authorize(Roles = "Operator, Admin")]
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+
+        //public async Task<IActionResult> AddRoute([Bind("RouteID,StartLocation,Stops,EndLocation,EstimatedTime")] Route route)  // Removed CompanyID from the Bind
+        //{
+        //    // Retrieve UserId from claims
+        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        //    // Get the current user, including the BusCompany based on the UserId
+        //    var currentUser = await _context.User_Table
+        //        .Include(u => u.BusCompany)  // Load the associated BusCompany
+        //        .FirstOrDefaultAsync(u => u.UserId.ToString() == userId);  // Find user by UserId
+
+        //    if (currentUser?.BusCompany == null)
+        //    {
+        //        return NotFound("Operator's company not found.");
+        //    }
+
+        //    // Automatically set the route's CompanyID to the operator's company
+        //    route.CompanyID = currentUser.BusCompany.CompanyId;  // Assign the current user's company ID
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        // Save the new route with the operator's company ID
+        //        _context.Add(route);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(ListRoute));
+        //    }
+
+        //    // If there's an error, reload the view
+        //    return View(route);
+        //}
+
         [HttpPost]
+        [Authorize(Roles = "Operator, Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddRoute([Bind("RouteID,StartLocation,Stops,EndLocation,EstimatedTime")] Route route)  // Removed CompanyID from the Bind
+        public async Task<IActionResult> AddRoute([Bind("RouteID,StartLocation,Stops,EndLocation,EstimatedTime,EndLongitude,EndLatitude,StartLongitude,StartLatitude")] Route route)
         {
-            // Retrieve UserId from claims
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Get the current user, including the BusCompany based on the UserId
             var currentUser = await _context.User_Table
-                .Include(u => u.BusCompany)  // Load the associated BusCompany
-                .FirstOrDefaultAsync(u => u.UserId.ToString() == userId);  // Find user by UserId
+                .Include(u => u.BusCompany)
+                .FirstOrDefaultAsync(u => u.UserId.ToString() == userId);
 
             if (currentUser?.BusCompany == null)
             {
                 return NotFound("Operator's company not found.");
             }
 
-            // Automatically set the route's CompanyID to the operator's company
-            route.CompanyID = currentUser.BusCompany.CompanyId;  // Assign the current user's company ID
+            route.CompanyID = currentUser.BusCompany.CompanyId;
 
             if (ModelState.IsValid)
             {
-                // Save the new route with the operator's company ID
                 _context.Add(route);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(ListRoute));
             }
 
-            // If there's an error, reload the view
             return View(route);
         }
-
 
 
         // GET: Routes/Edit/5

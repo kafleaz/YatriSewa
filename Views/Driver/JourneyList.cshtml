@@ -22,14 +22,13 @@
                 <table class="table table-bordered table-hover">
                     <thead class="table-primary">
                         <tr>
-                            <th>Serial No.</th>
+                            
+                            <th></th>
                             <th>Bus Name</th>
                             <th>Start Location</th>
                             <th>Stop Locations</th>
                             <th>End Location</th>
-                            
-                            <th>Departure Time</th>
-                            <th>Arrival Time</th>
+                            <th>Journey Date</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -44,8 +43,7 @@
                                 <td>@journey.StartLocation</td>
                                 <td>@journey.StopLocations</td>
                                 <td>@journey.EndLocation</td>
-                                <td>@journey.DepartureTime.ToString("hh:mm tt")</td>
-                                <td>@journey.ArrivalTime.ToString("hh:mm tt")</td>
+                                <td>@journey.JourneyDate</td>
                             </tr>
 
                         }

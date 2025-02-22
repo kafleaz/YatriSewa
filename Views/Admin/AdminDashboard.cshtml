@@ -8,7 +8,7 @@
     <!-- Real-Time Stats Boxes -->
     <div class="row">
         <div class="col-md-4">
-            <div class="card text-center">
+            <div class="card text-center bg-success text-white">
                 <div class="card-body">
                     <h5 class="card-title">Total Users</h5>
                     <h3 id="totalUsers">0</h3>
@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card text-center">
+            <div class="card text-center bg-success text-white">
                 <div class="card-body">
                     <h5 class="card-title">Total Buses</h5>
                     <h3 id="totalBuses">0</h3>
@@ -24,7 +24,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card text-center">
+            <div class="card text-center bg-success text-white">
                 <div class="card-body">
                     <h5 class="card-title">Total Operators</h5>
                     <h3 id="totalOperators">0</h3>
@@ -33,12 +33,61 @@
         </div>
     </div>
 
-    <!-- Graph Section -->
+
     <div class="row mt-5">
-        <div class="chart-container" style="position: relative; max-width: 800px; margin: 0 auto;">
-            <canvas id="usersChart"></canvas>
+        <!-- Operator Requests Box -->
+        <div class="col-md-4">
+            <a href="/Admin/OperatorDetails" class="text-decoration-none">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Operator Requests</h5>
+                        <h2 id="operatorRequestsCount">0</h2>
+                        <p class="card-text">Click to view pending operator requests</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Driver Requests Box -->
+        <div class="col-md-4">
+            <a href="/Admin/DriverDetails" class="text-decoration-none">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Driver Requests</h5>
+                        <h2 id="driverRequestsCount">0</h2>
+                        <p class="card-text">Click to view pending driver requests</p>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
+</div>
+<script>
+    async function fetchDashboardStats() {
+        const response = await fetch('/api/getstats');
+        const data = await response.json();
+        document.getElementById('totalUsers').innerText = data.users;
+        document.getElementById('totalBuses').innerText = data.buses;
+        document.getElementById('totalOperators').innerText = data.operators;
+    }
+    fetchDashboardStats();
+
+    async function fetchRequests() {
+        const response = await fetch('/api/getrequests');
+        const data = await response.json();
+        document.getElementById('operatorRequestsCount').innerText = data.operatorRequests.length;
+        document.getElementById('driverRequestsCount').innerText = data.driverRequests.length;
+    }
+    fetchRequests();
+</script>
+
+
+<!-- Graph Section -->
+<div class="row mt-5">
+    <div class="chart-container" style="position: relative; max-width: 800px; margin: 0 auto;">
+        <canvas id="usersChart"></canvas>
+    </div>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -99,89 +148,4 @@
     </script>
 
 
-    <!-- Pending Requests Section -->
-    <h3 class="mt-5">Pending Requests</h3>
-    <ul class="nav nav-tabs" id="requestTabs" role="tablist">
-        <li class="nav-item">
-            <a class="nav-link active" id="operator-tab" data-toggle="tab" href="#operatorRequests" role="tab" aria-controls="operatorRequests" aria-selected="true">Operator Requests</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" id="driver-tab" data-toggle="tab" href="#driverRequests" role="tab" aria-controls="driverRequests" aria-selected="false">Driver Requests</a>
-        </li>
-    </ul>
-    <div class="tab-content mt-4">
-        <!-- Operator Requests -->
-        <div class="tab-pane fade show active" id="operatorRequests" role="tabpanel" aria-labelledby="operator-tab">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Company Name</th>
-                        <th>Contact Info</th>
-                        <th>Requested By</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="operatorRequestList">
-                    <!-- Populated by JavaScript -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Driver Requests -->
-        <div class="tab-pane fade" id="driverRequests" role="tabpanel" aria-labelledby="driver-tab">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Driver Name</th>
-                        <th>Phone Number</th>
-                        <th>Requested By</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="driverRequestList">
-                    <!-- Populated by JavaScript -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script>
-    async function fetchDashboardStats() {
-        const response = await fetch('/api/getstats');
-        const data = await response.json();
-        document.getElementById('totalUsers').innerText = data.users;
-        document.getElementById('totalBuses').innerText = data.buses;
-        document.getElementById('totalOperators').innerText = data.operators;
-    }
-    fetchDashboardStats();
-
-    async function fetchRequests() {
-        const response = await fetch('/api/getrequests');
-        const data = await response.json();
-        populateRequests('operatorRequestList', data.operatorRequests, 'Operator');
-        populateRequests('driverRequestList', data.driverRequests, 'Driver');
-    }
-
-    function populateRequests(tableId, requests, role) {
-        const tableBody = document.getElementById(tableId);
-        tableBody.innerHTML = '';
-        if (requests.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="4" class="text-center">No requests found</td></tr>`;
-            return;
-        }
-        requests.forEach(request => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${request.name}</td>
-                <td>${request.contactInfo}</td>
-                <td>${request.requestedBy}</td>
-                <td>
-                    <a class="btn btn-primary" href="/Admin/ApproveRequest?requestId=${request.id}&role=${role}">Details</a>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-    }
-    fetchRequests();
-</script>
+    
