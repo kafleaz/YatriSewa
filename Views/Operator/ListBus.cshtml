@@ -9,8 +9,10 @@
 <p>
     <a asp-controller="Operator" asp-action="AddBus">Create New</a>
 </p>
-<table id="busTable" class="table">
-    <thead>
+<div class="table-responsive">
+    <table id="busTable" class="table table-bordered table-hover">
+        <thead class="table-primary">
+
         <tr>
 
             <th onclick="sortTable(0)" style="cursor:pointer;">
@@ -99,7 +101,8 @@
         }
     </tbody>
 </table>
-@section Scripts {
+</div>
+
     <script>
         function sortTable(columnIndex) {
             var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
@@ -145,4 +148,3 @@
             }
         }
     </script>
-}

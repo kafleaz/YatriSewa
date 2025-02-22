@@ -7,11 +7,9 @@
 
 <h3>List Of All Operators</h3>
 
-@* <p>
-    <a asp-action="ListOperators"></a>
-</p> *@
-<table class="table">
-    <thead>
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="table-primary">
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.CompanyName)
@@ -50,4 +48,5 @@
         }
     </tbody>
 </table>
+</div>
 
