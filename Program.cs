@@ -72,6 +72,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 app.MapHub<BusLocationHub>("/busLocationHub");
+app.MapHub<PassengerLocationHub>("/passengerLocationHub");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

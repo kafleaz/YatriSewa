@@ -433,6 +433,87 @@
 </script>
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
+
+<script>
+    let busId = null; // Stores passenger's assigned bus ID
+
+    async function fetchAssignedBusId() {
+        const passengerId = "@Model.PassengerId"; // Get from Razor model
+
+        try {
+            const response = await fetch(`/Passenger/GetAssignedBusId?passengerId=${passengerId}`);
+            const data = await response.json();
+
+            if (data.success) {
+                busId = data.busId;
+                localStorage.setItem("busId", busId); // Store it
+                console.log(`✅ Assigned Bus ID: ${busId}`);
+                startLocationSharing(); // Start sending location
+            } else {
+                console.warn("⚠️ No assigned bus found.");
+            }
+        } catch (error) {
+            console.error("❌ Error fetching bus ID:", error);
+        }
+    }
+
+    function startLocationSharing() {
+        if (!busId) {
+            console.warn("⚠️ Bus ID not available.");
+            return;
+        }
+
+        const connection = new signalR.HubConnectionBuilder().withUrl("/passengerLocationHub").build();
+
+        connection.start().then(() => {
+            console.log(`✅ Connected to SignalR for Bus ${busId}`);
+            connection.invoke("JoinBusGroup", busId); // Join bus-specific group
+        }).catch(err => console.error("❌ Error:", err));
+
+        function sendPassengerLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    console.log(`📍 Sending Location for Bus ${busId}: ${latitude}, ${longitude}`);
+
+                    // ✅ Send location to server with correct bus ID
+                    connection.invoke("SendPassengerLocation", busId, latitude, longitude);
+                });
+            } else {
+                console.warn("⚠️ Geolocation not supported.");
+            }
+        }
+
+        // ✅ Send location every 10 seconds
+        setInterval(sendPassengerLocation, 10000);
+    }
+
+    // 🔹 Fetch Bus ID & Start Location Sharing
+    fetchAssignedBusId();
+</script>
+<script>
+    let passengerId = @Model.PassengerId; // ✅ Now it exists!
+
+    async function fetchAssignedBusId() {
+        try {
+            const response = await fetch(`/Passenger/GetAssignedBusId?passengerId=${passengerId}`);
+            const data = await response.json();
+
+            if (data.success) {
+                console.log(`✅ Assigned Bus ID: ${data.busId}`);
+            } else {
+                console.warn("⚠️ No assigned bus found.");
+            }
+        } catch (error) {
+            console.error("❌ Error fetching bus ID:", error);
+        }
+    }
+
+    fetchAssignedBusId();
+</script>
 
 
 

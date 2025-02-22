@@ -1,10 +1,20 @@
 ﻿@{
     ViewData["Title"] = "Passenger List";
+    Layout = "_DriverLayout";
 }
 @model List<YatriSewa.Models.Passenger>
 
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Passenger List</h2>
+<div class=" padding-bt">
+    <div class="osahan-header-nav shadow-sm bg-darkblue p-3 d-flex align-items-center">
+        <h5 class="font-weight-normal mb-0 text-white">
+            <a class="text-darkblue mr-3" onclick="goBack()"><i class="icofont-rounded-left"></i></a>
+            Passenger List
+        </h5>
+        <div class="ml-auto d-flex align-items-center">
+            <a href="#" class="text-white mr-3">Clear</a>
+            <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#"><i class="icofont-navigation-menu"></i></a>
+        </div>
+    </div>
 
     <div class="input-group mb-4">
         <input type="text" class="form-control" placeholder="Search Passenger">
@@ -46,6 +56,12 @@
             }
         </tbody>
     </table>
+</div>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4"></h2>
+
+    
 </div>
 
 <!-- Add Bootstrap from a CDN -->

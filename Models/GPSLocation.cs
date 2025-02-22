@@ -107,5 +107,14 @@ namespace YatriSewa.Models
         public string? LocationDescription { get; set; }
     }
 
-
+    public class DriverDashboardViewModel
+    {
+        public int BusId { get; set; }
+        public string? BusName { get; set; }
+        public Route? Route { get; set; } // Contains start, stops, and end location
+        public List<Passenger> Passengers { get; set; } = new List<Passenger>(); // List of passengers
+        public decimal BusLatitude { get; set; }
+        public decimal BusLongitude { get; set; }
+        public string? DeviceIdentifier { get; set; } // IoT Device Identifier
+    }
 }

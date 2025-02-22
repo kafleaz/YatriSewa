@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -14,11 +15,13 @@ namespace YatriSewa.Controllers
     {
         private readonly IDriverService _driverService;
         private readonly ApplicationContext _context;
+        private readonly IHubContext<BusLocationHub> _hubContext;
 
-        public DriverController(IDriverService driverService, ApplicationContext context)
+        public DriverController(IDriverService driverService, ApplicationContext context, IHubContext<BusLocationHub> hubContext)
         {
             _driverService = driverService;
             _context = context;
+            _hubContext = hubContext;
         }
 
         // Dashboard: Display schedules for the logged-in driver
@@ -73,5 +76,21 @@ namespace YatriSewa.Controllers
             return View(journeys);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> StartJourney(int busId)
+        {
+            await _hubContext.Clients.All.SendAsync("StartJourney", busId);
+            return RedirectToAction ("LocationTracking", busId);
+            //return Ok(new { success = true, message = "Journey started successfully!" });
+        }
+
+        public IActionResult LocationTracking(int busid)
+        {
+            ViewBag.busid = busid;
+            return View(); // ✅ Pass ViewModel to LocationTracking.cshtml
+        }
+
     }
+
+
 }

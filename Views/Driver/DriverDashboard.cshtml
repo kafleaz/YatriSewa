@@ -23,67 +23,84 @@
     /* You can add more custom styles here if needed */
 </style>
 
-<div class="name-bar">
-    Welcome, @driverName!
+
+<div class=" padding-bt">
+    <div class="osahan-header-nav shadow-sm bg-darkblue p-3 d-flex align-items-center">
+        <h5 class="font-weight-normal mb-0 text-white">
+            @* <a class="text-darkblue mr-3" onclick="goBack()"><i class="icofont-rounded-left"></i></a> *@
+            Welcome to Driver Dashboard
+        </h5>
+        <div class="ml-auto d-flex align-items-center">
+            <a href="#" class="text-white mr-3">Clear</a>
+            <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#"><i class="icofont-navigation-menu"></i></a>
+        </div>
+    </div>
+@*     
+    <div class="name-bar">
+        Welcome, @driverName!
+    </div> *@
+
+@*     <h2>Driver Dashboard</h2> *@
+    <!-- Date Filter -->
+    <p>
+        <form method="get" asp-action="DriverDashboard" asp-controller="Driver">
+            <label for="date">Select Date:</label>
+            <input type="date" name="date" value="@selectedDate ?? @DateTime.Today.ToString("yyyy-MM-dd")" />
+            min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    </p>
+
+    @if (isDateSelected)
+    {
+        @if (Model.Any())
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Route</th>
+                        <th>Departure Time</th>
+                        <th>Arrival Time</th>
+                        <th>Available Seats</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var schedule in Model)
+                    {
+                        <tr>
+                            <td>@schedule.Route?.RouteID</td>
+                            <td>@schedule.DepartureTime.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@schedule.ArrivalTime.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@schedule.AvailableSeats</td>
+                            <td>@schedule.Price.ToString("C")</td>
+                            <td>@schedule.Status</td>
+                            <td>
+                                <a href="@Url.Action("PassengerList", "Driver", new { scheduleId = schedule.ScheduleId })" class="btn btn-primary">Passengers</a>
+                                <a href="@Url.Action("JourneyList", "Driver", new { date = selectedDate, scheduleId = schedule.ScheduleId })"
+                                   class="btn btn-primary">
+                                    View Journeys
+                                </a>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        <div class="alert alert-warning text-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> <!-- Bootstrap Icon -->
+            No schedules found for the selected date.
+        </div>
+    }
+    else
+    {
+        <p>Please select a date to view the schedule.</p>
+    }
 </div>
 
-<h2>Driver Dashboard</h2>
 
-<!-- Date Filter -->
-<p>
-    <form method="get" asp-action="DriverDashboard" asp-controller="Driver">
-        <label for="date">Select Date:</label>
-        <input type="date" name="date" value="@selectedDate ?? @DateTime.Today.ToString("yyyy-MM-dd")" />
-         min="@DateTime.Today.ToString("yyyy-MM-dd")" />
-        <button type="submit" class="btn btn-primary">Filter</button>
-    </form>
-</p>
 
-@if (isDateSelected)
-{
-    @if (Model.Any())
-    {
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Route</th>
-                    <th>Departure Time</th>
-                    <th>Arrival Time</th>
-                    <th>Available Seats</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var schedule in Model)
-                {
-                    <tr>
-                        <td>@schedule.Route?.RouteID</td>
-                        <td>@schedule.DepartureTime.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td>@schedule.ArrivalTime.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td>@schedule.AvailableSeats</td>
-                        <td>@schedule.Price.ToString("C")</td>
-                        <td>@schedule.Status</td>
-                        <td>
-                            <a href="@Url.Action("PassengerList", "Driver", new { scheduleId = schedule.ScheduleId })" class="btn btn-primary">Passengers</a>
-                            <a href="@Url.Action("JourneyList", "Driver", new { date = selectedDate, scheduleId = schedule.ScheduleId })"
-                               class="btn btn-primary">
-                                View Journeys
-                            </a>
 
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-    <div class="alert alert-warning text-center" role="alert">
-        <i class="bi bi-exclamation-triangle-fill"></i> <!-- Bootstrap Icon -->
-        No schedules found for the selected date.
-    </div>
-}
-else
-{
-    <p>Please select a date to view the schedule.</p>
-}

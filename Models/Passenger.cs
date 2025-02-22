@@ -138,6 +138,7 @@ namespace YatriSewa.Models
     {
         public string? TicketNumber { get; set; }
         public string? PNR { get; set; }
+        public int PassengerId { get; set; } 
         public string? PassengerName { get; set; }
         public string? StartLocation { get; set; }
         public string? EndLocation { get; set; }

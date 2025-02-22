@@ -1,5 +1,126 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model YatriSewa.Models.DriverDashboardViewModel
+
+
 @{
+    ViewData["Title"] = "LocationTracking";
+    Layout = "_DriverLayout";
 }
+<h2>Driver Dashboard - @Model.BusName</h2>
+
+<!-- Start Journey Button -->
+<button id="startJourneyButton" class="btn btn-success">Start Journey</button>
+
+<!-- Map Container -->
+<div id="map" style="width: 100%; height: 500px;"></div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", async function () {
+            const startCoords = [@Model.Route.StartLatitude, @Model.Route.StartLongitude];
+            const endCoords = [@Model.Route.EndLatitude, @Model.Route.EndLongitude];
+            const passengers = JSON.parse('@Html.Raw(Json.Serialize(Model.Passengers))');
+
+            const deviceIdentifier = '@Model.DeviceIdentifier';
+
+
+        let busMarker, routePolyline;
+        const accessToken = 'pk.eyJ1IjoiYXprYWZsZSIsImEiOiJjbTMxb3c3a3EwdzJ1MndxczJ3M3NoN2NhIn0.xgiZhvVHJtJTZy0Sxwm2Zg';
+
+        // ✅ Initialize Map
+        const map = L.map('map').setView(startCoords, 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // ✅ Add Start & End Markers
+        L.marker(startCoords).addTo(map).bindPopup('Start Location');
+        L.marker(endCoords).addTo(map).bindPopup('End Location');
+
+        // 🟡 Show Passenger Locations
+        passengers.forEach(passenger => {
+            L.circleMarker([passenger.Latitude, passenger.Longitude], {
+                color: 'yellow',
+                radius: 8,
+                fillColor: 'yellow',
+                fillOpacity: 0.9
+            }).addTo(map).bindPopup(`Passenger: ${passenger.Name}`);
+        });
+
+        // 🟢 Show Bus (Driver) Location
+        busMarker = L.circleMarker(startCoords, {
+            color: 'green',
+            radius: 8,
+            fillColor: 'green',
+            fillOpacity: 0.9
+        }).addTo(map);
+
+        // ✅ Fetch & Draw Route
+        async function drawRoute() {
+            const coordString = `${startCoords[1]},${startCoords[0]};${endCoords[1]},${endCoords[0]}`;
+            const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordString}?access_token=${accessToken}&geometries=geojson`;
+
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.routes?.length > 0) {
+                const coordinates = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                routePolyline = L.polyline(coordinates, { color: 'blue', weight: 5 }).addTo(map);
+                map.fitBounds(routePolyline.getBounds());
+            }
+        }
+        drawRoute();
+
+        // ✅ Connect to SignalR for Bus Updates
+        const connection = new signalR.HubConnectionBuilder().withUrl("/busLocationHub").build();
+        connection.start().then(() => connection.invoke("JoinGroup", deviceIdentifier));
+
+        connection.on("UpdateBusLocation", (deviceId, busName, latitude, longitude) => {
+            if (deviceId === deviceIdentifier) {
+                const busCoords = [latitude, longitude];
+                busMarker.setLatLng(busCoords);
+                map.setView(busCoords, 12);
+            }
+        });
+
+        // ✅ Start Journey Handler
+        document.getElementById("startJourneyButton").addEventListener("click", function () {
+            fetch('/Driver/StartJourney', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => alert(data.message));
+        });
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
+
+<script>
+    const busId = "@Model.BusId"; // Get assigned bus ID for the driver
+    const connection = new signalR.HubConnectionBuilder().withUrl("/passengerLocationHub").build();
+
+    connection.start().then(() => {
+        console.log(`✅ Driver connected to SignalR for Bus ${busId}`);
+        connection.invoke("JoinBusGroup", busId);
+    }).catch(err => console.error("❌ Error:", err));
+
+    // 🟡 Passenger Marker Storage
+    let passengerMarkers = {};
+
+    // ✅ Receive Passenger Location Updates
+    connection.on("ReceivePassengerLocation", (latitude, longitude) => {
+        const passengerCoords = [latitude, longitude];
+
+        if (passengerMarkers[latitude + longitude]) {
+            // Update existing marker position
+            passengerMarkers[latitude + longitude].setLatLng(passengerCoords);
+        } else {
+            // Create new marker if it doesn't exist
+            passengerMarkers[latitude + longitude] = L.circleMarker(passengerCoords, {
+                color: 'yellow',
+                radius: 8,
+                fillColor: 'yellow',
+                fillOpacity: 0.9
+            }).addTo(map);
+        }
+    });
+</script>
+

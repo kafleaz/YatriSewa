@@ -1594,6 +1594,7 @@ namespace YatriSewa.Controllers
             {
                 TicketNumber = ticket.TicketNo,
                 PNR = ticket.PNR,
+                PassengerId = ticket.Booking.Passenger.PassengerId,
                 PassengerName = ticket.Booking.Passenger.Name,
                 StartLocation = schedule?.Route?.StartLocation ?? "Unknown",
                 EndLocation = schedule?.Route?.EndLocation ?? "Unknown",
@@ -1750,6 +1751,20 @@ namespace YatriSewa.Controllers
         }
 
 
+        [HttpGet]
+        public async Task<IActionResult> GetAssignedBusId(int passengerId)
+        {
+            var booking = await _context.Ticket_Table
+                .Include(t => t.Booking)
+                .FirstOrDefaultAsync(t => t.Booking.PassengerId == passengerId);
+
+            if (booking == null)
+            {
+                return NotFound(new { success = false, message = "No assigned bus found for this passenger." });
+            }
+
+            return Ok(new { success = true, busId = booking.Booking.BusId });
+        }
 
         public IActionResult Notification()
         {
