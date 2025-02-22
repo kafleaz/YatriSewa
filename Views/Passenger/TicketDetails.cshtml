@@ -65,11 +65,16 @@
                     @if (ViewBag.NoDeviceConnected != null && (bool)ViewBag.NoDeviceConnected)
                     {
                         <p style="font-size: 16px; color: red;">No IoT device connected for this bus.</p>
+
                     }
                     else
                     {
-                        <p id="bus-info" style="font-size: 16px;">Waiting for updates...</p>
-                        <p id="eta-info" style="font-size: 16px; color: green;">Calculating ETA...</p>
+                        @* <p id="bus-info" style="font-size: 16px;">Waiting for updates...</p>
+                        <p id="eta-info" style="font-size: 16px; color: green;">Calculating ETA...</p> *@
+                        <div id="bus-info" style="margin-top: 10px; font-weight: bold;"></div>
+                        <div id="eta-info" style="margin-top: 10px; font-weight: bold; color: green;">Calculating ETA...</div>
+                        <div id="eta-info" style="margin-top: 10px; font-weight: bold; color: green;">Calculating ETA...</div>
+
                     }
                 </div>
             </div>
@@ -230,10 +235,12 @@
     }
 </script>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
 
-@* <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
-<link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet" /> *@
+ <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet" /> 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
@@ -245,736 +252,281 @@
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
 
-@* <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.9/signalr.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" /> *@
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
+
+
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
 
 <div id="bus-info" style="margin-top: 10px; font-weight: bold;"></div>
+<div id="eta-info" style="margin-top: 10px; font-weight: bold; color: green;">Calculating ETA...</div>
+
+
 <script>
-    const startCoords = [@ViewBag.StartLatitude, @ViewBag.StartLongitude];
-    const endCoords = [@ViewBag.EndLatitude, @ViewBag.EndLongitude];
-    const stops = JSON.parse('@Html.Raw(Json.Serialize(ViewBag.Stops))');  // Stops as an array of place names
-    const deviceIdentifier = '@Model.DeviceIdentifier';
+    document.addEventListener("DOMContentLoaded", async function () {
+        const startCoords = [@ViewBag.StartLatitude, @ViewBag.StartLongitude];
+        const endCoords = [@ViewBag.EndLatitude, @ViewBag.EndLongitude];
+        const stops = JSON.parse('@Html.Raw(Json.Serialize(ViewBag.Stops))');
+        const deviceIdentifier = '@Model.DeviceIdentifier';
 
-    let routePolyline, busMarker, isMapCentered = false;
+        let routePolyline, busMarker, passengerMarker, isMapCentered = false;
 
-    // Initialize Leaflet map
-    const map = L.map('map').setView(startCoords, 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+        // ✅ Mapbox API Key
+        const accessToken = 'pk.eyJ1IjoiYXprYWZsZSIsImEiOiJjbTMxb3c3a3EwdzJ1MndxczJ3M3NoN2NhIn0.xgiZhvVHJtJTZy0Sxwm2Zg';
 
-    // Add start and end markers
-    L.marker(startCoords).addTo(map).bindPopup('Start Location').openPopup();
-    L.marker(endCoords).addTo(map).bindPopup('End Location');
+        // ✅ Initialize Leaflet map
+        const map = L.map('map').setView(startCoords, 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
 
-    // Plot stops on the map
-    stops.forEach(function(stop) {
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(stop)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.length > 0) {
-                    const lat = parseFloat(data[0].lat);
-                    const lon = parseFloat(data[0].lon);
-                    L.marker([lat, lon]).addTo(map).bindPopup(stop);
+        // ✅ Add Start & End Markers
+        L.marker(startCoords).addTo(map).bindPopup('Start Location').openPopup();
+        L.marker(endCoords).addTo(map).bindPopup('End Location');
+
+        // 🟢 Bus Marker (Green Circle)
+        busMarker = L.circleMarker(startCoords, {
+            color: 'green',
+            radius: 8,
+            fillColor: 'green',
+            fillOpacity: 0.9
+        }).addTo(map);
+
+        // 🟡 Passenger Marker (Yellow Circle)
+        passengerMarker = L.circleMarker(startCoords, {
+            color: 'yellow',
+            radius: 8,
+            fillColor: 'yellow',
+            fillOpacity: 0.9
+        }).addTo(map);
+
+        // ✅ Function to Fetch Stops & Display Markers
+        async function getStopCoordinates() {
+            let waypointCoords = [];
+            for (let stop of stops) {
+                try {
+                    let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(stop)}`);
+                    let data = await response.json();
+                    if (data.length > 0) {
+                        let lat = parseFloat(data[0].lat);
+                        let lon = parseFloat(data[0].lon);
+                        waypointCoords.push([lat, lon]);
+                        L.marker([lat, lon]).addTo(map).bindPopup(`Stop: ${stop}`);
+                    } else {
+                        console.warn(`⚠️ No coordinates found for stop: ${stop}`);
+                    }
+                } catch (error) {
+                    console.error(`❌ Error fetching coordinates for stop: ${stop}`, error);
                 }
-            })
-            .catch(error => console.error(`Error fetching coordinates for stop: ${stop}`, error));
-    });
-
-    // Draw the static route through all stops
-    drawStaticRoute();
-
-    // Connect to the SignalR hub for real-time bus location
-    const connection = new signalR.HubConnectionBuilder().withUrl("/busLocationHub").build();
-    connection.start().then(() => {
-        console.log("✅ SignalR connection established.");
-        connection.invoke("JoinGroup", deviceIdentifier).catch(err => console.error("❌ Error joining group:", err));
-    }).catch(err => console.error("❌ Error starting SignalR connection:", err));
-
-    // Handle real-time bus location updates
-    connection.on("UpdateBusLocation", (updatedDeviceIdentifier, busName, latitude, longitude, speed) => {
-        if (updatedDeviceIdentifier === deviceIdentifier) {
-            const busCoords = [latitude, longitude];
-            console.log(`🚍 Bus ${busName} updated: [${latitude}, ${longitude}] at ${speed} km/h`);
-
-            updateBusMarker(busCoords, speed > 0 ? 'green' : 'red');
-            updateBusInfo(busName, speed);
-            drawRouteFromBusToEnd(busCoords);
-        }
-    });
-
-
-
-        async function snapToNearestRoad(coord) {
-        const apiKey = '5b3ce3597851110001cf6248adb968e4ef8343b4bcb40689abd21300';
-        const url = `https://api.openrouteservice.org/v2/nearest?api_key=${apiKey}&coordinates=${coord[1]},${coord[0]}`;
-
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data.waypoints?.length > 0) {
-                const snappedCoord = data.waypoints[0].location;
-                return [snappedCoord[1], snappedCoord[0]]; // Return as [latitude, longitude]
             }
-        } catch (error) {
-            console.error(`❌ Error snapping coordinate (${coord}):`, error);
-        }
-        return coord; // Return the original coordinate if snapping fails
-    }
-
-
-
-    // Function to draw the static route through all stops
-             async function drawStaticRoute() {
-        const apiKey = '5b3ce3597851110001cf6248adb968e4ef8343b4bcb40689abd21300';
-        const waypointCoords = await getStopCoordinates();
-
-        if (waypointCoords.length === 0) {
-            console.warn("⚠️ No valid stop coordinates found.");
-            return;
+            return waypointCoords;
         }
 
-        // Prepare coordinates: [longitude, latitude] in a comma-separated list
-        const allCoords = [startCoords, ...waypointCoords, endCoords];
-        const coordString = allCoords.map(coord => `${coord[1]},${coord[0]}`).join('|');
-
-        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&coordinates=${coordString}&format=geojson`;
-
-        console.log('Request URL:', url);  // Debugging the URL
-
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data.features?.length > 0) {
-                const coordinates = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                routePolyline = L.polyline(coordinates, { color: 'blue', weight: 5 }).addTo(map);
-                map.fitBounds(routePolyline.getBounds());
-            } else {
-                console.warn("⚠️ No valid static route data found.");
+        // ✅ Function to Draw the Route Using Mapbox Directions API
+        async function drawFullRoute() {
+            const waypointCoords = await getStopCoordinates();
+            if (waypointCoords.length === 0) {
+                console.warn("⚠️ No valid stop coordinates found.");
+                return;
             }
-        } catch (error) {
-            console.error("❌ Error fetching static route:", error);
-        }
-    }
-    async function drawRouteFromBusToEnd(busCoords) {
-        const apiKey = '5b3ce3597851110001cf6248adb968e4ef8343b4bcb40689abd21300';
-        const coordString = `${busCoords[1]},${busCoords[0]},${endCoords[1]},${endCoords[0]}`;
-        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&coordinates=${coordString}&format=geojson`;
 
-        console.log('Real-Time Route Request URL:', url);
+            const routePath = [startCoords, ...waypointCoords, endCoords];
+            const coordString = routePath.map(coord => `${coord[1]},${coord[0]}`).join(';');
 
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data.features?.length > 0) {
-                const coordinates = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                if (routePolyline) map.removeLayer(routePolyline);
-                routePolyline = L.polyline(coordinates, { color: 'green', weight: 5 }).addTo(map);
+            // 🔹 Fetch Route from Mapbox Directions API
+            const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordString}?access_token=${accessToken}&geometries=geojson&steps=true`;
 
-                if (!isMapCentered) {
-                    map.fitBounds(routePolyline.getBounds());
-                    isMapCentered = true;
-                }
-            } else {
-                console.warn("⚠️ No valid real-time route data found.");
-            }
-        } catch (error) {
-            console.error("❌ Error fetching real-time route:", error);
-        }
-    }
-
-
-
-
-
-
-
-    // async function drawStaticRoute() {
-    //     const apiKey = '5b3ce3597851110001cf6248adb968e4ef8343b4bcb40689abd21300';
-    //     const waypointCoords = await getStopCoordinates();
-
-    //     if (waypointCoords.length === 0) {
-    //         console.warn("⚠️ No valid stop coordinates found.");
-    //         return;
-    //     }
-
-    //     // Prepare coordinates for the API request: include start, all stops, and end
-    //     const coords = [startCoords, ...waypointCoords, endCoords];
-    //     const coordString = coords.map(coord => coord.reverse().join(',')).join('|');
-    //     const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&coordinates=${coordString.replace(/\|/g, '%7C')}&format=geojson`;
-
-    //     try {
-    //         const response = await fetch(url);
-    //         const data = await response.json();
-    //         if (data.features?.length > 0) {
-    //             const coordinates = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-    //             routePolyline = L.polyline(coordinates, { color: 'blue', weight: 5 }).addTo(map);
-    //             map.fitBounds(routePolyline.getBounds());
-    //         } else {
-    //             console.warn("⚠️ No valid static route data found.");
-    //         }
-    //     } catch (error) {
-    //         console.error("❌ Error fetching static route:", error);
-    //     }
-    // }
-
-    // Function to get coordinates for all stops
-    async function getStopCoordinates() {
-        const waypointCoords = [];
-        for (let stop of stops) {
             try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(stop)}`);
+                const response = await fetch(url);
                 const data = await response.json();
-                if (data.length > 0) {
-                    waypointCoords.push([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+
+                if (data.routes?.length > 0) {
+                    const coordinates = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                    if (routePolyline) map.removeLayer(routePolyline);
+                    routePolyline = L.polyline(coordinates, { color: 'blue', weight: 5 }).addTo(map);
+                    map.fitBounds(routePolyline.getBounds());
+
+                    console.log("✅ Route drawn successfully using Mapbox Directions API.");
                 } else {
-                    console.warn(`⚠️ No coordinates found for stop: ${stop}`);
+                    console.warn("⚠️ No valid route data found.");
                 }
             } catch (error) {
-                console.error(`❌ Error fetching coordinates for stop: ${stop}`, error);
+                console.error("❌ Error fetching route:", error);
             }
         }
-        return waypointCoords;
-    }
 
-    // Function to draw the route from the bus to the end location
-    async function drawRouteFromBusToEnd(busCoords) {
-        const apiKey = '5b3ce3597851110001cf6248adb968e4ef8343b4bcb40689abd21300';
-        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${busCoords[1]},${busCoords[0]}&end=${endCoords[1]},${endCoords[0]}`;
+        // ✅ Get Passenger Location from GPS & Snap to Route
+        function getPassengerLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const passengerCoords = [position.coords.latitude, position.coords.longitude];
 
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data.features?.length > 0) {
-                const coordinates = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                if (routePolyline) map.removeLayer(routePolyline);
-                routePolyline = L.polyline(coordinates, { color: 'green', weight: 5 }).addTo(map);
+                    // 🟡 Update Passenger Marker Position
+                    passengerMarker.setLatLng(passengerCoords);
+                    map.setView(passengerCoords, 12);
 
-                if (!isMapCentered) {
-                    map.fitBounds(routePolyline.getBounds());
-                    isMapCentered = true;
-                }
-            } else {
-                console.warn("⚠️ No valid real-time route data found.");
-            }
-        } catch (error) {
-            console.error("❌ Error fetching real-time route:", error);
-        }
-    }
-
-    // Function to update the bus marker
-    function updateBusMarker(busCoords, color) {
-        if (busMarker) {
-            busMarker.setLatLng(busCoords);
-        } else {
-            busMarker = L.circleMarker(busCoords, {
-                color: color,
-                radius: 10,
-                fillColor: color,
-                fillOpacity: 0.8
-            }).addTo(map);
-        }
-    }
-
-    // Function to update bus information on the UI
-    function updateBusInfo(busName, speed) {
-        const busInfoElement = document.getElementById("bus-info");
-        busInfoElement.innerHTML = `<p>Bus "${busName}" is moving at ${speed} km/h.</p>`;
-    }
-</script>
-@* <script>
-    const startCoords = [parseFloat('@ViewBag.StartLatitude'), parseFloat('@ViewBag.StartLongitude')];
-    const endCoords = [parseFloat('@ViewBag.EndLatitude'), parseFloat('@ViewBag.EndLongitude')];
-    const stops = JSON.parse('@Html.Raw(Json.Serialize(ViewBag.Stops))'); // Stops as place names
-    const deviceIdentifier = '@Model.DeviceIdentifier';
-    let routePolyline, busMarker, isMapCentered = false;
-
-    // Initialize Leaflet map
-    const map = L.map('map').setView(startCoords, 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Add start and end markers
-    L.marker(startCoords).addTo(map).bindPopup('Start Location').openPopup();
-    L.marker(endCoords).addTo(map).bindPopup('End Location');
-
-    // Plot stops on the map with geocoding
-    stops.forEach(function(stop) {
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(stop)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.length > 0) {
-                    const lat = parseFloat(data[0].lat);
-                    const lon = parseFloat(data[0].lon);
-                    L.marker([lat, lon]).addTo(map).bindPopup(stop);
-                }
-            })
-            .catch(error => console.error(`Error fetching coordinates for stop: ${stop}`, error));
-    });
-
-    // Draw the static route
-    drawStaticRoute();
-
-    // Connect to the SignalR hub for real-time bus location
-    const connection = new signalR.HubConnectionBuilder().withUrl("/busLocationHub").build();
-    connection.start().then(() => {
-        console.log("✅ SignalR connection established.");
-        connection.invoke("JoinGroup", deviceIdentifier).catch(err => console.error("❌ Error joining group:", err));
-    }).catch(err => console.error("❌ Error starting SignalR connection:", err));
-
-    // Handle real-time bus location updates
-    connection.on("UpdateBusLocation", (updatedDeviceIdentifier, busName, latitude, longitude, speed) => {
-        if (updatedDeviceIdentifier === deviceIdentifier) {
-            const busCoords = [latitude, longitude];
-            console.log(`🚍 Bus ${busName} updated: [${latitude}, ${longitude}] at ${speed} km/h`);
-
-            updateBusMarker(busCoords, speed > 0 ? 'green' : 'red');
-            updateBusInfo(busName, speed);
-            drawRouteFromBusToEnd(busCoords);
-        }
-    });
-
-    // Function to draw the static route
-    async function drawStaticRoute() {
-        const apiKey = '5b3ce3597851110001cf6248adb968e4ef8343b4bcb40689abd21300';
-        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${startCoords[1]},${startCoords[0]}&end=${endCoords[1]},${endCoords[0]}`;
-
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data.features?.length > 0) {
-                const coordinates = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                routePolyline = L.polyline(coordinates, { color: 'blue', weight: 5 }).addTo(map);
-                map.fitBounds(routePolyline.getBounds());
-            } else {
-                console.warn("⚠️ No valid static route data found.");
-            }
-        } catch (error) {
-            console.error("❌ Error fetching static route:", error);
-        }
-    }
-
-    // Function to draw the route from the bus to the end location
-    async function drawRouteFromBusToEnd(busCoords) {
-        const apiKey = '5b3ce3597851110001cf6248adb968e4ef8343b4bcb40689abd21300';
-        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${busCoords[1]},${busCoords[0]}&end=${endCoords[1]},${endCoords[0]}`;
-
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data.features?.length > 0) {
-                const coordinates = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                if (routePolyline) map.removeLayer(routePolyline);
-                routePolyline = L.polyline(coordinates, { color: 'green', weight: 5 }).addTo(map);
-
-                if (!isMapCentered) {
-                    map.fitBounds(routePolyline.getBounds());
-                    isMapCentered = true;
-                }
-            } else {
-                console.warn("⚠️ No valid real-time route data found.");
-            }
-        } catch (error) {
-            console.error("❌ Error fetching real-time route:", error);
-        }
-    }
-
-    // Function to update the bus marker
-    function updateBusMarker(busCoords, color) {
-        if (busMarker) {
-            busMarker.setLatLng(busCoords);
-        } else {
-            busMarker = L.circleMarker(busCoords, {
-                color: color,
-                radius: 10,
-                fillColor: color,
-                fillOpacity: 0.8
-            }).addTo(map);
-        }
-    }
-
-    // Function to update bus information on the UI
-    function updateBusInfo(busName, speed) {
-        const busInfoElement = document.getElementById("bus-info");
-        busInfoElement.innerHTML = `<p>Bus "${busName}" is moving at ${speed} km/h.</p>`;
-    }
-</script> *@
-
-
-@* <script>
-    const startCoords = [parseFloat('@ViewBag.StartLatitude'), parseFloat('@ViewBag.StartLongitude')];
-    const endCoords = [parseFloat('@ViewBag.EndLatitude'), parseFloat('@ViewBag.EndLongitude')];
-    const deviceIdentifier = '@Model.DeviceIdentifier';
-    let routePolyline;
-    let isMapCentered = false;
-    let busMarker;
-
-    // Initialize Leaflet map
-    const map = L.map('map').setView(startCoords, 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Add static start and end markers
-    L.marker(startCoords).addTo(map).bindPopup('Start Location').openPopup();
-    L.marker(endCoords).addTo(map).bindPopup('End Location');
-
-    // Draw the static route
-    drawStaticRoute();
-
-    // Connect to the SignalR hub
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/busLocationHub")
-        .build();
-
-    connection.start()
-        .then(() => {
-            console.log("✅ SignalR connection established.");
-            connection.invoke("JoinGroup", deviceIdentifier)
-                .then(() => console.log(`📡 Joined group for device: ${deviceIdentifier}`))
-                .catch(err => console.error("❌ Error joining group:", err));
-        })
-        .catch(err => console.error("❌ Error starting SignalR connection:", err));
-
-    // Handle real-time bus location updates
-    connection.on("UpdateBusLocation", (updatedDeviceIdentifier, busName, latitude, longitude, speed) => {
-        if (updatedDeviceIdentifier === deviceIdentifier) {
-            const busCoords = [latitude, longitude];
-            console.log(`🚍 Bus ${busName} updated: [${latitude}, ${longitude}] at ${speed} km/h`);
-
-            updateBusMarker(busCoords, speed > 0 ? 'green' : 'red');
-            updateBusInfo(busName, speed);
-            drawRouteFromBusToEnd(busCoords);
-        }
-    });
-
-    // Function to draw the static route
-    async function drawStaticRoute() {
-        const apiKey = '5b3ce3597851110001cf6248adb968e4ef8343b4bcb40689abd21300';
-        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${startCoords[1]},${startCoords[0]}&end=${endCoords[1]},${endCoords[0]}`;
-
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error("Failed to fetch route data.");
-            const data = await response.json();
-
-            if (data && data.features && data.features.length > 0) {
-                const coordinates = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                routePolyline = L.polyline(coordinates, { color: 'blue', weight: 5 }).addTo(map);
-                map.fitBounds(routePolyline.getBounds());
-            } else {
-                console.warn("⚠️ No valid static route data found.");
-            }
-        } catch (error) {
-            console.error("❌ Error fetching static route:", error);
-        }
-    }
-
-    // Function to draw the route from the bus to the end location
-    async function drawRouteFromBusToEnd(busCoords) {
-        const apiKey = '5b3ce3597851110001cf6248adb968e4ef8343b4bcb40689abd21300';
-        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${busCoords[1]},${busCoords[0]}&end=${endCoords[1]},${endCoords[0]}`;
-
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error("Failed to fetch real-time route data.");
-            const data = await response.json();
-
-            if (data && data.features && data.features.length > 0) {
-                const coordinates = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                if (routePolyline) map.removeLayer(routePolyline);
-                routePolyline = L.polyline(coordinates, { color: 'green', weight: 5 }).addTo(map);
-
-                if (!isMapCentered) {
-                    map.fitBounds(routePolyline.getBounds());
-                    isMapCentered = true;
-                }
-            } else {
-                console.warn("⚠️ No valid real-time route data found.");
-            }
-        } catch (error) {
-            console.error("❌ Error fetching real-time route:", error);
-        }
-    }
-
-    // Function to update the bus marker as a red or green circle
-    function updateBusMarker(busCoords, color) {
-        if (busMarker) {
-            busMarker.setLatLng(busCoords);
-        } else {
-            busMarker = L.circleMarker(busCoords, {
-                color: color,
-                radius: 10,
-                fillColor: color,
-                fillOpacity: 0.8
-            }).addTo(map);
-        }
-    }
-
-    // Function to update bus information on the UI
-    function updateBusInfo(busName, speed) {
-        const busInfoElement = document.getElementById("bus-info");
-        busInfoElement.innerHTML = `<p>Bus "${busName}" is moving at ${speed} km/h.</p>`;
-    }
-</script> *@
-
-
-
-
-
-
-
-
-@* <script>
-    const startCoords = [@ViewBag.StartLatitude, @ViewBag.StartLongitude];
-    const endCoords = [@ViewBag.EndLatitude, @ViewBag.EndLongitude];
-    const deviceIdentifier = '@Model.DeviceIdentifier';
-
-    let markers = {};
-    let routeLine, passengerMarker;
-    const routeCoordinates = [startCoords, endCoords]; // Start and End coordinates
-    let isMapCentered = false;
-
-    const map = L.map('map').setView(startCoords, 7);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Place Start and End markers
-    L.marker(startCoords).addTo(map).bindPopup('Start Location').openPopup();
-    L.marker(endCoords).addTo(map).bindPopup('End Location').openPopup();
-
-    // Connect to the SignalR hub
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/busLocationHub")
-        .build();
-
-    connection.start()
-        .then(() => {
-            console.log("SignalR connection established");
-            connection.invoke("JoinGroup", deviceIdentifier)
-                .then(() => console.log(`Joined group for device: ${deviceIdentifier}`))
-                .catch(err => console.error("Error joining group:", err));
-        })
-        .catch(err => console.error("Error starting SignalR connection:", err));
-
-    // Handle real-time bus location updates
-    connection.on("UpdateBusLocation", (updatedDeviceIdentifier, busName, latitude, longitude, speed) => {
-        if (updatedDeviceIdentifier === deviceIdentifier) {
-            console.log(`Bus ${updatedDeviceIdentifier} updated: [${latitude}, ${longitude}] at ${speed} km/h`);
-
-            const busCoords = [latitude, longitude];
-            if (!markers[updatedDeviceIdentifier]) {
-                const busIcon = L.icon({
-                    iconUrl: '/img/gps.png',
-                    iconSize: [40, 40],
-                    iconAnchor: [20, 40]
+                    // Snap to nearest route point
+                    const nearestPoint = await snapToRoute(passengerCoords);
+                    passengerMarker.setLatLng(nearestPoint);
                 });
-                markers[updatedDeviceIdentifier] = L.marker(busCoords, { icon: busIcon }).addTo(map);
             } else {
-                markers[updatedDeviceIdentifier].setLatLng(busCoords);
+                console.warn("⚠️ Geolocation is not supported.");
             }
-
-            // Update or draw the polyline for the route
-            const fullRoute = [startCoords, busCoords, endCoords];
-            if (routeLine) {
-                routeLine.setLatLngs(fullRoute);
-            } else {
-                routeLine = L.polyline(fullRoute, { color: 'blue', weight: 5 }).addTo(map);
-            }
-
-            if (!isMapCentered) {
-                map.fitBounds(routeLine.getBounds());
-                isMapCentered = true;
-            }
-
-            // Update the bus info with speed and distance
-            document.getElementById("bus-info").textContent = `Bus ${busName} is moving at ${speed} km/h.`;
         }
-    });
 
-    connection.onclose(async () => {
-        console.log("Connection lost. Reconnecting...");
-        try {
-            await connection.start();
-            connection.invoke("JoinGroup", deviceIdentifier);
-            console.log(`Reconnected and joined group for device: ${deviceIdentifier}`);
-        } catch (err) {
-            console.error("Reconnection failed:", err);
+        // ✅ Snap Any Point to the Nearest Route Location
+        async function snapToRoute(point) {
+            const url = `https://api.mapbox.com/matching/v5/mapbox/driving/${point[1]},${point[0]}?access_token=${accessToken}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.matchings?.length > 0) {
+                    return data.matchings[0].geometry.coordinates[0].reverse();
+                }
+            } catch (error) {
+                console.error("❌ Error snapping to route:", error);
+            }
+            return point;
         }
+
+        // ✅ Calculate ETA Based on Route Distance
+        async function calculateETA(busCoords) {
+            const passengerCoords = passengerMarker.getLatLng();
+            const coordString = `${busCoords[1]},${busCoords[0]};${passengerCoords.lng},${passengerCoords.lat}`;
+
+            const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordString}?access_token=${accessToken}&geometries=geojson`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.routes?.length > 0) {
+                    const duration = data.routes[0].duration / 60; // Convert to minutes
+                    document.getElementById("eta-info").innerHTML = `ETA: ${Math.round(duration)} mins`;
+                }
+            } catch (error) {
+                console.error("❌ Error calculating ETA:", error);
+            }
+        }
+
+        // ✅ SignalR Event Listener for Live Bus Location Updates
+        const connection = new signalR.HubConnectionBuilder().withUrl("/busLocationHub").build();
+        connection.start().then(() => {
+            console.log("✅ SignalR connection established.");
+            connection.invoke("JoinGroup", deviceIdentifier).catch(err => console.error("❌ Error joining group:", err));
+        }).catch(err => console.error("❌ Error starting SignalR connection:", err));
+
+        connection.on("UpdateBusLocation", async (updatedDeviceIdentifier, busName, latitude, longitude, speed) => {
+            if (updatedDeviceIdentifier === deviceIdentifier) {
+                const busCoords = [latitude, longitude];
+
+                // 🟢 Update Bus Marker Position
+                busMarker.setLatLng(busCoords);
+
+                // Calculate ETA
+                await calculateETA(busCoords);
+            }
+        });
+
+        // ✅ Start Process
+        drawFullRoute();
+        getPassengerLocation();
     });
 </script>
 
 
-<script>
-    const busMarkerIcon = L.icon({ iconUrl: '/img/gps.png', iconSize: [40, 40], iconAnchor: [20, 40] });
-    let busMarker, routePolyline;
-    const map = L.map('map').setView([27.7172, 85.3240], 7);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
 
-    // Add start and end markers
-    // const startCoords = [@ViewBag.StartLatitude, @ViewBag.StartLongitude];
-    // const endCoords = [@ViewBag.EndLatitude, @ViewBag.EndLongitude];
-    const startCoords = [parseFloat('@ViewBag.StartLatitude'), parseFloat('@ViewBag.StartLongitude')];
-    const endCoords = [parseFloat('@ViewBag.EndLatitude'), parseFloat('@ViewBag.EndLongitude')];
-    L.marker(startCoords).addTo(map).bindPopup('Start Location');
-    L.marker(endCoords).addTo(map).bindPopup('End Location');
 
-    const routeData = JSON.parse('@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.RouteData ?? "{}"))');
+@* =====================================working===========================
+    <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+        const startCoords = [@ViewBag.StartLatitude, @ViewBag.StartLongitude];
+        const endCoords = [@ViewBag.EndLatitude, @ViewBag.EndLongitude];
+        const stops = JSON.parse('@Html.Raw(Json.Serialize(ViewBag.Stops))');
+        const deviceIdentifier = '@Model.DeviceIdentifier';
 
-    // Load pre-fetched route from ViewBag.RouteData
-    console.log("Route data:", routeData);
+        let routePolyline, busMarker, isMapCentered = false;
 
-    if (routeData !== "null") {
-        try {
-            const data = JSON.parse(routeData);
-            if (data.features && data.features.length > 0) {
-                const coordinates = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                routePolyline = L.polyline(coordinates, { color: 'blue', weight: 5 }).addTo(map);
-                map.fitBounds(routePolyline.getBounds());
-            } else {
-                console.warn("No valid route data found.");
+        // ✅ Ensure Mapbox API Key is set
+        const accessToken = 'pk.eyJ1IjoiYXprYWZsZSIsImEiOiJjbTMxb3c3a3EwdzJ1MndxczJ3M3NoN2NhIn0.xgiZhvVHJtJTZy0Sxwm2Zg';
+
+        // ✅ Initialize Leaflet map AFTER DOM is ready
+        const map = L.map('map').setView(startCoords, 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // ✅ Add start and end markers
+        L.marker(startCoords).addTo(map).bindPopup('Start Location').openPopup();
+        L.marker(endCoords).addTo(map).bindPopup('End Location');
+
+        // ✅ Function to Fetch Stops & Display Markers
+        async function getStopCoordinates() {
+            let waypointCoords = [];
+            for (let stop of stops) {
+                try {
+                    let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(stop)}`);
+                    let data = await response.json();
+                    if (data.length > 0) {
+                        let lat = parseFloat(data[0].lat);
+                        let lon = parseFloat(data[0].lon);
+                        waypointCoords.push([lat, lon]);
+                        L.marker([lat, lon]).addTo(map).bindPopup(`Stop: ${stop}`);
+                    } else {
+                        console.warn(`⚠️ No coordinates found for stop: ${stop}`);
+                    }
+                } catch (error) {
+                    console.error(`❌ Error fetching coordinates for stop: ${stop}`, error);
+                }
             }
-        } catch (error) {
-            console.error("Error parsing route data:", error);
-        }
-    } else {
-        console.error("No route data available.");
-    }
-
-    let lastBusCoords = null;
-
-    // Function to calculate distance between two coordinates (Haversine formula)
-    function getDistance(lat1, lng1, lat2, lng2) {
-        const R = 6371; // Radius of the Earth in km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLng = (lng2 - lng1) * Math.PI / 180;
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distance in km
-    }
-
-    // Handle real-time bus updates
-    connection.on("UpdateBusLocation", (updatedDeviceIdentifier, busName, latitude, longitude, speed) => {
-        const busCoords = [latitude, longitude];
-
-        if (!busMarker) {
-            busMarker = L.marker(busCoords, { icon: busMarkerIcon }).addTo(map);
-        } else {
-            busMarker.setLatLng(busCoords);
+            return waypointCoords;
         }
 
-        // Update the route if the bus moves significantly (more than 500 meters)
-        if (lastBusCoords) {
-            const distanceMoved = getDistance(lastBusCoords[0], lastBusCoords[1], latitude, longitude);
-            if (distanceMoved > 0.5) {
-                console.log(`Bus moved ${distanceMoved.toFixed(2)} km. Updating the route...`);
-                getRoadRoute(busCoords);
+        // ✅ Function to Draw the Route Using Mapbox Directions API
+        async function drawFullRoute() {
+            const waypointCoords = await getStopCoordinates();
+
+            if (waypointCoords.length === 0) {
+                console.warn("⚠️ No valid stop coordinates found.");
+                return;
+            }
+
+            // Construct route path (start, stops, end)
+            const routePath = [startCoords, ...waypointCoords, endCoords];
+
+            // Ensure coordinates are formatted correctly for Mapbox
+            const coordString = routePath.map(coord => `${coord[1]},${coord[0]}`).join(';');
+
+            // 🔹 Use Mapbox Directions API for better road mapping
+            const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordString}?access_token=${accessToken}&geometries=geojson&steps=true`;
+
+            console.log("🔗 Fetching route from:", url);
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.routes?.length > 0) {
+                    const coordinates = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                    if (routePolyline) map.removeLayer(routePolyline);
+                    routePolyline = L.polyline(coordinates, { color: 'blue', weight: 5 }).addTo(map);
+                    map.fitBounds(routePolyline.getBounds());
+
+                    console.log("✅ Route drawn successfully using Mapbox Directions API.");
+                } else {
+                    console.warn("⚠️ No valid route data found.");
+                }
+            } catch (error) {
+                console.error("❌ Error fetching route:", error);
             }
         }
 
-        lastBusCoords = busCoords;
-
-        document.getElementById("bus-info").innerHTML = `
-            <p>Bus "${busName}" is moving at ${speed} km/h.</p>
-        `;
-    });
-
-    async function getRoadRoute(busCoords) {
-        const apiKey = '5b3ce3597851110001cf6248adb968e4ef8343b4bcb40689abd21300';
-        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${busCoords[1]},${busCoords[0]}&end=${endCoords[1]},${endCoords[0]}`;
-
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error("Failed to fetch route data.");
-
-            const data = await response.json();
-
-            if (routePolyline) map.removeLayer(routePolyline);
-
-            const coordinates = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-            routePolyline = L.polyline(coordinates, { color: 'blue', weight: 5 }).addTo(map);
-            map.fitBounds(routePolyline.getBounds());
-
-            const distance = data.features[0].properties.segments[0].distance / 1000;
-            const duration = data.features[0].properties.segments[0].duration / 60;
-
-            document.getElementById("bus-info").innerHTML += `
-                <p>Distance to destination: ${distance.toFixed(2)} km</p>
-                <p>ETA: ${Math.round(duration)} min</p>
-            `;
-        } catch (error) {
-            console.error("Error fetching route:", error);
-        }
-    }
-</script> *@
-
-
-
-
-@* <script>
-    const busMarkerIcon = L.icon({ iconUrl: '/img/gps.png', iconSize: [40, 40], iconAnchor: [20, 40] });
-    let busMarker, routePolyline;
-    const map = L.map('map').setView([27.7172, 85.3240], 7);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Add start and end markers
-    const startCoords = [@ViewBag.StartLatitude, @ViewBag.StartLongitude];
-    const endCoords = [@ViewBag.EndLatitude, @ViewBag.EndLongitude];
-    L.marker(startCoords).addTo(map).bindPopup('Start Location');
-    L.marker(endCoords).addTo(map).bindPopup('End Location');
-
-    // Function to fetch and display the road route and calculate distance & ETA
-    async function getRoadRoute(busCoords) {
-        const apiKey = '5b3ce359785111001cf6248adb968e4ef8343b4bcb40689abd21300';  // Your API key
-        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${busCoords[1]},${busCoords[0]}&end=${endCoords[1]},${endCoords[0]}`;
-
-
-
-
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (routePolyline) map.removeLayer(routePolyline);
-
-        const coordinates = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-        routePolyline = L.polyline(coordinates, { color: 'blue', weight: 5 }).addTo(map);
-
-        const distance = data.features[0].properties.segments[0].distance / 1000;  // Distance in kilometers
-        const duration = data.features[0].properties.segments[0].duration / 60;  // Duration in minutes
-
-        document.getElementById("bus-info").innerHTML = `
-            <p>Bus is moving at ${speed} km/h.</p>
-            <p>Distance to destination: ${distance.toFixed(2)} km</p>
-            <p>ETA: ${Math.round(duration)} min</p>
-        `;
-
-        map.fitBounds(routePolyline.getBounds());
-    }
-
-    // Handle real-time bus updates
-    connection.on("UpdateBusLocation", (updatedDeviceIdentifier, busName, latitude, longitude, speed) => {
-        const busCoords = [latitude, longitude];
-        if (!busMarker) {
-            busMarker = L.marker(busCoords, { icon: busMarkerIcon }).addTo(map);
-        } else {
-            busMarker.setLatLng(busCoords);
-        }
-
-        getRoadRoute(busCoords);  // Fetch the road-based route
+        // ✅ Call function to draw the route
+        drawFullRoute();
     });
 </script>
  *@
+
