@@ -31,7 +31,7 @@ namespace YatriSewa.Models
         public string? LicensePhotoPath { get; set; }  // Can be optional for now
 
         public bool IsAvailable { get; set; } = true;  // Default to true
-        public bool IsAssigned { get; set; } = false;  // Track assignment status
+        public bool IsAssigned { get; set; } = true;  // Track assignment status
 
         // Link to the User entity
         public int UserId { get; set; }
