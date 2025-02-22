@@ -88,7 +88,7 @@ namespace YatriSewa.Migrations
                         column: x => x.PassengerId,
                         principalTable: "Passenger_Table",
                         principalColumn: "PassengerId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict); // Changed from Cascade to Restrict
                 });
 
             migrationBuilder.CreateIndex(
