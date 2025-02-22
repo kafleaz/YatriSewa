@@ -171,7 +171,7 @@ namespace YatriSewa.Controllers
             {
                 // New request submission
                 model.CompanyId = null;
-                model.IsAvailable = false;
+                model.IsAvailable = true;
                 model.IsAssigned = false;
 
                 _context.Driver_Table.Add(model);
@@ -988,7 +988,8 @@ namespace YatriSewa.Controllers
                         Name = request.FullName,
                         PhoneNumber = request.PhoneNumber,
                         BoardingPoint = request.BoardingPoint,
-                        DroppingPoint = request.DroppingPoint
+                        DroppingPoint = request.DroppingPoint,
+                        BusId = request.BusId
                     };
                     _context.Passenger_Table.Add(passenger);
                     await _context.SaveChangesAsync();
@@ -1582,6 +1583,13 @@ namespace YatriSewa.Controllers
                 .Include(s => s.Route)
                 .FirstOrDefaultAsync(s => s.BusId == ticket.Booking.BusId);
 
+
+            KalmanFilter latFilter = new KalmanFilter((double)(iotDevice?.Latitude ?? 27.7614M));
+            KalmanFilter lonFilter = new KalmanFilter((double)(iotDevice?.Longitude ?? 85.3156M));
+
+            double filteredLat = latFilter.Update((double)(iotDevice?.Latitude ?? 27.7614M));
+            double filteredLon = lonFilter.Update((double)(iotDevice?.Longitude ?? 85.3156M));
+
             var ticketDetailsViewModel = new TicketDetailsViewModel
             {
                 TicketNumber = ticket.TicketNo,
@@ -1597,8 +1605,10 @@ namespace YatriSewa.Controllers
                 TotalAmount = ticket.Price,
                 PickupPoint = ticket.Booking.Passenger.BoardingPoint,
                 DropPoint = ticket.Booking.Passenger.DroppingPoint,
-                Latitude = iotDevice?.Latitude ?? (decimal)27.7614,
-                Longitude = iotDevice?.Longitude ?? (decimal)85.3156,
+                //Latitude = iotDevice?.Latitude ?? (decimal)27.7614,
+                //Longitude = iotDevice?.Longitude ?? (decimal)85.3156,
+                Latitude = (decimal)filteredLat,
+                Longitude = (decimal)filteredLon,
                 DeviceIdentifier = iotDevice?.DeviceIdentifier ?? "No Device",
                 LastUpdated = iotDevice?.LastUpdated ?? DateTime.MinValue
             };

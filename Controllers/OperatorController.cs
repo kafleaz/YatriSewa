@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using YatriSewa.Models;
 using YatriSewa.Services;
+using YatriSewa.Services.Interfaces;
 using Route = YatriSewa.Models.Route;
 
 namespace YatriSewa.Controllers
@@ -13,19 +14,24 @@ namespace YatriSewa.Controllers
     {
         private readonly ApplicationContext _context;
         private readonly ILogger<OperatorController> _logger;
+        private readonly IOperatorService _operatorService;
 
         // Modify the constructor to accept ILogger<OperatorController>
-        public OperatorController(ApplicationContext context, ILogger<OperatorController> logger)
+
+        public OperatorController(ApplicationContext context, IOperatorService operatorService, ILogger<OperatorController> logger)
         {
-            _context = context;
-            _logger = logger;  // Assign logger to the private field
+            _context = context; // Initialize context
+            _operatorService = operatorService; // Initialize the service
+            _logger = logger; // Assign logger to the private field
         }
+
 
         [Authorize(Roles = "Operator")]
         public IActionResult OperatorDashboard()
         {
             return View();
         }
+
         [Authorize(Roles = "Admin, Operator, Driver")]
         public async Task<IActionResult> ListBus()
         {
@@ -39,34 +45,11 @@ namespace YatriSewa.Controllers
             }
 
             // Retrieve the logged-in user from the User_Table with their associated company
-            var user = await _context.User_Table
-                .Include(u => u.BusCompany) // Assuming User_Table has a relation with BusCompany
-                .FirstOrDefaultAsync(u => u.UserId == userId);
-
-            if (user == null || user.BusCompany == null)
-            {
-                return Unauthorized(); // Handle unauthorized access
-            }
-
-            var companyId = user.BusCompany.CompanyId;
-
-            // Fetch only buses associated with the user's company
-            var buses = await _context.Bus_Table
-                .Include(b => b.BusCompany)
-                .Include(b => b.BusDriver)
-                .Include(b => b.Route)
-                .Where(b => b.CompanyId == companyId) // Filter by company ID
-                .ToListAsync();
-
-            // Set the company name based on the user's company
-            ViewBag.CompanyName = user.BusCompany.CompanyName;
-
-            return View(buses);
+            var buses = await _operatorService.GetBusesByUserIdAsync(userId.ToString()); // Adjusted based on user ID type
+            return View(buses); // Pass buses to view
         }
 
-
-
-
+          
         [Authorize(Roles = "Admin, Operator, Driver")]
         public async Task<IActionResult> BusDetails(int? id)
         {
@@ -88,6 +71,7 @@ namespace YatriSewa.Controllers
             return View(bus);
         }
 
+        //adding bus section
         [Authorize(Roles = "Admin, Operator")]
         public async Task<IActionResult> AddBus()
         {
@@ -131,7 +115,7 @@ namespace YatriSewa.Controllers
                 })
                 .ToList();
 
-            
+
 
             // Populate ViewData with filtered routes and drivers
             ViewData["RouteId"] = new SelectList(routes, "RouteID", "RouteDescription");
@@ -213,6 +197,7 @@ namespace YatriSewa.Controllers
 
             return View(bus);
         }
+
 
 
         // GET: Buses/Edit/5

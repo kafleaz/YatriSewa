@@ -1,128 +1,111 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-#nullable disable
-
-namespace YatriSewa.Migrations
+namespace YatriSewa.Models
 {
-    /// <inheritdoc />
-    public partial class IotDevicesupdatebus : Migration
+    //public class IoTDevice
+    //{
+    //    [Key]
+    //    public int DeviceId { get; set; } // Unique ID for each device record
+
+    //    [MaxLength(50)]
+    //    public string? SerialNumber { get; set; } // Unique serial number of the IoT device
+
+    //    [ForeignKey("BusId")]
+    //    public int? BusId { get; set; } // Associated BusId
+    //    public virtual Bus? Bus { get; set; } // Navigation property to Bus
+    //}
+    public class IoTDevice
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.CreateTable(
-                name: "IoTDeviceLocationLogs",
-                columns: table => new
-                {
-                    LocationId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    BusId = table.Column<int>(type: "int", nullable: false),
-                    Latitude = table.Column<decimal>(type: "decimal(10,7)", nullable: false),
-                    Longitude = table.Column<decimal>(type: "decimal(10,7)", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Speed = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
-                    LocationDescription = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    IsMoving = table.Column<bool>(type: "bit", nullable: false),
-                    HasPassengers = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_IoTDeviceLocationLogs", x => x.LocationId);
-                    table.ForeignKey(
-                        name: "FK_IoTDeviceLocationLogs_Bus_Table_BusId",
-                        column: x => x.BusId,
-                        principalTable: "Bus_Table",
-                        principalColumn: "BusId",
-                        onDelete: ReferentialAction.Cascade);
-                });
 
-            migrationBuilder.CreateTable(
-                name: "IoTDevices",
-                columns: table => new
-                {
-                    DeviceId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DeviceName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    DeviceIdentifier = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Latitude = table.Column<decimal>(type: "decimal(10,6)", nullable: false),
-                    Longitude = table.Column<decimal>(type: "decimal(10,6)", nullable: false),
-                    Speed = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    BusId = table.Column<int>(type: "int", nullable: true),
-                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_IoTDevices", x => x.DeviceId);
-                    table.ForeignKey(
-                        name: "FK_IoTDevices_Bus_Table_BusId",
-                        column: x => x.BusId,
-                        principalTable: "Bus_Table",
-                        principalColumn: "BusId");
-                });
+        [Key]
+        public int DeviceId { get; set; } // Primary Key for IoT device
 
-            migrationBuilder.CreateTable(
-                name: "PassengerLocationLogs",
-                columns: table => new
-                {
-                    LocationId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PassengerId = table.Column<int>(type: "int", nullable: false),
-                    BusId = table.Column<int>(type: "int", nullable: false),
-                    Latitude = table.Column<decimal>(type: "decimal(10,7)", nullable: false),
-                    Longitude = table.Column<decimal>(type: "decimal(10,7)", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LocationDescription = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PassengerLocationLogs", x => x.LocationId);
-                    table.ForeignKey(
-                        name: "FK_PassengerLocationLogs_Bus_Table_BusId",
-                        column: x => x.BusId,
-                        principalTable: "Bus_Table",
-                        principalColumn: "BusId",
-                        onDelete: ReferentialAction.NoAction);//dascas]de into no action
-                    table.ForeignKey(
-                        name: "FK_PassengerLocationLogs_Passenger_Table_PassengerId",
-                        column: x => x.PassengerId,
-                        principalTable: "Passenger_Table",
-                        principalColumn: "PassengerId",
-                        onDelete: ReferentialAction.NoAction); //cascaed into no action
-                });
+        [Required]
+        [StringLength(100)]
+        public string? DeviceName { get; set; } // Name or identifier for the IoT device
 
-            migrationBuilder.CreateIndex(
-                name: "IX_IoTDeviceLocationLogs_BusId",
-                table: "IoTDeviceLocationLogs",
-                column: "BusId");
+        [Required]
+        [StringLength(255)]
+        public string? DeviceIdentifier { get; set; } // Unique identifier, e.g., ESP8266-12345
 
-            migrationBuilder.CreateIndex(
-                name: "IX_IoTDevices_BusId",
-                table: "IoTDevices",
-                column: "BusId");
+        [Column(TypeName = "decimal(10, 6)")]
+        public decimal Latitude { get; set; } // Latitude of the device
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PassengerLocationLogs_BusId",
-                table: "PassengerLocationLogs",
-                column: "BusId");
+        [Column(TypeName = "decimal(10, 6)")]
+        public decimal Longitude { get; set; } // Longitude of the device
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PassengerLocationLogs_PassengerId",
-                table: "PassengerLocationLogs",
-                column: "PassengerId");
-        }
+        [Column(TypeName = "decimal(10, 2)")]
+        public decimal Speed { get; set; } // Speed of the device
+        [ForeignKey("BusId")]
+        public int? BusId { get; set; } // Associated BusId
+        public virtual Bus? Bus { get; set; } // Navigation property to Bus
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "IoTDeviceLocationLogs");
-
-            migrationBuilder.DropTable(
-                name: "IoTDevices");
-
-            migrationBuilder.DropTable(
-                name: "PassengerLocationLogs");
-        }
+        public DateTime LastUpdated { get; set; } = DateTime.UtcNow; // Timestamp of the last update
     }
+
+
+    public class IoTDeviceLocationLog
+    {
+        [Key]
+        public int LocationId { get; set; }
+
+        [Required]
+        [ForeignKey("BusId")]
+        public int BusId { get; set; }
+        public virtual Bus? Bus { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(10, 7)")]
+        public decimal Latitude { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(10, 7)")]
+        public decimal Longitude { get; set; }
+
+        [Required]
+        public DateTime Timestamp { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(5, 2)")]
+        public decimal Speed { get; set; }
+
+        [StringLength(100)]
+        public string? LocationDescription { get; set; }
+
+        public bool IsMoving { get; set; } = true;
+        public bool HasPassengers { get; set; } = true;
+    }
+
+    public class PassengerLocationLog
+    {
+        [Key]
+        public int LocationId { get; set; }
+
+        [Required]
+        [ForeignKey("PassengerId")]
+        public int PassengerId { get; set; }
+        public virtual Passenger? Passenger { get; set; }
+
+        [Required]
+        public int BusId { get; set; }
+        [ForeignKey("BusId")]
+        public virtual Bus? Bus { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(10, 7)")]
+        public decimal Latitude { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(10, 7)")]
+        public decimal Longitude { get; set; }
+
+        [Required]
+        public DateTime Timestamp { get; set; }
+
+        [StringLength(100)]
+        public string? LocationDescription { get; set; }
+    }
+
+
 }

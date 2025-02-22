@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YatriSewa.Models;
 
@@ -11,9 +12,11 @@ using YatriSewa.Models;
 namespace YatriSewa.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250119084353_addbusIDpktopassenger")]
+    partial class addbusIDpktopassenger
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -296,86 +299,6 @@ namespace YatriSewa.Migrations
                     b.ToTable("EsewaTransaction_Table");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.IoTDevice", b =>
-                {
-                    b.Property<int>("DeviceId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DeviceId"));
-
-                    b.Property<int?>("BusId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DeviceIdentifier")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("DeviceName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Latitude")
-                        .HasColumnType("decimal(10, 6)");
-
-                    b.Property<decimal>("Longitude")
-                        .HasColumnType("decimal(10, 6)");
-
-                    b.Property<decimal>("Speed")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.HasKey("DeviceId");
-
-                    b.HasIndex("BusId");
-
-                    b.ToTable("IoTDevices");
-                });
-
-            modelBuilder.Entity("YatriSewa.Models.IoTDeviceLocationLog", b =>
-                {
-                    b.Property<int>("LocationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LocationId"));
-
-                    b.Property<int>("BusId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("HasPassengers")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsMoving")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("Latitude")
-                        .HasColumnType("decimal(10, 7)");
-
-                    b.Property<string>("LocationDescription")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("Longitude")
-                        .HasColumnType("decimal(10, 7)");
-
-                    b.Property<decimal>("Speed")
-                        .HasColumnType("decimal(5, 2)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("LocationId");
-
-                    b.HasIndex("BusId");
-
-                    b.ToTable("IoTDeviceLocationLogs");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.Merchant", b =>
                 {
                     b.Property<int>("MerchantId")
@@ -481,42 +404,6 @@ namespace YatriSewa.Migrations
                     b.ToTable("Passenger_Table");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.PassengerLocationLog", b =>
-                {
-                    b.Property<int>("LocationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LocationId"));
-
-                    b.Property<int>("BusId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Latitude")
-                        .HasColumnType("decimal(10, 7)");
-
-                    b.Property<string>("LocationDescription")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("Longitude")
-                        .HasColumnType("decimal(10, 7)");
-
-                    b.Property<int>("PassengerId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("LocationId");
-
-                    b.HasIndex("BusId");
-
-                    b.HasIndex("PassengerId");
-
-                    b.ToTable("PassengerLocationLogs");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.Payment", b =>
                 {
                     b.Property<int>("PaymentId")
@@ -540,12 +427,6 @@ namespace YatriSewa.Migrations
                     b.Property<int>("PaymentMethod")
                         .HasMaxLength(20)
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("RefundDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("RefundTransactionId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasMaxLength(20)
@@ -586,30 +467,18 @@ namespace YatriSewa.Migrations
                     b.Property<int>("CompanyID")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("EndLatitude")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("EndLocation")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<decimal?>("EndLongitude")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("EstimatedTime")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("StartLatitude")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("StartLocation")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<decimal?>("StartLongitude")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Stops")
                         .HasMaxLength(255)
@@ -766,10 +635,6 @@ namespace YatriSewa.Migrations
 
                     b.Property<int>("BookingId")
                         .HasColumnType("int");
-
-                    b.Property<string>("ChargeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -981,26 +846,6 @@ namespace YatriSewa.Migrations
                     b.Navigation("BusDriver");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.IoTDevice", b =>
-                {
-                    b.HasOne("YatriSewa.Models.Bus", "Bus")
-                        .WithMany()
-                        .HasForeignKey("BusId");
-
-                    b.Navigation("Bus");
-                });
-
-            modelBuilder.Entity("YatriSewa.Models.IoTDeviceLocationLog", b =>
-                {
-                    b.HasOne("YatriSewa.Models.Bus", "Bus")
-                        .WithMany()
-                        .HasForeignKey("BusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Bus");
-                });
-
             modelBuilder.Entity("YatriSewa.Models.Merchant", b =>
                 {
                     b.HasOne("YatriSewa.Models.BusCompany", "Company")
@@ -1027,7 +872,7 @@ namespace YatriSewa.Migrations
                     b.Navigation("User_Table");
                 });
 
-            modelBuilder.Entity("YatriSewa.Models.PassengerLocationLog", b =>
+            modelBuilder.Entity("YatriSewa.Models.Passenger", b =>
                 {
                     b.HasOne("YatriSewa.Models.Bus", "Bus")
                         .WithMany()
@@ -1035,15 +880,7 @@ namespace YatriSewa.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("YatriSewa.Models.Passenger", "Passenger")
-                        .WithMany()
-                        .HasForeignKey("PassengerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Bus");
-
-                    b.Navigation("Passenger");
                 });
 
             modelBuilder.Entity("YatriSewa.Models.Payment", b =>

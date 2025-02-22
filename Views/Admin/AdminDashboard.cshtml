@@ -1,4 +1,151 @@
 ﻿@{
     Layout = "_AdminLayout";
 }
-<h2>This is Admin Dashboard</h2>
+
+<div class="container mt-4">
+    <h1>Admin Dashboard</h1>
+
+    <!-- Real-Time Stats Boxes -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <h3 id="totalUsers">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Buses</h5>
+                    <h3 id="totalBuses">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Operators</h5>
+                    <h3 id="totalOperators">0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row mt-5">
+        <!-- Operator Requests Box -->
+        <div class="col-md-4">
+            <a href="/Admin/OperatorDetails" class="text-decoration-none">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Operator Requests</h5>
+                        <h2 id="operatorRequestsCount">0</h2>
+                        <p class="card-text">Click to view pending operator requests</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Driver Requests Box -->
+        <div class="col-md-4">
+            <a href="/Admin/DriverDetails" class="text-decoration-none">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Driver Requests</h5>
+                        <h2 id="driverRequestsCount">0</h2>
+                        <p class="card-text">Click to view pending driver requests</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+<script>
+    async function fetchDashboardStats() {
+        const response = await fetch('/api/getstats');
+        const data = await response.json();
+        document.getElementById('totalUsers').innerText = data.users;
+        document.getElementById('totalBuses').innerText = data.buses;
+        document.getElementById('totalOperators').innerText = data.operators;
+    }
+    fetchDashboardStats();
+
+    async function fetchRequests() {
+        const response = await fetch('/api/getrequests');
+        const data = await response.json();
+        document.getElementById('operatorRequestsCount').innerText = data.operatorRequests.length;
+        document.getElementById('driverRequestsCount').innerText = data.driverRequests.length;
+    }
+    fetchRequests();
+</script>
+
+
+<!-- Graph Section -->
+<div class="row mt-5">
+    <div class="chart-container" style="position: relative; max-width: 800px; margin: 0 auto;">
+        <canvas id="usersChart"></canvas>
+    </div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        async function fetchChartData() {
+            try {
+                const response = await fetch('/api/getstats');
+                const data = await response.json();
+
+                const ctx = document.getElementById('usersChart').getContext('2d');
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Total Users', 'Total Buses', 'Total Operators'],
+                        datasets: [{
+                            label: 'Count',
+                            data: [data.users, data.buses, data.operators],
+                            backgroundColor: ['#4CAF50', '#FF9800', '#2196F3'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.dataset.label}: ${context.raw}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Count'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Categories'
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching chart data:', error);
+            }
+        }
+        fetchChartData();
+    </script>
+
+
+    

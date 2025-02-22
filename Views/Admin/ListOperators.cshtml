@@ -1,0 +1,53 @@
+﻿@model IEnumerable<YatriSewa.Models.BusCompany> 
+@{
+    ViewData["Title"] = "Registered Operators";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    // Set the title for the page
+}
+
+<h3>List Of All Operators</h3>
+
+@* <p>
+    <a asp-action="ListOperators"></a>
+</p> *@
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.CompanyName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CompanyId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CompanyAddress)
+            </th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CompanyName)
+                </td>
+                <td>
+                    <a asp-action="ListBus"
+                       asp-route-companyId="@item.CompanyId">
+                        @Html.DisplayFor(modelItem => item.CompanyId)
+                    </a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CompanyAddress)
+                </td>
+               
+               @*  <td>
+                    <a asp-action="DriverDetails" asp-route-id="@item.CompanyId">Details</a> |
+                    <a asp-action="DeleteDriver" asp-route-id="@item.DriverId">Remove</a>
+                </td> *@
+            </tr>
+        }
+    </tbody>
+</table>
+
