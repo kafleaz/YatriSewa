@@ -172,7 +172,48 @@ namespace YatriSewa.Services
         {
             return await _context.Company_Table.FirstOrDefaultAsync(c => c.CompanyId == companyId);
         }
-      
+
+
+        public async Task<IEnumerable<dynamic>> GetPassengersByScheduleIdAsync(int scheduleId)
+        {
+            var schedule = await _context.Schedule_Table
+                .Include(s => s.Bus)
+                .ThenInclude(b => b.Route) // ✅ Ensure Route is included
+                .FirstOrDefaultAsync(s => s.ScheduleId == scheduleId);
+
+            if (schedule == null || schedule.Bus == null)
+            {
+                return new List<dynamic>();
+            }
+
+            var confirmedBookings = await _context.Payment_Table
+                .Where(p => p.Status == PaymentStatus.Successful)
+                .Select(p => p.BookingId)
+                .ToListAsync();
+
+            var bookings = await _context.Booking_Table
+                .Include(b => b.Passenger)
+                .Include(b => b.Tickets)
+                .ThenInclude(t => t.Seat)
+                .Include(b => b.Bus)
+                .ThenInclude(b => b.Route)
+                .Where(b => b.BusId == schedule.Bus.BusId)
+                .Where(b => confirmedBookings.Contains(b.BookingId))
+                .ToListAsync();
+
+            return bookings.Select(b => new
+            {
+                BookingId = b.BookingId,
+                PassengerName = b.Passenger?.Name ?? "Unknown",
+                PhoneNumber = b.Passenger?.PhoneNumber ?? "N/A",
+                BoardingPoint = b.Passenger?.BoardingPoint , // ✅ Fetch Boarding Point
+                DroppingPoint = b.Passenger?.DroppingPoint ,
+                SeatNumbers = b.Tickets != null
+                    ? string.Join(", ", b.Tickets.Where(t => t.Seat != null).Select(t => t.Seat.SeatNumber))
+                    : "No Seat Assigned"
+            }).ToList();
+        }
+
 
 
     }

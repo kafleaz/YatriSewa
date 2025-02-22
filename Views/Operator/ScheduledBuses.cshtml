@@ -1,0 +1,35 @@
+﻿@model List<Schedule>
+
+@{
+    ViewData["Title"] = "Scheduled Buses";
+    Layout = "~/Views/Shared/_OperatorLayout.cshtml";
+}
+
+<h2 class="text-center my-4">Scheduled Buses for Today</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning text-center">
+        <strong>No scheduled buses available.</strong>
+    </div>
+}
+else
+{
+    @foreach (var bus in Model)
+    {
+        <div class="card shadow-lg mb-4">
+            <div class="card-header bg-success text-white">
+                <h4>@bus.Bus.BusName (Bus ID: @bus.BusId)</h4>
+                <p class="mb-0">Departure Time: @bus.DepartureTime.ToString("hh:mm tt, MMM dd")</p>
+            </div>
+
+            <div class="card-body text-center">
+                <a asp-action="PassengerList" asp-controller="Operator" asp-route-scheduleId="@bus.ScheduleId" class="btn btn-primary">
+                    <i class="fas fa-users"></i> View Passengers
+                </a>
+            </div>
+        </div>
+    }
+}
+
+

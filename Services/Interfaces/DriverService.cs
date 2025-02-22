@@ -34,7 +34,7 @@ public class DriverService : IDriverService
 
 
     // Fetch passengers for a specific schedule
-    public async Task<IEnumerable<Passenger>> GetPassengersByScheduleIdAsync(int scheduleId)
+    public async Task<IEnumerable<object>> GetPassengersByScheduleIdAsync(int scheduleId)
     {
         var schedule = await _context.Schedule_Table
             .Include(s => s.Bus)
@@ -42,13 +42,33 @@ public class DriverService : IDriverService
 
         if (schedule == null || schedule.BusId == null)
         {
-            return new List<Passenger>();
+            return new List<object>(); // Return empty list if schedule is not found
         }
 
-        return await _context.Passenger_Table
+        var passengers = await _context.Passenger_Table
+            .Include(p => p.Bookings)         // Include bookings
+            .ThenInclude(b => b.Tickets)      // Include tickets
+            .ThenInclude(t => t.Seat)         // Include seat details
             .Where(p => p.BusId == schedule.BusId)
+            .Select(p => new
+            {
+                p.PassengerId,
+                p.Name,
+                p.PhoneNumber,
+                p.BusId,
+                p.BoardingPoint,               // ✅ Fetch Boarding Point
+                p.DroppingPoint,               // ✅ Fetch Dropping Point
+                SeatNumbers = p.Bookings
+                    .SelectMany(b => b.Tickets)
+                    .Where(t => t.Seat != null)
+                    .Select(t => t.Seat.SeatNumber) // ✅ Fetch seat numbers directly
+                    .ToList()
+            })
             .ToListAsync();
+
+        return passengers;
     }
+
 
     // Fetch detailed schedule information
     public async Task<Schedule> GetScheduleDetailsAsync(int scheduleId)

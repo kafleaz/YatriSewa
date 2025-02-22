@@ -1,6 +1,7 @@
 ﻿@model IEnumerable<YatriSewa.Models.Schedule>
 @{
-    Layout = "_DriverLayout";
+    Layout = "~/Views/Shared/_DriverLayout.cshtml";
+
     string driverName = ViewBag.DriverName;
     // Get the selected date from the query string
     var selectedDate = ViewContext.HttpContext.Request.Query["date"].ToString();

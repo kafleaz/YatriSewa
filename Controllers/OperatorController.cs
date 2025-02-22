@@ -15,15 +15,18 @@ namespace YatriSewa.Controllers
     {
         private readonly ApplicationContext _context;
         private readonly ILogger<OperatorController> _logger;
+        private readonly IDriverService _driverService;
         private readonly IOperatorService _operatorService;
 
         // Modify the constructor to accept ILogger<OperatorController>
 
-        public OperatorController(ApplicationContext context, IOperatorService operatorService, ILogger<OperatorController> logger)
+        public OperatorController(ApplicationContext context, IOperatorService operatorService,IDriverService driverService, ILogger<OperatorController> logger)
         {
             _context = context; // Initialize context
             _operatorService = operatorService; // Initialize the service
-            _logger = logger; // Assign logger to the private field
+            _logger = logger;
+            _driverService = driverService;
+            // Assign logger to the private field
         }
 
 
@@ -1049,6 +1052,65 @@ namespace YatriSewa.Controllers
             return RedirectToAction(nameof(Profile));
         }
 
+
+
+      
+        [Authorize(Roles = "Operator")]
+        public async Task<IActionResult> PassengerList(int scheduleId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var passengers = await _operatorService.GetPassengersByScheduleIdAsync(scheduleId);
+
+            if (!passengers.Any())
+            {
+                ViewBag.Message = "No passengers have purchased tickets for this schedule.";
+                return View(new List<dynamic>()); // ✅ Pass an empty List<dynamic> if no passengers
+            }
+
+            return View(passengers.ToList()); // ✅ Convert to List<dynamic>
+        }
+
+
+        [Authorize(Roles = "Operator")]
+        public async Task<IActionResult> ScheduledBuses()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var operatorUser = await _context.User_Table
+                .Include(u => u.BusCompany)
+                .FirstOrDefaultAsync(u => u.UserId.ToString() == userId);
+
+            if (operatorUser?.BusCompany == null)
+            {
+                return NotFound("No associated company found for this operator.");
+            }
+
+            var companyId = operatorUser.BusCompany.CompanyId;
+            var today = DateTime.UtcNow.Date;
+
+            var scheduledBuses = await _context.Schedule_Table
+                .Include(s => s.Bus)
+                .Include(s => s.Route)
+                .Where(s => s.Bus.CompanyId == companyId && s.DepartureTime.Date == today)
+                .ToListAsync();
+
+            if (!scheduledBuses.Any())
+            {
+                ViewBag.Message = "No scheduled buses available for today.";
+                return View(new List<Schedule>());
+            }
+
+            return View(scheduledBuses);
+        }
 
     }
 

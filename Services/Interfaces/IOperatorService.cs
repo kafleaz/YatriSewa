@@ -21,6 +21,8 @@ namespace YatriSewa.Services.Interfaces
         Task<List<Bus>> GetBusesByCompanyIdAsync(int companyId);
         Task<BusCompany?> GetCompanyByIdAsync(int companyId);
 
+        Task<IEnumerable<dynamic>> GetPassengersByScheduleIdAsync(int scheduleId);
+
     }
-    
+
 }

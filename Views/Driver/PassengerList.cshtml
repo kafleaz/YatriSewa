@@ -1,8 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Passenger List";
+    Layout = "~/Views/Shared/_DriverLayout.cshtml";
 }
-@model List<YatriSewa.Models.Passenger>
-
+@model IEnumerable<dynamic>
 <div class="container mt-5">
     <h2 class="text-center mb-4">Passenger List</h2>
 
@@ -20,6 +20,7 @@
                 <ht>Seat Number</ht>
                 <th>Pickup Address</th>
                 <th>Destination Address</th>
+                <th>Seat Numbers</th>
             </tr>
         </thead>
         <tbody>
@@ -34,6 +35,7 @@
                         <td>@passenger.PhoneNumber</td>
                         <td>@passenger.BoardingPoint</td>
                         <td>@passenger.DroppingPoint</td>
+                        <td>@string.Join(", ", passenger.SeatNumbers)</td>
                     </tr>
                     count++;
                 }

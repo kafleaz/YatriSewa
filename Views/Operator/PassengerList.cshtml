@@ -1,0 +1,43 @@
+﻿
+@model List<dynamic>
+@{
+    ViewData["Title"] = "Passengers for Bus";
+    Layout = "~/Views/Shared/_OperatorLayout.cshtml";
+}
+
+<h2 class="text-center my-4">Passengers for Scheduled Bus</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning text-center">
+        <strong>No passengers have purchased tickets for this schedule.</strong>
+    </div>
+}
+else
+{
+    <table class="table table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Booking ID</th>
+                <th>Passenger Name</th>
+                <th>Phone Number</th>
+                <th>Boarding Point</th>
+                <th>DroppingPoint</th>
+                <th>Seat Number</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var passenger in Model)
+            {
+                <tr>
+                    <td>@passenger.BookingId</td>
+                    <td>@passenger.PassengerName</td>
+                    <td>@passenger.PhoneNumber</td>
+                    <td>@passenger.BoardingPoint</td>
+                    <td>@passenger.DroppingPoint</td>
+                    <td>@passenger.SeatNumbers</td> <!-- ✅ No more NullReferenceException -->
+                </tr>
+            }
+        </tbody>
+    </table>
+}
