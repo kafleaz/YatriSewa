@@ -24,11 +24,15 @@
     /* You can add more custom styles here if needed */
 </style>
 
-<div class="name-bar">
-    Welcome, @driverName!
-</div>
+
 
 <h2>Driver Dashboard</h2>
+<div class="card mb-4">
+    <div class="card-body ">
+        <h4>Welcome, @ViewBag.DriverName</h4>
+        <p>Your upcoming schedules are displayed below.</p>
+    </div>
+</div>
 
 <!-- Date Filter -->
 <p>
@@ -88,3 +92,32 @@ else
 {
     <p>Please select a date to view the schedule.</p>
 }
+<style>
+    .bg-muted-green {
+        background-color: #157347 !important; /* Darker Green */
+    }
+</style>
+
+
+
+<div class="row justify-content-center text-center mt-3">
+    <!-- Completed Trips -->
+    <div class="col-md-4">
+        <div class="card bg-muted-green text-white shadow-lg">
+            <div class="card-body">
+                <h5 class="fw-bold">Completed Trips</h5>
+                <h2 class="display-5">@ViewBag.TotalTrips</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Canceled Trips -->
+    <div class="col-md-4">
+        <div class="card bg-secondary text-white shadow-lg">
+            <div class="card-body">
+                <h5 class="fw-bold">Canceled Trips</h5>
+                <h2 class="display-5">@ViewBag.CanceledTrips</h2>
+            </div>
+        </div>
+    </div>
+</div>

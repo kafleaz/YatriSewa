@@ -44,6 +44,10 @@ namespace YatriSewa.Controllers
 
             // Debugging: Log details
             Console.WriteLine($"UserId: {userId}, DriverId: {driverId}, SelectedDate: {selectedDate}, Schedules Count: {schedules.Count()}");
+            ViewBag.Layout = "~/Views/Shared/_DriverLayout.cshtml";
+            ViewBag.DriverName = driver.DriverName;
+            ViewBag.TotalTrips = await _context.Schedule_Table.CountAsync(s => s.DriverId == driverId);
+            ViewBag.CanceledTrips = await _context.Schedule_Table.CountAsync(s => s.DriverId == driverId && s.Status == "Canceled");
 
             return View(schedules); // Pass schedules to the view
         }

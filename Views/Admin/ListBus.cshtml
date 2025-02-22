@@ -15,8 +15,9 @@
 }
 else
 {
-    <table class="table table-bordered table-striped">
-        <thead class="thead-dark">
+     <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-primary">
             <tr>
                 <th>#</th>
                 <th>@Html.DisplayNameFor(model => model.First().BusName)</th>
@@ -49,6 +50,7 @@ else
             }
         </tbody>
     </table>
+    </div>
 }
 
 

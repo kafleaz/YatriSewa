@@ -30,11 +30,7 @@ namespace YatriSewa.Controllers
         }
 
 
-        [Authorize(Roles = "Operator")]
-        public IActionResult OperatorDashboard()
-        {
-            return View();
-        }
+       
 
         [Authorize(Roles = "Admin, Operator, Driver")]
         public async Task<IActionResult> ListBus()
