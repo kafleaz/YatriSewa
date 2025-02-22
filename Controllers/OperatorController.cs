@@ -6,6 +6,7 @@ using System.Security.Claims;
 using YatriSewa.Models;
 using YatriSewa.Services;
 using YatriSewa.Services.Interfaces;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using Route = YatriSewa.Models.Route;
 
 namespace YatriSewa.Controllers
@@ -961,6 +962,93 @@ namespace YatriSewa.Controllers
         {
             return _context.Driver_Table.Any(e => e.DriverId == id);
         }
+        public async Task<IActionResult> Profile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var operatorUser = await _context.User_Table
+                .Include(u => u.BusCompany) // Include company info
+                .FirstOrDefaultAsync(u => u.UserId.ToString() == userId && u.Role == UserRole.Operator);
+
+            if (operatorUser == null)
+            {
+                return NotFound("Operator profile not found.");
+            }
+
+            return View(operatorUser);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(User model)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var operatorUser = await _context.User_Table.FindAsync(userId);
+            if (operatorUser == null)
+            {
+                return NotFound();
+            }
+
+            // Update fields
+            operatorUser.Name = model.Name;
+            operatorUser.PhoneNo = model.PhoneNo;
+
+            _context.Update(operatorUser);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Profile updated successfully!";
+            return RedirectToAction(nameof(Profile));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword, string confirmPassword)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var operatorUser = await _context.User_Table.FindAsync(userId);
+            if (operatorUser == null)
+            {
+                return NotFound();
+            }
+
+            // Verify the current password
+            if (!BCrypt.Net.BCrypt.Verify(currentPassword, operatorUser.Password))
+            {
+                ModelState.AddModelError("", "Current password is incorrect.");
+                return View("Profile", operatorUser);
+            }
+
+            // Check if the new passwords match
+            if (newPassword != confirmPassword)
+            {
+                ModelState.AddModelError("", "New passwords do not match.");
+                return View("Profile", operatorUser);
+            }
+
+            // Hash and update the password
+            operatorUser.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            _context.Update(operatorUser);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Password changed successfully!";
+            return RedirectToAction(nameof(Profile));
+        }
+
 
     }
 

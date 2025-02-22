@@ -146,7 +146,11 @@
                         <span class="ms-2">operator</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="profileicon dropdown-item far fa-user-circle " href="#"> Profile</a></li>
+                        <li>
+                            <form asp-controller="Operator" asp-action="Profile" method="post" class="d-inline">
+                                <button type="submit" class="profileicon dropdown-item far fa-user-circle ">Profile</button>
+                            </form>
+                            
                         <li>
                             <form id="logoutForm" asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
                                 <button type="submit" class="profileicon dropdown-item fas fa-sign-out-alt">Logout</button>
