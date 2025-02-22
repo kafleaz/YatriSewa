@@ -27,7 +27,9 @@
             <a asp-controller="Admin" asp-action="AdminDashboard" class="nav-link">
                 <i class="fas fa-user-tie"></i> Dashboard
             </a>
-     
+            <a asp-controller="Admin" asp-action="ActiveUsers" class="nav-link">
+                <i class="fas fa-user-tie"></i> Active Users
+            </a>
             <a asp-controller="Admin" asp-action="ListOperators" class="nav-link">
                 <i class="fas fa-user-tie"></i> Operators
             </a>
@@ -41,9 +43,7 @@
             <a href="#" class="nav-link">
                 <i class="fas fa-calendar-alt"></i> Schedule
             </a>
-            <a href="#" class="nav-link">
-                <i class="fas fa-dollar-sign"></i> Ticket Price
-            </a>
+           
             <a asp-controller="Admin" asp-action="PassengerList" class="nav-link">
                 <i class="fas fa-users"></i> Passengers
             </a>
@@ -158,7 +158,11 @@
                         <span class="ms-2">admin</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="profileicon dropdown-item far fa-user-circle " href="#"> Profile</a></li>
+                        <li>
+                            <form id="logoutForm" asp-controller="Admin" asp-action="Profile" method="post" class="d-inline">
+                                <button type="submit" class="profileicon dropdown-item far fa-user-circle">Profile</button>
+                            </form>
+                           </li>
                         <li>
                             <form id="logoutForm" asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
                                 <button type="submit" class="profileicon dropdown-item fas fa-sign-out-alt">Logout</button>

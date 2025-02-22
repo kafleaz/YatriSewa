@@ -23,7 +23,7 @@ else
                 <th>@Html.DisplayNameFor(model => model.First().BusNumber)</th>
                 <th>Route</th>
                 <th>Driver</th>
-                <th>Actions</th>
+              
             </tr>
         </thead>
         <tbody>
@@ -44,14 +44,7 @@ else
                         }
                     </td>
                     <td>@bus.BusDriver?.DriverName ?? "<span class='text-muted'>Unassigned</span>"</td>
-                    <td>
-                        <a asp-action="EditBus" asp-route-id="@bus.BusId" class="btn btn-sm btn-warning" title="Edit Bus">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                        <a asp-action="DeleteBus" asp-route-id="@bus.BusId" class="btn btn-sm btn-danger" title="Delete Bus" onclick="return confirm('Are you sure you want to delete this bus?');">
-                            <i class="fas fa-trash"></i> Delete
-                        </a>
-                    </td>
+                  
                 </tr>
             }
         </tbody>

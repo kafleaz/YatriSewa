@@ -11,6 +11,7 @@ using YatriSewa.Services.Interfaces;
 using Route = YatriSewa.Models.Route;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Globalization;
+using BCrypt.Net;
 
 namespace YatriSewa.Controllers
 {
@@ -548,70 +549,13 @@ namespace YatriSewa.Controllers
             return RedirectToAction("DriverDetails");
         }
 
-        // Action to render the EditBus view
-        [HttpGet]
-        public async Task<IActionResult> EditBus(int id)
-        {
-            // Fetch the bus with the given id
-            var bus = await _context.Bus_Table.FindAsync(id);
-            if (bus == null)
-            {
-                return NotFound(); // If bus not found, return 404
-            }
-
-            // Populate ViewBag with available data for the dropdowns
-            ViewBag.CompanyId = new SelectList(_context.Company_Table, "CompanyId", "CompanyName", bus.CompanyId);
-            ViewBag.DriverId = new SelectList(_context.Driver_Table, "DriverId", "DriverName", bus.DriverId);
-            ViewBag.RouteId = new SelectList(_context.Route_Table, "RouteId", "EndLocation", bus.RouteId);
-
-            return View(bus); // Pass the bus object to the EditBus view
-        }
-
-        // Action to save the edited bus (POST)
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditBus(int id, Bus bus)
-        {
-            if (id != bus.BusId)
-            {
-                return NotFound();  // If id does not match, return 404
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    // Update the bus details in the database
-                    _context.Update(bus);
-                    await _context.SaveChangesAsync();  // Save the changes
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BusExists(bus.BusId))
-                    {
-                        return NotFound(); // If bus does not exist
-                    }
-                    else
-                    {
-                        throw; // If error happens, throw the error
-                    }
-                }
-                return RedirectToAction(nameof(ListBus));  // Redirect to the ListBus view after saving changes
-            }
-
-            // Repopulate the dropdown lists in case of validation failure
-            ViewBag.CompanyId = new SelectList(_context.Company_Table, "CompanyId", "CompanyName", bus.CompanyId);
-            ViewBag.DriverId = new SelectList(_context.Driver_Table, "DriverId", "DriverName", bus.DriverId);
-            ViewBag.RouteId = new SelectList(_context.Route_Table, "RouteId", "EndLocation", bus.RouteId);
-
-            return View(bus);  // Return to the view with the current bus data if validation fails
-        }
-
+       
         // Helper method to check if a bus exists
         private bool BusExists(int id)
         {
             return _context.Bus_Table.Any(e => e.BusId == id);
         }
+
         //fetching all users of system 
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -624,15 +568,211 @@ namespace YatriSewa.Controllers
 
             return View(users);
         }
+
+        public async Task<IActionResult> EditUsers(int id)
+        {
+            
+            var user = await _context.User_Table.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            ViewBag.Role = new SelectList(Enum.GetValues(typeof(UserRole)));
+            ViewBag.CompanyID = new SelectList(_context.Company_Table, "CompanyId", "CompanyName", user.CompanyID);
+            ViewBag.DriverId = new SelectList(_context.Driver_Table, "DriverId", "DriverName", user.DriverId);
+            return View(user);
+        }
+
+        // POST: Admin/EditUser/5
+         // Ensure BCrypt is used for password hashing
+
+[HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditUsers(int id, [Bind("UserId,Name,Email,PhoneNo,Auth_Method,IsVerified,Role,CompanyID,DriverId,Password")] User user)
+    {
+        if (id != user.UserId)
+        {
+            return NotFound();
+        }
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                // Fetch the existing user from the database
+                var existingUser = await _context.User_Table.FindAsync(id);
+                if (existingUser == null)
+                {
+                    return NotFound();
+                }
+
+                // Update user fields
+                existingUser.Name = user.Name;
+                existingUser.Email = user.Email;
+                existingUser.PhoneNo = user.PhoneNo;
+                existingUser.Auth_Method = user.Auth_Method;
+                existingUser.IsVerified = user.IsVerified;
+                existingUser.Role = user.Role;
+                existingUser.CompanyID = user.CompanyID;
+                existingUser.DriverId = user.DriverId;
+                existingUser.Updated_At = DateTime.UtcNow;
+
+                // ✅ Update the password only if a new one is provided
+                if (!string.IsNullOrEmpty(user.Password))
+                {
+                    existingUser.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+                }
+
+                _context.Update(existingUser);
+                await _context.SaveChangesAsync();
+
+                // ✅ Ensure correct redirection to ActiveUsers after a successful update
+                return RedirectToAction("ActiveUsers", "Admin");
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.User_Table.Any(u => u.UserId == user.UserId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+            ViewBag.Role = new SelectList(Enum.GetValues(typeof(UserRole)));
+            // Reload dropdown data if ModelState is invalid
+            ViewBag.CompanyID = new SelectList(_context.Company_Table, "CompanyId", "CompanyName", user.CompanyID);
+        ViewBag.DriverId = new SelectList(_context.Driver_Table, "DriverId", "DriverName", user.DriverId);
+
+        return View(user); // If validation fails, reload EditUsers page
     }
 
+    // GET: Admin/DeleteUser/5
+    public async Task<IActionResult> DeleteUsers(int id)
+        {
 
+            var user = await _context.User_Table
+                .Include(u => u.BusCompany)
+                .FirstOrDefaultAsync(u => u.UserId == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return View(user);
+        }
 
+        // POST: Admin/DeleteUser/5
+        [HttpPost, ActionName("DeleteUsers")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUserConfirmed(int id)
+        {
+            var user = await _context.User_Table.FindAsync(id);
+            if (user != null)
+            {
+                _context.User_Table.Remove(user);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(ActiveUsers));
+        }
 
+        private bool UserExists(int id)
+        {
+            return _context.User_Table.Any(u => u.UserId == id);
+        }
 
+        public async Task<IActionResult> Profile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
 
+            var admin = await _context.User_Table
+                .FirstOrDefaultAsync(u => u.UserId.ToString() == userId && u.Role == UserRole.Admin);
 
+            if (admin == null)
+            {
+                return NotFound("Admin profile not found.");
+            }
 
+            return View(admin);
+        }
+
+        // ✅ POST: Update Admin Profile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(User model)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var admin = await _context.User_Table.FindAsync(int.Parse(userId));
+            if (admin == null)
+            {
+                return NotFound("Admin not found.");
+            }
+
+            // ✅ Update allowed fields
+            admin.Name = model.Name;
+            admin.Email = model.Email;
+            admin.PhoneNo = model.PhoneNo;
+            admin.Updated_At = DateTime.UtcNow;
+
+            _context.Update(admin);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Profile updated successfully!";
+            return RedirectToAction(nameof(Profile));
+        }
+
+        // ✅ POST: Change Admin Password
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword, string confirmPassword)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var admin = await _context.User_Table.FindAsync(int.Parse(userId));
+            if (admin == null)
+            {
+                return NotFound("Admin not found.");
+            }
+
+            // ✅ Verify Current Password
+            if (!BCrypt.Net.BCrypt.Verify(currentPassword, admin.Password))
+            {
+                ModelState.AddModelError("", "Current password is incorrect.");
+                return View("Profile", admin);
+            }
+
+            // ✅ Check if New Password Matches Confirmation
+            if (newPassword != confirmPassword)
+            {
+                ModelState.AddModelError("", "New passwords do not match.");
+                return View("Profile", admin);
+            }
+
+            // ✅ Hash and Save New Password
+            admin.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            _context.Update(admin);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Password changed successfully!";
+            return RedirectToAction(nameof(Profile));
+        }
+    
+
+}
 
 
 }
