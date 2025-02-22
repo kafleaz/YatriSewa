@@ -11,6 +11,7 @@ using YatriSewa.Services.Interfaces;
 using Route = YatriSewa.Models.Route;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Globalization;
+using BCrypt.Net;
 
 namespace YatriSewa.Controllers
 {
@@ -576,51 +577,80 @@ namespace YatriSewa.Controllers
             {
                 return NotFound();
             }
-            return View(user);
-        }
-
-        // POST: Admin/EditUser/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditUsers(int id, [Bind("UserId,Name,Email,PhoneNo,Auth_Method,IsVerified,Role,CompanyID,DriverId")] User user)
-        {
-            if (id != user.UserId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    user.Updated_At = DateTime.UtcNow;
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
-
-                    // ✅ Ensure correct redirection
-                    return RedirectToAction("ActiveUsers", "Admin");
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.User_Table.Any(u => u.UserId == user.UserId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
-
-            // Reload ViewBag data if ModelState is invalid
+            ViewBag.Role = new SelectList(Enum.GetValues(typeof(UserRole)));
             ViewBag.CompanyID = new SelectList(_context.Company_Table, "CompanyId", "CompanyName", user.CompanyID);
             ViewBag.DriverId = new SelectList(_context.Driver_Table, "DriverId", "DriverName", user.DriverId);
             return View(user);
         }
 
-        // GET: Admin/DeleteUser/5
-        public async Task<IActionResult> DeleteUsers(int id)
+        // POST: Admin/EditUser/5
+         // Ensure BCrypt is used for password hashing
+
+[HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditUsers(int id, [Bind("UserId,Name,Email,PhoneNo,Auth_Method,IsVerified,Role,CompanyID,DriverId,Password")] User user)
+    {
+        if (id != user.UserId)
+        {
+            return NotFound();
+        }
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                // Fetch the existing user from the database
+                var existingUser = await _context.User_Table.FindAsync(id);
+                if (existingUser == null)
+                {
+                    return NotFound();
+                }
+
+                // Update user fields
+                existingUser.Name = user.Name;
+                existingUser.Email = user.Email;
+                existingUser.PhoneNo = user.PhoneNo;
+                existingUser.Auth_Method = user.Auth_Method;
+                existingUser.IsVerified = user.IsVerified;
+                existingUser.Role = user.Role;
+                existingUser.CompanyID = user.CompanyID;
+                existingUser.DriverId = user.DriverId;
+                existingUser.Updated_At = DateTime.UtcNow;
+
+                // ✅ Update the password only if a new one is provided
+                if (!string.IsNullOrEmpty(user.Password))
+                {
+                    existingUser.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+                }
+
+                _context.Update(existingUser);
+                await _context.SaveChangesAsync();
+
+                // ✅ Ensure correct redirection to ActiveUsers after a successful update
+                return RedirectToAction("ActiveUsers", "Admin");
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.User_Table.Any(u => u.UserId == user.UserId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+            ViewBag.Role = new SelectList(Enum.GetValues(typeof(UserRole)));
+            // Reload dropdown data if ModelState is invalid
+            ViewBag.CompanyID = new SelectList(_context.Company_Table, "CompanyId", "CompanyName", user.CompanyID);
+        ViewBag.DriverId = new SelectList(_context.Driver_Table, "DriverId", "DriverName", user.DriverId);
+
+        return View(user); // If validation fails, reload EditUsers page
+    }
+
+    // GET: Admin/DeleteUser/5
+    public async Task<IActionResult> DeleteUsers(int id)
         {
 
             var user = await _context.User_Table
@@ -651,15 +681,98 @@ namespace YatriSewa.Controllers
         {
             return _context.User_Table.Any(u => u.UserId == id);
         }
-    }
 
+        public async Task<IActionResult> Profile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
 
+            var admin = await _context.User_Table
+                .FirstOrDefaultAsync(u => u.UserId.ToString() == userId && u.Role == UserRole.Admin);
 
+            if (admin == null)
+            {
+                return NotFound("Admin profile not found.");
+            }
 
+            return View(admin);
+        }
 
+        // ✅ POST: Update Admin Profile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(User model)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
 
+            var admin = await _context.User_Table.FindAsync(int.Parse(userId));
+            if (admin == null)
+            {
+                return NotFound("Admin not found.");
+            }
 
+            // ✅ Update allowed fields
+            admin.Name = model.Name;
+            admin.Email = model.Email;
+            admin.PhoneNo = model.PhoneNo;
+            admin.Updated_At = DateTime.UtcNow;
 
+            _context.Update(admin);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Profile updated successfully!";
+            return RedirectToAction(nameof(Profile));
+        }
+
+        // ✅ POST: Change Admin Password
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword, string confirmPassword)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var admin = await _context.User_Table.FindAsync(int.Parse(userId));
+            if (admin == null)
+            {
+                return NotFound("Admin not found.");
+            }
+
+            // ✅ Verify Current Password
+            if (!BCrypt.Net.BCrypt.Verify(currentPassword, admin.Password))
+            {
+                ModelState.AddModelError("", "Current password is incorrect.");
+                return View("Profile", admin);
+            }
+
+            // ✅ Check if New Password Matches Confirmation
+            if (newPassword != confirmPassword)
+            {
+                ModelState.AddModelError("", "New passwords do not match.");
+                return View("Profile", admin);
+            }
+
+            // ✅ Hash and Save New Password
+            admin.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            _context.Update(admin);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Password changed successfully!";
+            return RedirectToAction(nameof(Profile));
+        }
+    
+
+}
 
 
 }
