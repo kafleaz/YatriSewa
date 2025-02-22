@@ -172,26 +172,35 @@ namespace YatriSewa.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ScheduleId,BusId,RouteId,DepartureTime,ArrivalTime,Price,AvailableSeats,Status,DriverId,BusCompanyId")] Schedule schedule)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(schedule);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return View(schedule);
             }
-            ViewData["BusId"] = new SelectList(_context.Bus_Table, "BusId", "BusName", schedule.BusId);
-            ViewData["BusCompanyId"] = new SelectList(_context.Company_Table, "CompanyId", "CompanyName", schedule.BusCompanyId);
-            ViewData["DriverId"] = new SelectList(_context.Driver_Table, "DriverId", "Address", schedule.DriverId);
-            ViewData["RouteId"] = new SelectList(_context.Route_Table, "RouteID", "EndLocation", schedule.RouteId);
-            return View(schedule);
+
+            // Get the date of the schedule (ignore time)
+            DateTime scheduleDate = schedule.DepartureTime.Date;
+
+            // Check if the bus is already scheduled on the same date
+            bool isBusAlreadyScheduled = await _context.Schedule_Table
+                .AnyAsync(s => s.BusId == schedule.BusId && s.DepartureTime.Date == scheduleDate);
+
+            if (isBusAlreadyScheduled)
+            {
+                ModelState.AddModelError("", "This bus is already scheduled for the selected date.");
+                return View(schedule); // Return the form with an error message
+            }
+
+            // Save the schedule if no conflict is found
+            _context.Add(schedule);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
+
         // GET: Schedules/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            
 
             // Fetch the schedule record with the provided ID
             var schedule = await _context.Schedule_Table.FindAsync(id);
@@ -262,7 +271,6 @@ namespace YatriSewa.Controllers
 
         // POST: Schedules/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ScheduleId,BusId,RouteId,DepartureTime,ArrivalTime,Price,AvailableSeats,Status,DriverId,BusCompanyId")] Schedule schedule)
@@ -272,31 +280,41 @@ namespace YatriSewa.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(schedule);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ScheduleExists(schedule.ScheduleId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                return View(schedule);
+            }
+
+            // Get the date of the schedule (ignore time)
+            DateTime scheduleDate = schedule.DepartureTime.Date;
+
+            // Check if another schedule already exists for the same bus on the same date
+            bool isDuplicate = await _context.Schedule_Table
+                .AnyAsync(s => s.BusId == schedule.BusId && s.DepartureTime.Date == scheduleDate && s.ScheduleId != schedule.ScheduleId);
+
+            if (isDuplicate)
+            {
+                ModelState.AddModelError("", "This bus is already scheduled for the selected date.");
+                return View(schedule); // Return the form with an error message
+            }
+
+            try
+            {
+                _context.Update(schedule);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BusId"] = new SelectList(_context.Bus_Table, "BusId", "BusName", schedule.BusId);
-            ViewData["BusCompanyId"] = new SelectList(_context.Company_Table, "CompanyId", "CompanyName", schedule.BusCompanyId);
-            ViewData["DriverId"] = new SelectList(_context.Driver_Table, "DriverId", "Address", schedule.DriverId);
-            ViewData["RouteId"] = new SelectList(_context.Route_Table, "RouteID", "EndLocation", schedule.RouteId);
-            return View(schedule);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ScheduleExists(schedule.ScheduleId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         // GET: Schedules/Delete/5
