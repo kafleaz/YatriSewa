@@ -82,13 +82,13 @@ namespace YatriSewa.Migrations
                         column: x => x.BusId,
                         principalTable: "Bus_Table",
                         principalColumn: "BusId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);//dascas]de into no action
                     table.ForeignKey(
                         name: "FK_PassengerLocationLogs_Passenger_Table_PassengerId",
                         column: x => x.PassengerId,
                         principalTable: "Passenger_Table",
                         principalColumn: "PassengerId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction); //cascaed into no action
                 });
 
             migrationBuilder.CreateIndex(
