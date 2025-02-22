@@ -4,6 +4,7 @@ using System.Net.Mail;
 using YatriSewa.Migrations;
 using YatriSewa.Models;
 using YatriSewa.Services;
+using YatriSewa.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseKestrel(options =>
@@ -22,6 +23,9 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("YatriSewa"));
 });
+
+builder.Services.AddTransient<IOperatorService, OperatorService>();
+builder.Services.AddTransient<IDriverService, DriverService>();
 
 // Register email service
 builder.Services.AddTransient<IEmailService, EmailService>();

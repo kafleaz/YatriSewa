@@ -1,0 +1,64 @@
+﻿@model IEnumerable<YatriSewa.Models.BusDriver>
+
+@{
+    ViewData["Title"] = "ListDrivers";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h3>List Of All Drivers</h3>
+
+<p>
+    <a asp-action="SearchDriver">Add Driver</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.DriverName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LicenseNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PhoneNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Address)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateOfBirth)
+            </th>
+          <th>
+            @Html.DisplayNameFor(model => model.IsAvailable)
+            </th> 
+        
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DriverName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LicenseNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Address)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DateOfBirth)
+                </td>
+                <td>
+                    <a asp-action="DriverDetails" asp-route-id="@item.DriverId">Details</a> |
+                    <a asp-action="DeleteDriver" asp-route-id="@item.DriverId">Remove</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -35,6 +35,12 @@ namespace YatriSewa.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+
+             name: "IX_Payment_Table_StripeTransId",
+              table: "Payment_Table",
+            column: "StripeTransId");
+
+            migrationBuilder.CreateIndex(
                name: "IX_Payment_Table_StripeTransId",
                table: "Payment_Table",
                column: "StripeTransId");
