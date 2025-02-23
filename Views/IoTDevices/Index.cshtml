@@ -1,0 +1,72 @@
+﻿@model IEnumerable<YatriSewa.Models.IoTDevice>
+
+@{
+    ViewData["Title"] = "IoTDevices";
+    Layout = "~/Views/Shared/_OperatorLayout.cshtml";
+}
+
+<h1>List Of Total IOT Devices</h1>
+
+@* <p>
+    <a asp-action="Create">Create New</a>
+</p> *@
+<table class="table">
+    <thead>
+        <tr>
+            @* <th>
+                @Html.DisplayNameFor(model => model.DeviceName)
+            </th> *@
+            <th>
+                @Html.DisplayNameFor(model => model.DeviceIdentifier)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Latitude)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Longitude)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Speed)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Bus)
+            </th>
+            @* <th>
+                @Html.DisplayNameFor(model => model.LastUpdated)
+            </th> *@
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            @* <td>
+                @Html.DisplayFor(modelItem => item.DeviceName)
+            </td> *@
+            <td>
+                @Html.DisplayFor(modelItem => item.DeviceIdentifier)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Latitude)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Longitude)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Speed)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Bus.BusName)
+            </td>
+            @* <td>
+                @Html.DisplayFor(modelItem => item.LastUpdated)
+            </td> *@
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.DeviceId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.DeviceId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.DeviceId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

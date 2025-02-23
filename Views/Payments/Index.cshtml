@@ -1,0 +1,95 @@
+﻿@model IEnumerable<YatriSewa.Models.Payment>
+
+@{
+    ViewData["Title"] = "Transactions";
+    Layout = "~/Views/Shared/_OperatorLayout.cshtml";
+}
+<h1>List of total Transactions</h1>
+
+@* <p>
+    <a asp-action="Create">Create New</a>
+</p> *@
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PaymentDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AmountPaid)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PaymentMethod)
+            </th>
+            @* <th>
+                @Html.DisplayNameFor(model => model.Passenger)
+            </th> *@
+            <th>
+                @Html.DisplayNameFor(model => model.User)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            @* <th>
+                @Html.DisplayNameFor(model => model.EsewaTransaction)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StripeTrans)
+            </th> *@
+            @* <th>
+                @Html.DisplayNameFor(model => model.RefundTransactionId)
+            </th> *@
+            @* <th>
+                @Html.DisplayNameFor(model => model.RefundDate)
+            </th> *@
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Booking.BookingId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PaymentDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AmountPaid)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PaymentMethod)
+            </td>
+           @*  <td>
+                @Html.DisplayFor(modelItem => item.Passenger.Name)
+            </td> *@
+            <td>
+                @Html.DisplayFor(modelItem => item.User.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            @* <td>
+                @Html.DisplayFor(modelItem => item.EsewaTransaction.MerchantCode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StripeTrans.ChargeId)
+            </td> *@
+            @* <td>
+                @Html.DisplayFor(modelItem => item.RefundTransactionId)
+            </td> *@
+            @* <td>
+                @Html.DisplayFor(modelItem => item.RefundDate)
+            </td> *@
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.PaymentId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.PaymentId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.PaymentId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

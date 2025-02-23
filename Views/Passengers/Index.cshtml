@@ -1,0 +1,59 @@
+﻿@model IEnumerable<YatriSewa.Models.Passenger>
+
+@{
+    ViewData["Title"] = "List of Passengers";
+    Layout = "~/Views/Shared/_OperatorLayout.cshtml";
+}
+<h1>List of total Passengers</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PhoneNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BoardingPoint)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DroppingPoint)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Bus)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PhoneNumber)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BoardingPoint)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DroppingPoint)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Bus.BusName)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.PassengerId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.PassengerId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.PassengerId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

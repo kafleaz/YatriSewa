@@ -42,11 +42,11 @@
                 <i class="fas fa-calendar-alt"></i> Schedule
             </a>
            
-            <a href="#" class="nav-link">
+            <a asp-controller="Passengers" asp-action="Index" class="nav-link">
                 <i class="fas fa-users"></i> Passengers
             </a>
             
-            <a href="#" class="nav-link">
+            @* <a href="#" class="nav-link">
                 <i class="fas fa-hourglass-half"></i> Pending Payment
             </a>
             <a href="#" class="nav-link">
@@ -54,8 +54,8 @@
             </a>
             <a href="#" class="nav-link">
                 <i class="fas fa-undo-alt"></i> Refunded Payment
-            </a>
-            <a href="#" class="nav-link">
+            </a> *@
+            <a asp-controller="Payments" asp-action="Index" class="nav-link">
                 <i class="fas fa-history"></i> Transaction History
             </a>
         </nav>

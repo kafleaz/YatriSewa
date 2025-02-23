@@ -384,7 +384,7 @@ namespace YatriSewa.Controllers
             return user.Role switch
             {
                 UserRole.Admin => RedirectToAction("AdminDashboard", "Admin"),
-                UserRole.Operator => RedirectToAction("OperatorDashboard", "Operator"),
+                UserRole.Operator => RedirectToAction("ListBus", "Operator"),
                 UserRole.Passenger => RedirectToAction("HomePage", "Passenger"),
                 UserRole.Driver => RedirectToAction("DriverDashboard", "Driver"),
                 _ => RedirectToAction("Index", "Home"),

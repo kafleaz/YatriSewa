@@ -60,6 +60,13 @@
                         <a asp-controller="Driver" asp-action="PassengerList"><i class="icofont-ui-play mr-2"></i> Passenger List</a>
                     </li>
                     <li>
+                        <form id="logoutForm" asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn p-0 m-0 align-baseline small">
+                                <i class="icofont-logout mr-2"></i>Logout
+                            </button>
+                        </form>
+                    </li>
+                    <li>
                         <a href="#"><i class="icofont-key mr-2"></i> Authentication</a>
                         <ul>
                             <li><a asp-action="SignIn">Sign In</a></li>
