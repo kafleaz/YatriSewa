@@ -44,27 +44,31 @@ public class DriverService : IDriverService
         {
             return new List<object>(); // Return empty list if schedule is not found
         }
+        var journeyDate = schedule.DepartureTime.Date;
 
         var passengers = await _context.Passenger_Table
-            .Include(p => p.Bookings)         // Include bookings
-            .ThenInclude(b => b.Tickets)      // Include tickets
-            .ThenInclude(t => t.Seat)         // Include seat details
-            .Where(p => p.BusId == schedule.BusId)
-            .Select(p => new
-            {
-                p.PassengerId,
-                p.Name,
-                p.PhoneNumber,
-                p.BusId,
-                p.BoardingPoint,               // ✅ Fetch Boarding Point
-                p.DroppingPoint,               // ✅ Fetch Dropping Point
-                SeatNumbers = p.Bookings
-                    .SelectMany(b => b.Tickets)
-                    .Where(t => t.Seat != null)
-                    .Select(t => t.Seat.SeatNumber) // ✅ Fetch seat numbers directly
-                    .ToList()
-            })
-            .ToListAsync();
+        .Include(p => p.Bookings)         // Include bookings
+        .ThenInclude(b => b.Tickets)      // Include tickets
+        .ThenInclude(t => t.Seat)         // Include seat details
+        .Where(p => p.BusId == schedule.BusId)
+        .Select(p => new
+        {
+            p.PassengerId,
+            p.Name,
+            p.PhoneNumber,
+            p.BusId,
+            p.BoardingPoint,               // ✅ Fetch Boarding Point
+            p.DroppingPoint,
+            JourneyDate = journeyDate.ToString("yyyy-MM-dd"),// ✅ Fetch Dropping Point
+            SeatNumbers = p.Bookings
+                // Filter bookings whose journey date matches the schedule's departure date.
+              
+                .SelectMany(b => b.Tickets)
+                .Where(t => t.Seat != null)
+                .Select(t => t.Seat.SeatNumber)
+                .ToList()
+        })
+        .ToListAsync();
 
         return passengers;
     }

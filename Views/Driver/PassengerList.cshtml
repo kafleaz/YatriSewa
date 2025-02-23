@@ -10,16 +10,16 @@
         <input type="text" class="form-control" placeholder="Search Passenger">
         <button class="btn btn-primary" type="button">Search</button>
     </div>
-
-    <table class="table table-bordered table-hover">
-        <thead class="table-primary text-center">
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-primary">
             <tr>
                 <th>Serial No.</th>
                 <th>Name</th>
                 <th>Phone Number</th>
                 <ht>Seat Number</ht>
                 <th>Pickup Address</th>
-                <th>Destination Address</th>
+                
                 <th>Seat Numbers</th>
             </tr>
         </thead>
@@ -34,7 +34,7 @@
                         <td>@passenger.Name</td>
                         <td>@passenger.PhoneNumber</td>
                         <td>@passenger.BoardingPoint</td>
-                        <td>@passenger.DroppingPoint</td>
+                        
                         <td>@string.Join(", ", passenger.SeatNumbers)</td>
                     </tr>
                     count++;
@@ -48,6 +48,7 @@
             }
         </tbody>
     </table>
+    </div>
 </div>
 
 <!-- Add Bootstrap from a CDN -->

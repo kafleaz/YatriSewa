@@ -36,9 +36,9 @@
                 <p><strong>Company Email:</strong> <span id="opEmail"></span></p>
                 <p>
                     <strong>VAT/PAN Document:</strong><br>
-                    <img id="opVatPhoto" src="" class="img-fluid" style="max-width: 300px;" alt="VAT Document">
+                    <img id="opVatPhoto" target="_blank" src="" class="img-fluid" style="max-width: 300px;" alt="VAT Document">
                 </p>
-            </div>
+               </div>
         </div>
     </div>
 </div>
@@ -100,8 +100,7 @@
             document.getElementById("opVatPan").innerText = data.vatPan || "Not Provided";
             document.getElementById("opAddress").innerText = data.address || "Not Provided";
             document.getElementById("opEmail").innerText = data.email || "Not Provided";
-            document.getElementById("opDescription").innerText = data.description || "Not Provided";
-
+          
             const vatPhoto = data.vatPanPhotoPath ? data.vatPanPhotoPath : "default-image.jpg";
             document.getElementById("opVatPhoto").src = vatPhoto;
 
