@@ -1,0 +1,59 @@
+﻿@model IEnumerable<YatriSewa.Models.Bus>
+
+@{
+    ViewData["Title"] = "List of Buses";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h3 class="my-4">Buses Registered Under: <strong>@ViewBag.CompanyName</strong></h3>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning" role="alert">
+        No buses found for this company.
+    </div>
+}
+else
+{
+     <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-primary">
+            <tr>
+                <th>#</th>
+                <th>@Html.DisplayNameFor(model => model.First().BusName)</th>
+                <th>@Html.DisplayNameFor(model => model.First().BusNumber)</th>
+                <th>Route</th>
+                <th>Driver</th>
+              
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var bus in Model)
+            {
+                <tr>
+                    <td>@bus.BusId</td>
+                    <td>@bus.BusName</td>
+                    <td>@bus.BusNumber</td>
+                    <td>
+                        @if (bus.Route != null)
+                        {
+                            @($"{bus.Route.StartLocation} - {bus.Route.Stops} - {bus.Route.EndLocation}")
+                        }
+                        else
+                        {
+                            <span class="text-muted">No Route Assigned</span>
+                        }
+                    </td>
+                    <td>@bus.BusDriver?.DriverName ?? "<span class='text-muted'>Unassigned</span>"</td>
+                  
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+}
+
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js" crossorigin="anonymous"></script>

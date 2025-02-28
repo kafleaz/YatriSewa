@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using YatriSewa.Models;
 using YatriSewa.Services;
+using YatriSewa.Services.Interfaces;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using Route = YatriSewa.Models.Route;
 
 namespace YatriSewa.Controllers
@@ -13,19 +15,23 @@ namespace YatriSewa.Controllers
     {
         private readonly ApplicationContext _context;
         private readonly ILogger<OperatorController> _logger;
+        private readonly IDriverService _driverService;
+        private readonly IOperatorService _operatorService;
 
         // Modify the constructor to accept ILogger<OperatorController>
-        public OperatorController(ApplicationContext context, ILogger<OperatorController> logger)
+
+        public OperatorController(ApplicationContext context, IOperatorService operatorService,IDriverService driverService, ILogger<OperatorController> logger)
         {
-            _context = context;
-            _logger = logger;  // Assign logger to the private field
+            _context = context; // Initialize context
+            _operatorService = operatorService; // Initialize the service
+            _logger = logger;
+            _driverService = driverService;
+            // Assign logger to the private field
         }
 
-        [Authorize(Roles = "Operator")]
-        public IActionResult OperatorDashboard()
-        {
-            return View();
-        }
+
+       
+
         [Authorize(Roles = "Admin, Operator, Driver")]
         public async Task<IActionResult> ListBus()
         {
@@ -39,34 +45,11 @@ namespace YatriSewa.Controllers
             }
 
             // Retrieve the logged-in user from the User_Table with their associated company
-            var user = await _context.User_Table
-                .Include(u => u.BusCompany) // Assuming User_Table has a relation with BusCompany
-                .FirstOrDefaultAsync(u => u.UserId == userId);
-
-            if (user == null || user.BusCompany == null)
-            {
-                return Unauthorized(); // Handle unauthorized access
-            }
-
-            var companyId = user.BusCompany.CompanyId;
-
-            // Fetch only buses associated with the user's company
-            var buses = await _context.Bus_Table
-                .Include(b => b.BusCompany)
-                .Include(b => b.BusDriver)
-                .Include(b => b.Route)
-                .Where(b => b.CompanyId == companyId) // Filter by company ID
-                .ToListAsync();
-
-            // Set the company name based on the user's company
-            ViewBag.CompanyName = user.BusCompany.CompanyName;
-
-            return View(buses);
+            var buses = await _operatorService.GetBusesByUserIdAsync(userId.ToString()); // Adjusted based on user ID type
+            return View(buses); // Pass buses to view
         }
 
-
-
-
+          
         [Authorize(Roles = "Admin, Operator, Driver")]
         public async Task<IActionResult> BusDetails(int? id)
         {
@@ -88,6 +71,7 @@ namespace YatriSewa.Controllers
             return View(bus);
         }
 
+        //adding bus section
         [Authorize(Roles = "Admin, Operator")]
         public async Task<IActionResult> AddBus()
         {
@@ -131,7 +115,7 @@ namespace YatriSewa.Controllers
                 })
                 .ToList();
 
-            
+
 
             // Populate ViewData with filtered routes and drivers
             ViewData["RouteId"] = new SelectList(routes, "RouteID", "RouteDescription");
@@ -213,6 +197,7 @@ namespace YatriSewa.Controllers
 
             return View(bus);
         }
+
 
 
         // GET: Buses/Edit/5
@@ -975,6 +960,152 @@ namespace YatriSewa.Controllers
         private bool BusDriverExists(int id)
         {
             return _context.Driver_Table.Any(e => e.DriverId == id);
+        }
+        public async Task<IActionResult> Profile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var operatorUser = await _context.User_Table
+                .Include(u => u.BusCompany) // Include company info
+                .FirstOrDefaultAsync(u => u.UserId.ToString() == userId && u.Role == UserRole.Operator);
+
+            if (operatorUser == null)
+            {
+                return NotFound("Operator profile not found.");
+            }
+
+            return View(operatorUser);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(User model)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var operatorUser = await _context.User_Table.FindAsync(userId);
+            if (operatorUser == null)
+            {
+                return NotFound();
+            }
+
+            // Update fields
+            operatorUser.Name = model.Name;
+            operatorUser.PhoneNo = model.PhoneNo;
+
+            _context.Update(operatorUser);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Profile updated successfully!";
+            return RedirectToAction(nameof(Profile));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword, string confirmPassword)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var operatorUser = await _context.User_Table.FindAsync(userId);
+            if (operatorUser == null)
+            {
+                return NotFound();
+            }
+
+            // Verify the current password
+            if (!BCrypt.Net.BCrypt.Verify(currentPassword, operatorUser.Password))
+            {
+                ModelState.AddModelError("", "Current password is incorrect.");
+                return View("Profile", operatorUser);
+            }
+
+            // Check if the new passwords match
+            if (newPassword != confirmPassword)
+            {
+                ModelState.AddModelError("", "New passwords do not match.");
+                return View("Profile", operatorUser);
+            }
+
+            // Hash and update the password
+            operatorUser.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            _context.Update(operatorUser);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Password changed successfully!";
+            return RedirectToAction(nameof(Profile));
+        }
+
+
+
+      
+        [Authorize(Roles = "Operator")]
+        public async Task<IActionResult> PassengerList(int scheduleId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var passengers = await _operatorService.GetPassengersByScheduleIdAsync(scheduleId);
+
+            if (!passengers.Any())
+            {
+                ViewBag.Message = "No passengers have purchased tickets for this schedule.";
+                return View(new List<dynamic>()); // ✅ Pass an empty List<dynamic> if no passengers
+            }
+
+            return View(passengers.ToList()); // ✅ Convert to List<dynamic>
+        }
+
+
+        [Authorize(Roles = "Operator")]
+        public async Task<IActionResult> ScheduledBuses()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var operatorUser = await _context.User_Table
+                .Include(u => u.BusCompany)
+                .FirstOrDefaultAsync(u => u.UserId.ToString() == userId);
+
+            if (operatorUser?.BusCompany == null)
+            {
+                return NotFound("No associated company found for this operator.");
+            }
+
+            var companyId = operatorUser.BusCompany.CompanyId;
+            var today = DateTime.UtcNow.Date;
+
+            var scheduledBuses = await _context.Schedule_Table
+                .Include(s => s.Bus)
+                .Include(s => s.Route)
+                .Where(s => s.Bus.CompanyId == companyId && s.DepartureTime.Date == today)
+                .ToListAsync();
+
+            if (!scheduledBuses.Any())
+            {
+                ViewBag.Message = "No scheduled buses available for today.";
+                return View(new List<Schedule>());
+            }
+
+            return View(scheduledBuses);
         }
 
     }

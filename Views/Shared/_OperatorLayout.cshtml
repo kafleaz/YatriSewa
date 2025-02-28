@@ -23,9 +23,7 @@
 
         <!-- Scrollable Links -->
         <nav class="nav-links">
-            <a asp-controller="Operator" asp-action="OperatorDashboard" class="nav-link">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-            </a>
+           
             <a asp-controller="Operator" asp-action="ListBus" class="nav-link">
                 <i class="fas fa-bus"></i> Bus
             </a>
@@ -41,12 +39,12 @@
             <a asp-controller="Schedules" asp-action="Index" class="nav-link">
                 <i class="fas fa-calendar-alt"></i> Schedule
             </a>
-            <a href="#" class="nav-link">
-                <i class="fas fa-dollar-sign"></i> Ticket Price
-            </a>
-            <a href="#" class="nav-link">
-                <i class="fas fa-users"></i> Passengers
-            </a>
+
+            <a asp-controller="Operator" asp-action="ScheduledBuses" class="nav-link">
+                    <i class="fas fa-bus"></i> Scheduled Buses
+                </a>
+           
+
             
             <a href="#" class="nav-link">
                 <i class="fas fa-hourglass-half"></i> Pending Payment
@@ -148,7 +146,11 @@
                         <span class="ms-2">operator</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="profileicon dropdown-item far fa-user-circle " href="#"> Profile</a></li>
+                        <li>
+                            <form asp-controller="Operator" asp-action="Profile" method="post" class="d-inline">
+                                <button type="submit" class="profileicon dropdown-item far fa-user-circle ">Profile</button>
+                            </form>
+                            
                         <li>
                             <form id="logoutForm" asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
                                 <button type="submit" class="profileicon dropdown-item fas fa-sign-out-alt">Logout</button>

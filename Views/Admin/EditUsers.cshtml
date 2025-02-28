@@ -1,0 +1,77 @@
+﻿@model YatriSewa.Models.User
+
+@{
+    ViewData["Title"] = "Edit Users";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>User</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditUsers">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="UserId" />
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="PhoneNo" class="control-label"></label>
+                <input asp-for="PhoneNo" class="form-control" />
+                <span asp-validation-for="PhoneNo" class="text-danger"></span>
+            </div>
+            
+            
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsVerified" /> @Html.DisplayNameFor(model => model.IsVerified)
+                </label>
+            </div>
+            <div class="form-group">
+                <label asp-for="Role" class="control-label"></label>
+                <select asp-for="Role" class="form-control" asp-items="ViewBag.Role">
+                    <option value="">--- Select Role ---</option> <!-- Ensures default value -->
+                </select>
+                <span asp-validation-for="Role" class="text-danger"></span>
+            </div>
+
+          
+            <div class="form-group">
+                <label asp-for="CompanyID" class="control-label"></label>
+                <select asp-for="CompanyID" class="form-control" asp-items="ViewBag.CompanyID">
+                    <option value="">--- Select a Company ---</option> <!-- This will appear as the default -->
+                </select>
+                <span asp-validation-for="CompanyID" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="DriverId" class="control-label"></label>
+                <select asp-for="DriverId" class="form-control" asp-items="ViewBag.DriverId">
+                    <option value="">--- Select a Driver ---</option>
+                </select>
+                <span asp-validation-for="DriverId" class="text-danger"></span>
+            </div>
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a asp-action="ActiveUsers" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="ActiveUsers">Back to List</a>
+</div>
+
+
+

@@ -1,0 +1,134 @@
+﻿@model YatriSewa.Models.User
+
+@{
+    ViewData["Title"] = "Operator Profile";
+    Layout = "~/Views/Shared/_SidebarLayout.cshtml"; // Ensure this layout exists
+}
+
+<div class="osahan-profile">
+    <div class="osahan-header-nav shadow-sm bg-darkblue p-3 d-flex align-items-center">
+        <h5 class="font-weight-normal mb-0 text-white">
+            <a class="text-darkblue mr-3" asp-controller="Operator" asp-action="Dashboard">
+                <i class="icofont-rounded-left"></i>
+            </a>
+            Operator Profile
+        </h5>
+        <div class="ml-auto d-flex align-items-center">
+            <a class="toggle osahan-toggle h4 m-0 text-white ml-auto" href="#">
+                <i class="icofont-navigation-menu"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="px-3 pt-3 pb-5">
+        <!-- Profile Picture Form -->
+        <form id="photoForm" asp-controller="Operator" asp-action="UpdateProfilePhoto" method="post" enctype="multipart/form-data" class="text-center">
+            <img src="@(Model.ProfilePicPath ?? Url.Content("~/img/default-profile.png"))"
+                 class="rounded-pill mb-2"
+                 style="width: 100px; height: 100px; object-fit: cover;"
+                 id="profileImage" />
+            <div>
+                <label for="upload-photo" class="text-green icofont-edit-alt"> Edit Photo</label>
+                <input type="file" name="ProfilePic" id="upload-photo" class="form-control-file d-none" />
+            </div>
+        </form>
+
+        <!-- Profile Update Form -->
+        <form asp-controller="Operator" asp-action="UpdateProfile" method="post">
+            <div class="form-profile w-100">
+                <!-- User Name -->
+                <div class="form-group position-relative">
+                    <label class="text-muted f-10 mb-1">Name</label>
+                    <span class="icofont-edit-alt text-green position-absolute" style="top: 73%; right: 15px; cursor: pointer; transform: translateY(-50%);" id="editNameIcon"></span>
+                    <input type="text" class="form-control" name="Name" value="@Model.Name" id="nameField" disabled />
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label class="text-muted f-10 mb-1">Email</label>
+                    <input type="email" class="form-control" name="Email" value="@Model.Email" disabled />
+                </div>
+
+                <!-- Phone Number -->
+                <div class="form-group">
+                    <label class="text-muted f-10 mb-1">Phone Number</label>
+                    <input type="text" class="form-control" name="PhoneNo" value="@Model.PhoneNo" />
+                </div>
+
+                <!-- Company Name -->
+                <div class="form-group">
+                    <label class="text-muted f-10 mb-1">Company Name</label>
+                    <input type="text" class="form-control" value="@Model.BusCompany?.CompanyName ?? " N /A"" disabled />
+                </div>
+
+                <!-- Success Message -->
+                @if (TempData["Message"] != null)
+                {
+                    <div class="alert alert-success" role="alert">
+                        @TempData["Message"]
+                    </div>
+                }
+
+                <!-- Update Button -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-darkblue btn-block osahanbus-btn rounded-1">
+                        UPDATE PROFILE
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <hr />
+
+        <!-- Change Password Form -->
+        <h4 class="text-center mt-3">Change Password</h4>
+        <form asp-controller="Operator" asp-action="ChangePassword" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" name="currentPassword" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" name="newPassword" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" name="confirmPassword" class="form-control" required />
+            </div>
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-danger btn-block osahanbus-btn rounded-1">
+                    CHANGE PASSWORD
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('upload-photo').addEventListener('change', function () {
+            var form = document.getElementById('photoForm');
+            form.submit();
+        });
+
+        document.getElementById('editNameIcon').addEventListener('click', function () {
+            const nameField = document.getElementById('nameField');
+            if (nameField.disabled) {
+                nameField.disabled = false;
+                nameField.focus();
+            } else {
+                nameField.disabled = true;
+            }
+        });
+
+        setTimeout(function () {
+            const alert = document.querySelector('.alert-success');
+            if (alert) {
+                alert.style.display = 'none';
+            }
+        }, 5000); // Hide alert after 5 seconds
+    </script>
+</div>

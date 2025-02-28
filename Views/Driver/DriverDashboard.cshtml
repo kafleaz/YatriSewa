@@ -1,4 +1,123 @@
-﻿@{
-    Layout = "_DriverLayout";
+﻿@model IEnumerable<YatriSewa.Models.Schedule>
+@{
+    Layout = "~/Views/Shared/_DriverLayout.cshtml";
+
+    string driverName = ViewBag.DriverName;
+    // Get the selected date from the query string
+    var selectedDate = ViewContext.HttpContext.Request.Query["date"].ToString();
+    bool isDateSelected = !string.IsNullOrEmpty(selectedDate);
 }
-<h2>This is Driver Dashboard</h2>
+
+<style>
+    .name-bar {
+        background: #007bff;
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* You can add more custom styles here if needed */
+</style>
+
+
+
+<h2>Driver Dashboard</h2>
+<div class="card mb-4">
+    <div class="card-body ">
+        <h4>Welcome, @ViewBag.DriverName</h4>
+        <p>Your upcoming schedules are displayed below.</p>
+    </div>
+</div>
+
+<!-- Date Filter -->
+<p>
+    <form method="get" asp-action="DriverDashboard" asp-controller="Driver">
+        <label for="date">Select Date:</label>
+        <input type="date" name="date" value="@selectedDate ?? @DateTime.Today.ToString("yyyy-MM-dd")" />
+         min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+</p>
+
+@if (isDateSelected)
+{
+    @if (Model.Any())
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Route</th>
+                    <th>Departure Time</th>
+                    <th>Arrival Time</th>
+                    <th>Available Seats</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var schedule in Model)
+                {
+                    <tr>
+                        <td>@schedule.Route?.RouteID</td>
+                        <td>@schedule.DepartureTime.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@schedule.ArrivalTime.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@schedule.AvailableSeats</td>
+                        <td>@schedule.Price.ToString("C")</td>
+                        <td>@schedule.Status</td>
+                        <td>
+                            <a href="@Url.Action("PassengerList", "Driver", new { scheduleId = schedule.ScheduleId })" class="btn btn-primary">Passengers</a>
+                            <a href="@Url.Action("JourneyList", "Driver", new { date = selectedDate, scheduleId = schedule.ScheduleId })"
+                               class="btn btn-primary">
+                                View Journeys
+                            </a>
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    <div class="alert alert-warning text-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i> <!-- Bootstrap Icon -->
+        No schedules found for the selected date.
+    </div>
+}
+else
+{
+    <p>Please select a date to view the schedule.</p>
+}
+<style>
+    .bg-muted-green {
+        background-color: #157347 !important; /* Darker Green */
+    }
+</style>
+
+
+
+<div class="row justify-content-center text-center mt-3">
+    <!-- Completed Trips -->
+    <div class="col-md-4">
+        <div class="card bg-muted-green text-white shadow-lg">
+            <div class="card-body">
+                <h5 class="fw-bold">Completed Trips</h5>
+                <h2 class="display-5">@ViewBag.TotalTrips</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Canceled Trips -->
+    <div class="col-md-4">
+        <div class="card bg-secondary text-white shadow-lg">
+            <div class="card-body">
+                <h5 class="fw-bold">Canceled Trips</h5>
+                <h2 class="display-5">@ViewBag.CanceledTrips</h2>
+            </div>
+        </div>
+    </div>
+</div>

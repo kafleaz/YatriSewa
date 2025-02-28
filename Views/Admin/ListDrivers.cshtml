@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "ListDrivers";
-    Layout = "~/Views/Shared/_OperatorLayout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <h3>List Of All Drivers</h3>
@@ -10,9 +10,8 @@
 <p>
     <a asp-action="SearchDriver">Add Driver</a>
 </p>
-<div class="table-responsive">
-    <table class="table table-bordered table-hover">
-        <thead class="table-primary">
+<table class="table">
+    <thead>
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.DriverName)
@@ -29,15 +28,10 @@
             <th>
                 @Html.DisplayNameFor(model => model.DateOfBirth)
             </th>
-            @* <th>
-                @Html.DisplayNameFor(model => model.IsAvailable)
-            </th> *@
-            @* <th>
-                @Html.DisplayNameFor(model => model.LicensePhotoPath)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User)
-            </th> *@
+          <th>
+            @Html.DisplayNameFor(model => model.IsAvailable)
+            </th> 
+        
             <th></th>
         </tr>
     </thead>
@@ -68,4 +62,3 @@
         }
     </tbody>
 </table>
-</div>
